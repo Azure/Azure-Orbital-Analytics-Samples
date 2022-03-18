@@ -1,0 +1,29 @@
+{
+    "name": "AOI Postgres Batch",
+    "properties": {
+        "annotations": [],
+        "type": "AzureBatch",
+        "typeProperties": {
+            "batchUri": "https://__batch_account__.__location__.batch.azure.com",
+            "poolName": "data-cpu-pool",
+            "accountName": "__batch_account__",
+            "linkedServiceName": {
+                "referenceName": "AOI Batch Storage",
+                "type": "LinkedServiceReference"
+            },
+            "accessKey": {
+                "type": "AzureKeyVaultSecret",
+                "store": {
+                    "referenceName": "AOI Pipeline Key Vault",
+                    "type": "LinkedServiceReference"
+                },
+                "secretName": "GeospatialBatchAccountKey"
+            }
+        },
+        "connectVia": {
+            "referenceName": "AutoResolveIntegrationRuntime",
+            "type": "IntegrationRuntimeReference"
+        }
+    },
+    "type": "Microsoft.Synapse/workspaces/linkedservices"
+}
