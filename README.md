@@ -1,14 +1,18 @@
 # Project
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+This repository contains sample solution that demonstrates how to execute a [Custom Vision AI model](https://azure.microsoft.com/services/cognitive-services/custom-vision-service/#overview) as part of an Azure Synapse Analytics pipeline for object detection over a specific geospatial area of interest.
 
-As the maintainer of this project, please make a few updates:
+# Getting Started
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+Start by following the steps in the `deploy` folder to setup the Azure resources required to build your pipeline.
+
+Import the pipeline under the `workflow` folder to your Azure Synapse Analytics instance's workspace. Alternatively, you can copy the files to your repository (git or Azure DevOps) and link the repository to your Azure Synapse Analytics workspace. 
+
+Sample pipelines are provided that include the following AI Model:
+
+### a. Custom Vision model for Pool detection
+
+This model uses Custom Vision model to detect pool in a given geospatial data.
 
 ## Contributing
 
