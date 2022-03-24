@@ -1,25 +1,20 @@
-# TODO: The maintainer of this repo has not yet edited this file
-
-**REPO OWNER**: Do you want Customer Service & Support (CSS) support for this product/project?
-
-- **No CSS support:** Fill out this template with information about how to file issues and get help.
-- **Yes CSS support:** Fill out an intake form at [aka.ms/spot](https://aka.ms/spot). CSS will work with/help you to determine next steps. More details also available at [aka.ms/onboardsupport](https://aka.ms/onboardsupport).
-- **Not sure?** Fill out a SPOT intake as though the answer were "Yes". CSS will help you decide.
-
-*Then remove this first heading from this SUPPORT.MD file before publishing your repo.*
-
 # Support
 
-## How to file issues and get help  
+### Azure support tickets
 
-This project uses GitHub Issues to track bugs and feature requests. Please search the existing 
-issues before filing new issues to avoid duplicates.  For new issues, file your bug or 
-feature request as a new Issue.
+Customers with an [Azure support plan](https://azure.microsoft.com/support/options/) can open an [Azure support ticket](https://azure.microsoft.com/support/create-ticket/).
+**We recommend this option if your problem requires immediate attention.**
 
-For help and questions about using this project, please **REPO MAINTAINER: INSERT INSTRUCTIONS HERE 
-FOR HOW TO ENGAGE REPO OWNERS OR COMMUNITY FOR HELP. COULD BE A STACK OVERFLOW TAG OR OTHER
-CHANNEL. WHERE WILL YOU HELP PEOPLE?**.
+### GitHub issues
+
+We use [GitHub Issues](https://github.com/Azure/Azure-Orbital-Analytics-Samples/issues/new/choose) to track bugs, questions, and feature requests.
+GitHub issues are free, but **response time is not guaranteed.** 
+
+### Security bugs
+Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center(secure@microsoft.com). 
+You should receive a response within 24 hours. 
+Further information, including the MSRC PGP key, can be found in the [Security TechCenter](https://www.microsoft.com/msrc/faqs-report-an-issue?rtc=1)
 
 ## Microsoft Support Policy  
 
-Support for this **PROJECT or PRODUCT** is limited to the resources listed above.
+Support for this [Azure Orbital Analytics](https://aka.ms/synapse-geospatial-analytics) is limited to the resources listed above.
