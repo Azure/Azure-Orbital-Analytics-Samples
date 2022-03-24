@@ -157,6 +157,12 @@ docker push <container-registry-name>.azurecr.io/custom_vision_offline:latest
 
 Once the image is loaded to your Container Registry, update the [specification document](../src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) with the Container Registry details.
 
+[Specification document](../src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) and [Configuration file](../src/aimodels/custom_vision_object_detection_offline/config/config.json) required to run the Custom Vision Model.
+
+- Specification document - This solution has a framework defined to standardized way of running AI Models as containerized solutions. A Specification document works as a contract definition document to run an AI Model.
+
+- Configuration file - Each AI Model may require one or more parameters to run the model. This parameters driven by the end users are passed to the AI Model in the form of a configuration file. The schema of these configuration file is specific to the AI Model and hence we provide a template for the end user to plug-in their values.
+
 # Configuring the Resources
 
 Next step is to configure your resources and set them up with the required dependencies like Python files, Library requirements and so on, before importing the Synapse pipeline. Run the `configure.sh` script below to perform the configuration:
