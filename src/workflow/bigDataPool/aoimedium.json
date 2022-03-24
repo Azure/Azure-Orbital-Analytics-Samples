@@ -1,0 +1,33 @@
+{
+    "name": "__synapse_pool_name__",
+    "location": "__location__",
+    "properties": {
+        "autoPause": {
+            "enabled": true,
+            "delayInMinutes": 15
+        },
+        "autoScale": {
+            "enabled": true,
+            "maxNodeCount": 4,
+            "minNodeCount": 3
+        },
+        "nodeCount": 0,
+        "nodeSize": "Medium",
+        "nodeSizeFamily": "MemoryOptimized",
+        "sparkVersion": "3.1",
+        "libraryRequirements": {
+            "content": "name: aoidemo\r\nchannels:\r\n  - conda-forge\r\n  - defaults\r\ndependencies:\r\n  - gdal=3.3.0\r\n  - pip>=20.1.1\r\n  - azure-storage-file-datalake\r\n  - libgdal\r\n  - shapely\r\n  - pyproj\r\n  - pip:\r\n    - rasterio\r\n    - geopandas",
+            "filename": "environment.yml",
+            "time": "2022-02-22T00:52:46.8995063Z"
+        },
+        "isComputeIsolationEnabled": false,
+        "sparkConfigProperties": {
+            "configurationType": "File",
+            "filename": "config.txt",
+            "content": "spark.storage.synapse.linkedServiceName \"AOI Geospatial v2\"\rfs.azure.account.oauth.provider.type com.microsoft.azure.synapse.tokenlibrary.LinkedServiceBasedTokenProvider",
+            "time": "2022-02-22T00:52:46.8995063Z"
+        },
+        "sessionLevelPackagesEnabled": true,
+        "annotations": []
+    }
+}
