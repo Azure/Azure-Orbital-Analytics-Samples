@@ -66,7 +66,7 @@ param batchAccountPublicNetworkAccess bool = true
 // Parameters with default values  for Data Fetch Batch Account Pool
 param batchAccountCpuOnlyPoolName string = 'data-cpu-pool'
 param batchAccountCpuOnlyPoolVmSize string = 'standard_d2s_v3'
-param batchAccountCpuOnlyPoolDedicatedNodes int = 0
+param batchAccountCpuOnlyPoolDedicatedNodes int = 1
 param batchAccountCpuOnlyPoolImageReferencePublisher string = 'microsoft-azure-batch'
 param batchAccountCpuOnlyPoolImageReferenceOffer string = 'ubuntu-server-container'
 param batchAccountCpuOnlyPoolImageReferenceSku string = '20-04-lts'

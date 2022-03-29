@@ -151,6 +151,8 @@ docker load < custom_vision_offline.tar.gz
 
 docker tag custom_vision_offline <container-registry-name>.azurecr.io/custom_vision_offline:latest
 
+az acr login --name <container-registry-name>
+
 docker push <container-registry-name>.azurecr.io/custom_vision_offline:latest
 
 ```
