@@ -25,17 +25,17 @@ then
 fi
 
 # get batch account
-BATCH_ACCT=$(az batch account list --query "[?tags.type && tags.type == 'batch'].name" -o tsv -g $1-orc-rg)
+BATCH_ACCT=$(az batch account list --query "[?tags.type && tags.type == 'batch'].name" -o tsv -g ${ENVCODE}-orc-rg)
 echo $BATCH_ACCT
 
-BATCH_ACCT_KEY=$(az batch account keys list --name stellarbatchdev --resource-group stellar-etl-dev-rg | jq ".primary")
+BATCH_ACCT_KEY=$(az batch account keys list --name ${BATCH_ACCT} --resource-group ${ENVCODE}-orc-rg | jq ".primary")
 
 if [[ -n $BATCH_ACCT ]]
 then
+    az batch account login --name ${BATCH_ACCT} --resource-group ${ENVCODE}-orc-rg
     # create batch job for custom vision model
     az batch job create --id 'custom-vision-model-job' --pool-id 'data-cpu-pool' --account-name ${BATCH_ACCT} --account-key ${BATCH_ACCT_KEY}
 fi
-8
 SYNAPSE_STORAGE_ACCT=$(az storage account list --query "[?tags.store && tags.store == 'synapse'].name" -o tsv -g $1-pipeline-rg)
 echo $SYNAPSE_STORAGE_ACCT
 
