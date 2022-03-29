@@ -1,0 +1,29 @@
+{
+    "name": "Warp",
+    "properties": {
+        "targetBigDataPool": {
+            "referenceName": "__synapse_pool_name__",
+            "type": "BigDataPoolReference"
+        },
+        "requiredSparkVersion": "3.1",
+        "language": "python",
+        "jobProperties": {
+            "name": "Warp",
+            "file": "abfss://spark-jobs@__synapse_storage_account__.dfs.core.windows.net/raster_warp/src/warp.py",
+            "conf": {
+                "spark.dynamicAllocation.enabled": "false",
+                "spark.dynamicAllocation.minExecutors": "3",
+                "spark.dynamicAllocation.maxExecutors": "3",
+                "spark.autotune.trackingId": "335dd1ad-fc75-4734-ad92-03a79e9ad399"
+            },
+            "args": [],
+            "jars": [],
+            "files": [],
+            "driverMemory": "56g",
+            "driverCores": 8,
+            "executorMemory": "56g",
+            "executorCores": 8,
+            "numExecutors": 3
+        }
+    }
+}

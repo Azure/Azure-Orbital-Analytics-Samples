@@ -1,0 +1,31 @@
+{
+    "name": "Pool Geolocation",
+    "properties": {
+        "targetBigDataPool": {
+            "referenceName": "__synapse_pool_name__",
+            "type": "BigDataPoolReference"
+        },
+        "requiredSparkVersion": "3.1",
+        "language": "python",
+        "jobProperties": {
+            "name": "Pool Geolocation",
+            "file": "abfss://spark-jobs@__synapse_storage_account__.dfs.core.windows.net/pool_geolocation/src/main.py",
+            "conf": {
+                "spark.dynamicAllocation.enabled": "false",
+                "spark.dynamicAllocation.minExecutors": "1",
+                "spark.dynamicAllocation.maxExecutors": "2",
+                "spark.autotune.trackingId": "0d715b42-8d99-4e74-8a24-860c7275f387"
+            },
+            "args": [],
+            "jars": [],
+            "files": [
+                "abfss://spark-jobs@__synapse_storage_account__.dfs.core.windows.net/pool_geolocation/src/utils.py"
+            ],
+            "driverMemory": "56g",
+            "driverCores": 8,
+            "executorMemory": "56g",
+            "executorCores": 8,
+            "numExecutors": 2
+        }
+    }
+}

@@ -1,0 +1,33 @@
+{
+    "name": "rawtifs",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "AOI Data Storage Account v2",
+            "type": "LinkedServiceReference"
+        },
+        "parameters": {
+            "containername": {
+                "type": "string"
+            },
+            "folderpath": {
+                "type": "string"
+            }
+        },
+        "annotations": [],
+        "type": "Binary",
+        "typeProperties": {
+            "location": {
+                "type": "AzureBlobStorageLocation",
+                "folderPath": {
+                    "value": "@dataset().folderpath",
+                    "type": "Expression"
+                },
+                "container": {
+                    "value": "@dataset().containername",
+                    "type": "Expression"
+                }
+            }
+        }
+    },
+    "type": "Microsoft.Synapse/workspaces/datasets"
+}

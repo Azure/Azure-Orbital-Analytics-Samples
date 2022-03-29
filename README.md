@@ -1,14 +1,22 @@
 # Project
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+This repository contains sample solution that demonstrates how to deploy and execute [Geospatial Analysis using Azure Synapse Analytics]
+(https://aka.ms/synapse-geospatial-analytics) workload on your Azure tenant. We recommend that you read the document on "Geospatial Analysis using Azure Synapse Analytics" before deploying this solution.
 
-As the maintainer of this project, please make a few updates:
+Disclaimer: The solution and samples provided in this repository is for learning purpose only. They're intended to explore the possibilites of the Azure Services and are a starting point to developing your own solution. We recommend that you follow the security best practices as per the Microsoft documentation for individual services.
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+# Getting Started
+
+Start by following the steps in the `deploy` folder to setup the Azure resources required to build your pipeline.
+
+Import the pipeline under the `workflow` folder to your Azure Synapse Analytics instance's workspace. Alternatively, you can copy the files to your repository (git or Azure DevOps) and link the repository to your Azure Synapse Analytics workspace. 
+
+Sample pipelines are provided that include the following AI Model:
+
+### a. AI model
+
+This solution uses the Custom Vision Model as a sample AI model for demonstrating end to end Azure Synapse workflow geospatial analysis. This sample solution uses Custom Vision model to detect pools in a given geospatial data. 
+You can use any other AI model for object detection or otherwise to run against this solution with a similar [specification](/src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) or different specification as defined by AI model to integrate in your solution.  
 
 ## Contributing
 
@@ -28,6 +36,6 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 
 This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft 
 trademarks or logos is subject to and must follow 
-[Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
+[Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/legal/intellectualproperty/trademarks/usage/general).
 Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
 Any use of third-party trademarks or logos are subject to those third-party's policies.
