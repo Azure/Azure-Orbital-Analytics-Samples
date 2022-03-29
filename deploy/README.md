@@ -192,7 +192,7 @@ Once the above step completes, a zip file is generated. Upload the generated zip
 
 ## Running the pipeline
 
-To run the pipeline, open the Synapse Studio for the Synapse workspace that you have created. Make sure you have followed the steps in the `Deployment Procedures` to deploy and configure the solution.
+To run the pipeline, open the Synapse Studio for the Synapse workspace that you have created and follow the below listed steps.
 
 - Open the `E2E Custom Vision Model Flow` and click on debug button
 
