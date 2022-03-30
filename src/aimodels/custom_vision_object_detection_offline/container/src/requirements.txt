@@ -1,6 +1,6 @@
 numpy~=1.17.5 
-tensorflow~=2.0.2 
+tensorflow~=2.0.4
 flask~=1.1.2 
-pillow~=7.2.0
+pillow~=9.0.1
 mscviplib==2.200731.16 
 MarkupSafe~=2.0.1
