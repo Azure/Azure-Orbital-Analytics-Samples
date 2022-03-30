@@ -9,6 +9,9 @@ param location string
 
 param synapseMIPrincipalId string
 
+// Guid to role definitions to be used during role
+// assignments including the below roles definitions:
+// Contributor
 param synapseMIBatchAccountRoles array = [
   'b24988ac-6180-42a0-ab88-20f7382dd24c'
 ]
