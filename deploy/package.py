@@ -36,7 +36,8 @@ def replace(tokens_map: dict, body: str):
 
 def package(tokens_map: dict):
 
-    src_folder_path = os.path.join(os.getcwd(), '..', 'src', 'workflow')
+    script_dirname = os.path.dirname(__file__)
+    src_folder_path = os.path.join(script_dirname, '..', 'src', 'workflow')
     package_folder_path= os.path.join(os.getcwd(), 'package')
 
     # mode

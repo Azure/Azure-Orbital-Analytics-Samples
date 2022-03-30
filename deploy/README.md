@@ -9,6 +9,8 @@ The deployment script uses following tools, please follow the links provided to 
 
 - The scripts are executed on bash shell, so if using a computer with windows based operating system, install a [WSL](https://docs.microsoft.com/windows/wsl/about) environment to execute the script.
 
+- The user performing the deployment of the bicep template and the associated scripts should have `Contributor` role assigned at the subscription to which the resources are being deployed.
+
 - This solution assumes no interference from Policies deployed to your tenant preventing resources from being deployed. 
 
 - The bicep templates included in this solution are not idempotent. Use the template for greenfield deployment only.
@@ -126,6 +128,8 @@ Following is the list of resource-groups and resources that should be created if
 
         Wait for all pools to complete resizing before moving to the next steps.
 
+        Note: The Bicep template adds the Synapse workspace's Managed Identity to the Batch Account as `Contributor`. Alternatively, Custom Role Definitions can be used to assign the Synapse workspace's Managed Identity to the Batch Account with required Azure RBAC operations.
+
     - Keyvault named `aoi-demo-orc-kv`.
     - User managed identity `aoi-demo8-orc-umi` for access and authentication.
     - Azure Container registry instance named `aoi-demoorcacr` to store container images.
@@ -150,6 +154,8 @@ curl https://stllrairbusdatav2.blob.core.windows.net/public/images/custom_vision
 docker load < custom_vision_offline.tar.gz
 
 docker tag custom_vision_offline <container-registry-name>.azurecr.io/custom_vision_offline:latest
+
+az acr login --name <container-registry-name>
 
 docker push <container-registry-name>.azurecr.io/custom_vision_offline:latest
 
@@ -190,7 +196,7 @@ Once the above step completes, a zip file is generated. Upload the generated zip
 
 ## Running the pipeline
 
-To run the pipeline, open the Synapse Studio for the Synapse workspace that you have created. Make sure you have followed the steps in the `Deployment Procedures` to deploy and configure the solution.
+To run the pipeline, open the Synapse Studio for the Synapse workspace that you have created and follow the below listed steps.
 
 - Open the `E2E Custom Vision Model Flow` and click on debug button
 

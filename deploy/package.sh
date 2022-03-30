@@ -3,6 +3,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/..; pwd)"
 set -ex
 
 echo 'Retrieving resources from Azure ...'
@@ -20,7 +21,7 @@ SYNAPSE_POOL=$(az synapse spark pool list --workspace-name $SYNAPSE_WORKSPACE --
 echo $SYNAPSE_POOL
 
 echo 'Retrieved resource from Azure and ready to package'
-PACKAGING_SCRIPT="python3 package.py --raw_storage_account_name $RAW_STORAGE_ACCT \
+PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/package.py --raw_storage_account_name $RAW_STORAGE_ACCT \
     --synapse_storage_account_name $SYNAPSE_STORAGE_ACCT \
     --batch_storage_account_name $BATCH_STORAGE_ACCT \
     --batch_account $BATCH_ACCT \
