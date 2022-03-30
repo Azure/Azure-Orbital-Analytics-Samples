@@ -1,0 +1,22 @@
+{
+    "algImageName" :"__registry_server__/geomodel/custom-vision-object-detection:latest",
+    "containerName":"pool",
+    "containerReference":"custom_vision_object_detection",
+	"mountedDirectory": "/data",
+    "submissionDirectory" : "in",
+    "resultsDirectory" : "out",
+    "logsDirectory":"logs",
+    "modelPython":"./custom_vision.py",
+    "vaultUri":"__vault_uri__",
+    "contextFileName":"config.json",
+	"cpu":3,
+	"memory":14,
+	"gpu":"",
+    "validations":[
+        {
+            "validator":"FileExtensionValidator",
+            "expected":".png",
+            "value":"*.*"
+        }
+    ]
+}

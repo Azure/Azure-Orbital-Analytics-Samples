@@ -1,0 +1,6 @@
+{
+    "width": 512.1,
+    "height": 512,
+    "probability_cutoff": 0.5,
+	"tag_name": "pool"
+}
