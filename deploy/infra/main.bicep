@@ -164,8 +164,10 @@ module orchestrationModule 'groups/orchestration.bicep' = {
     mountFileUrl: '${dataModule.outputs.rawStorageFileEndpointUri}volume-a'
     pipelineResourceGroupName: pipelineResourceGroup.name
     pipelineLinkedSvcKeyVaultName: '${environmentCode}-${pipelineModulePrefix}-kv'
+    synapseMIPrincipalId: pipelineModule.outputs.synapseMIPrincipalId
   }
   dependsOn: [
+    pipelineModule
     networkModule
     monitorModule
   ]

@@ -7,6 +7,12 @@ param environmentTag string
 param projectName string
 param location string
 
+param synapseMIPrincipalId string
+
+param synapseMIBatchAccountRoles array = [
+  'b24988ac-6180-42a0-ab88-20f7382dd24c'
+]
+
 // Name parameters for infrastructure resources
 param orchestrationResourceGroupName string = ''
 param keyvaultName string = ''
@@ -66,7 +72,7 @@ param batchAccountPublicNetworkAccess bool = true
 // Parameters with default values  for Data Fetch Batch Account Pool
 param batchAccountCpuOnlyPoolName string = 'data-cpu-pool'
 param batchAccountCpuOnlyPoolVmSize string = 'standard_d2s_v3'
-param batchAccountCpuOnlyPoolDedicatedNodes int = 1
+param batchAccountCpuOnlyPoolDedicatedNodes int = 0
 param batchAccountCpuOnlyPoolImageReferencePublisher string = 'microsoft-azure-batch'
 param batchAccountCpuOnlyPoolImageReferenceOffer string = 'ubuntu-server-container'
 param batchAccountCpuOnlyPoolImageReferenceSku string = '20-04-lts'
@@ -173,6 +179,18 @@ module batchAccount '../modules/batch.account.bicep' = {
     keyVault
   ]
 }
+
+module synapseIdentityForBatchAccess '../modules/batch.account.role.assignment.bicep' = [ for role in synapseMIBatchAccountRoles: {
+  name: '${namingPrefix}-batch-account-role-assgn'
+  params: {
+    resourceName: toLower(batchAccountNameVar)
+    principalId: synapseMIPrincipalId
+    roleDefinitionId: '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/${role}'
+  }
+  dependsOn: [
+    batchAccount
+  ]
+}]
 
 module batchAccountCpuOnlyPool '../modules/batch.account.pools.bicep' = {
   name: '${namingPrefix}-batch-account-data-fetch-pool'
