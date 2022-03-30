@@ -9,6 +9,8 @@ The deployment script uses following tools, please follow the links provided to 
 
 - The scripts are executed on bash shell, so if using a computer with windows based operating system, install a [WSL](https://docs.microsoft.com/windows/wsl/about) environment to execute the script.
 
+- The user performing the deployment of the bicep template and the associated scripts should have `Contributor` role assigned at the subscription to which the resources are being deployed.
+
 - This solution assumes no interference from Policies deployed to your tenant preventing resources from being deployed. 
 
 - The bicep templates included in this solution are not idempotent. Use the template for greenfield deployment only.
@@ -125,6 +127,8 @@ Following is the list of resource-groups and resources that should be created if
         - Resizing may take a few minutes. Pools that are resizing are indicated by `0 -> 1` numbers under dedicated nodes column. Pools that have completed resizing should show the number of dedicated nodes. 
 
         Wait for all pools to complete resizing before moving to the next steps.
+
+        Note: The Bicep template adds the Synapse workspace's Managed Identity to the Batch Account as `Contributor`. Alternatively, Custom Role Definitions can be used to assign the Synapse workspace's Managed Identity to the Batch Account with required Azure RBAC operations.
 
     - Keyvault named `aoi-demo-orc-kv`.
     - User managed identity `aoi-demo8-orc-umi` for access and authentication.
