@@ -146,21 +146,16 @@ Following is the list of resource-groups and resources that should be created if
 
 # Load the Custom Vision Model to your Container Registry
 
-Custom Vision Model is containerized image that can be downloaded as tar.gz file and loaded to your Container Registry. To load the image to your Container Registry, follow the steps below:
+Custom Vision Model is containerized image that can be pulled from `docker pull ghcr.io/azure/azure-orbital-analytics-samples/custom_vision_offline:latest`
 
-```bash
-curl https://stllrairbusdatav2.blob.core.windows.net/public/images/custom_vision_offline.tar.gz --output custom_vision_offline.tar.gz
-
-docker load < custom_vision_offline.tar.gz
-
-docker tag custom_vision_offline <container-registry-name>.azurecr.io/custom_vision_offline:latest
-
-az acr login --name <container-registry-name>
-
-docker push <container-registry-name>.azurecr.io/custom_vision_offline:latest
-
+In case users want to bring their own model, they can upload the relevant docker container to Azure Container Registry. In case the registry is private, container settings needs to be updated with the following in order to autheticate to container registry :
+```json
+"registry": {
+        "registryServer": "",
+        "username": "",
+        "password": ""
+    }
 ```
-
 Once the image is loaded to your Container Registry, update the [specification document](../src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) with the Container Registry details.
 
 [Specification document](../src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) and [Configuration file](../src/aimodels/custom_vision_object_detection_offline/config/config.json) required to run the Custom Vision Model.
