@@ -1,0 +1,7 @@
+{
+    "prob_cutoff": 0.25,
+    "tag_type": "pool",
+    "bbox_color":"red",
+    "bbox_width":1,
+    "json": true
+}

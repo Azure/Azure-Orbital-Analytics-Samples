@@ -109,12 +109,12 @@ def get_pool_gelocations(input_path: str,
             tag_name = config["tag_name"]
 
             logger.debug(f"found {len(predictions)} predictions total")
-            predictions = [pred for pred in predictions["predictions"] if pred["probability"] >= prob_cutoff and pred["tag_name"] == tag_name]
+            predictions = [pred for pred in predictions["predictions"] if pred["probability"] >= prob_cutoff and pred["tagName"] == tag_name]
             logger.debug(f"only {len(predictions)} preditions meet criteria")
 
             # iterate through all predictions and process
             for pred in predictions:
-                box = pred["bounding_box"]
+                box = pred["boundingBox"]
 
                 left = (col + box["left"]) * width
                 right = (col + box["left"] + box["width"]) * width
@@ -123,15 +123,15 @@ def get_pool_gelocations(input_path: str,
 
                 img_bbox = shp.geometry.box(left, bottom, right, top)
                 bbox = shp.geometry.Polygon(zip(*tfmr.transform(*rio.transform.xy(tfm, *reversed(img_bbox.boundary.xy), offset="ul"))))
-                pred["bounding_box"] = bbox
+                pred["boundingBox"] = bbox
                 pred["tile"] = os.path.basename(json_path)
 
             all_predictions.extend(predictions)
 
         logger.info(f"found {len(all_predictions)} total predictions")
         if len(all_predictions) > 0:
-            pools_geo = gpd.GeoDataFrame(all_predictions, geometry="bounding_box", crs=dst_crs)
-            pools_geo["center"] = pools_geo.apply(lambda r: str(asarray(r["bounding_box"].centroid).tolist()), axis=1)
+            pools_geo = gpd.GeoDataFrame(all_predictions, geometry="boundingBox", crs=dst_crs)
+            pools_geo["center"] = pools_geo.apply(lambda r: str(asarray(r["boundingBox"].centroid).tolist()), axis=1)
             output_file = f"{output_path}/{img_name}.geojson"
             pools_geo.to_file(output_file, driver='GeoJSON')
             logger.info(f"saved locations to {output_file}")

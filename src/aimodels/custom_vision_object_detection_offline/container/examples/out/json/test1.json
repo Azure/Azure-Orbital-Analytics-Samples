@@ -1,0 +1,107 @@
+{
+  "id": "",
+  "project": "",
+  "iteration": "",
+  "created": "2022-03-14T23:54:33.916392",
+  "predictions": [
+    {
+      "probability": 0.61881453,
+      "tagId": 0,
+      "tagName": "pool",
+      "boundingBox": {
+        "left": 0.19230918,
+        "top": 0.94991173,
+        "width": 0.04589038,
+        "height": 0.03576214
+      }
+    },
+    {
+      "probability": 0.60209858,
+      "tagId": 0,
+      "tagName": "pool",
+      "boundingBox": {
+        "left": 0.20987549,
+        "top": 0.10457236,
+        "width": 0.05345676,
+        "height": 0.03343743
+      }
+    },
+    {
+      "probability": 0.57750881,
+      "tagId": 0,
+      "tagName": "pool",
+      "boundingBox": {
+        "left": 0.40422668,
+        "top": 0.10402005,
+        "width": 0.04818549,
+        "height": 0.03059276
+      }
+    },
+    {
+      "probability": 0.57598472,
+      "tagId": 0,
+      "tagName": "pool",
+      "boundingBox": {
+        "left": 0.88052545,
+        "top": 0.87105907,
+        "width": 0.03775809,
+        "height": 0.03882225
+      }
+    },
+    {
+      "probability": 0.51797944,
+      "tagId": 0,
+      "tagName": "pool",
+      "boundingBox": {
+        "left": 0.66309578,
+        "top": 0.53548619,
+        "width": 0.04114099,
+        "height": 0.0347527
+      }
+    },
+    {
+      "probability": 0.44672883,
+      "tagId": 0,
+      "tagName": "pool",
+      "boundingBox": {
+        "left": 0.96371614,
+        "top": 0.24967665,
+        "width": 0.03051094,
+        "height": 0.03393322
+      }
+    },
+    {
+      "probability": 0.4148635,
+      "tagId": 0,
+      "tagName": "pool",
+      "boundingBox": {
+        "left": 0.71822231,
+        "top": 0.61416072,
+        "width": 0.03197394,
+        "height": 0.04014191
+      }
+    },
+    {
+      "probability": 0.32669157,
+      "tagId": 0,
+      "tagName": "pool",
+      "boundingBox": {
+        "left": 0.6975608,
+        "top": 0.08355029,
+        "width": 0.04166068,
+        "height": 0.02810757
+      }
+    },
+    {
+      "probability": 0.14432584,
+      "tagId": 0,
+      "tagName": "pool",
+      "boundingBox": {
+        "left": 0.15353942,
+        "top": 0.8245216,
+        "width": 0.03279916,
+        "height": 0.03068573
+      }
+    }
+  ]
+}
