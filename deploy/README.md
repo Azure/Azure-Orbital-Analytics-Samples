@@ -146,9 +146,48 @@ Following is the list of resource-groups and resources that should be created if
 
 # Load the Custom Vision Model to your Container Registry
 
-Custom Vision Model is containerized image that can be pulled from `docker pull ghcr.io/azure/azure-orbital-analytics-samples/custom_vision_offline:latest`
+There are three ways to load an AI Model with this pipeline:
 
-In case users want to bring their own model, they can upload the relevant docker container to Azure Container Registry. In case the registry is private, container settings needs to be updated with the following in order to autheticate to container registry :
+a. Use the publicly hosted Custom Vision Model as GitHub Packages. 
+
+No additional steps are required for this approach. Custom Vision Model is containerized image that can be pulled from `docker pull ghcr.io/azure/azure-orbital-analytics-samples/custom_vision_offline:latest`. The [Specification document](../src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) in this repository already points to the publicly hosted GitHub Registry.
+
+b. Download the publicly hosted Custom Vision Model and host it on your Container Registry.
+
+Run the shell cmds below to pull and push the image to your Container Registry.
+
+
+```bash
+
+docker pull ghcr.io/azure/azure-orbital-analytics-samples/custom_vision_offline:latest
+
+docker tag ghcr.io/azure/azure-orbital-analytics-samples/custom_vision_offline:latest <container-registry-name>.azurecr.io/custom_vision_offline:latest
+
+az acr login --name <container-registry-name>
+
+docker push <container-registry-name>.azurecr.io/custom_vision_offline:latest
+
+```
+
+Update the `algImageName` value in [Specification document](../src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) to point to the new image location.
+
+c. BYOM (Bring-your-own-Model) and host it on your Container Registry.
+
+If you have the image locally, run the shell cmds below to push the image to your Container Registry.
+
+```bash
+
+docker tag custom_vision_offline:latest <container-registry-name>.azurecr.io/custom_vision_offline:latest
+
+az acr login --name <container-registry-name>
+
+docker push <container-registry-name>.azurecr.io/custom_vision_offline:latest
+
+```
+Update the `algImageName` value in [Specification document](../src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) to point to the new image location.
+
+
+Note: When using a private Container Registry, update `containerSettings` property in your [Custom Vision Object Detection v2](/src/workflow/pipeline/Custom%20Vision%20Object%20Detection%20v2.json) pipeline and add the following sub-property in order to authenticate to Container Registry :
 ```json
 "registry": {
         "registryServer": "",
@@ -156,7 +195,6 @@ In case users want to bring their own model, they can upload the relevant docker
         "password": ""
     }
 ```
-Once the image is loaded to your Container Registry, update the [specification document](../src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) with the Container Registry details.
 
 [Specification document](../src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) and [Configuration file](../src/aimodels/custom_vision_object_detection_offline/config/config.json) required to run the Custom Vision Model.
 

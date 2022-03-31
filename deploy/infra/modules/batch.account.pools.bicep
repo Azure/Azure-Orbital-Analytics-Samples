@@ -5,6 +5,8 @@ param batchAccountName string
 param batchAccountPoolName string
 param batchPoolExists bool = false
 param vmSize string
+
+// Pool configuration
 param imageReferencePublisher string = 'microsoft-azure-batch'
 param imageReferenceOffer string
 param imageReferenceSku string
@@ -17,12 +19,15 @@ param nodeAgentSkuId string = 'batch.node.ubuntu 20.04'
 param nodePlacementConfigurationPolicy string = ''
 param batchAccountPoolDisplayName string = batchAccountPoolName
 param interNodeCommunication bool = false
+
+// Mount options
 param azureFileShareConfigurationAccountKey string = ''
 param azureFileShareConfigurationAccountName string = ''
 param azureFileShareConfigurationAzureFileUrl string = ''
 param azureFileShareConfigurationMountOptions string = ''
 param azureFileShareConfigurationRelativeMountPath string = ''
 param publicIPAddressConfigurationProvision string = ''
+
 param fixedScaleResizeTimeout string = 'PT15M'
 param fixedScaleTargetDedicatedNodes int = 1
 param fixedScaleTargetLowPriorityNodes int = 0
@@ -52,9 +57,9 @@ resource batchAccountPool 'Microsoft.Batch/batchAccounts/pools@2021-06-01' = if 
           sku: imageReferenceSku
           version: imageReferenceVersion
         }
-        containerConfiguration: (empty(containerImageNames))? null: {
+        containerConfiguration: {
           containerImageNames: containerImageNames
-          containerRegistries: [
+          containerRegistries: (empty(containerRegistryServer))? null: [
             {
               password: containerRegistryPassword
               registryServer: containerRegistryServer

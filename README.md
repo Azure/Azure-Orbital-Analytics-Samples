@@ -7,7 +7,7 @@ Disclaimer: The solution and samples provided in this repository is for learning
 
 # Getting Started
 
-Start by following the steps in the `deploy` folder to setup the Azure resources required to build your pipeline.
+Start by following the steps in the [deploy](/deploy/README.md) folder to setup the Azure resources required to build your pipeline.
 
 Import the pipeline under the `workflow` folder to your Azure Synapse Analytics instance's workspace. Alternatively, you can copy the files to your repository (git or Azure DevOps) and link the repository to your Azure Synapse Analytics workspace. 
 
@@ -15,7 +15,7 @@ Sample pipelines are provided that include the following AI Model:
 
 ### a. AI model
 
-This solution uses the Custom Vision Model as a sample AI model for demonstrating end to end Azure Synapse workflow geospatial analysis. This sample solution uses Custom Vision model to detect pools in a given geospatial data. 
+This solution uses the [Custom Vision Model](/src/aimodels) as a sample AI model for demonstrating end to end Azure Synapse workflow geospatial analysis. This sample solution uses Custom Vision model to detect pools in a given geospatial data. 
 You can use any other AI model for object detection or otherwise to run against this solution with a similar [specification](/src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) or different specification as defined by AI model to integrate in your solution.  
 
 ## Contributing
