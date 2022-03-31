@@ -1,5 +1,5 @@
 {
-    "algImageName" :"__registry_server__/geomodel/custom-vision-object-detection:latest",
+    "algImageName" :"ghcr.io/azure/azure-orbital-analytics-samples/custom_vision_offline:latest",
     "containerName":"pool",
     "containerReference":"custom_vision_object_detection",
 	"mountedDirectory": "/data",

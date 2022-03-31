@@ -16,7 +16,7 @@
                 "userProperties": [],
                 "typeProperties": {
                     "expression": {
-                        "value": "@not(equals(string(variables('FunctionCompleted')), 'running'))",
+                        "value": "@and(and(not(equals(string(variables('FunctionCompleted')), 'running')), not(equals(string(variables('FunctionCompleted')), 'active'))), not(equals(string(variables('FunctionCompleted')), 'preparing')))",
                         "type": "Expression"
                     },
                     "activities": [
