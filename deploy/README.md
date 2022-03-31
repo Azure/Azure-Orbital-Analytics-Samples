@@ -187,7 +187,7 @@ docker push <container-registry-name>.azurecr.io/custom_vision_offline:latest
 Update the `algImageName` value in [Specification document](../src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) to point to the new image location.
 
 
-Note: When using a private Container Registry, container settings needs to be updated with the following in order to authenticate to container registry :
+Note: When using a private Container Registry, update `containerSettings` property in your [Custom Vision Object Detection v2](/src/workflow/pipeline/Custom%20Vision%20Object%20Detection%20v2.json) pipeline and add the following sub-property in order to authenticate to Container Registry :
 ```json
 "registry": {
         "registryServer": "",
