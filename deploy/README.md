@@ -229,6 +229,22 @@ Once the above step completes, a zip file is generated. Upload the generated zip
 
 ## Running the pipeline
 
+Before starting the pipeline, prepare the storage account to create a container for the pipeline run.
+
+- Create a new container for every pipeline run. Make sure the container name does not exceed 8 characters.
+
+- Under the newly created container, add two folders. One folder named `config` with the following configuration files:
+
+    - [Specification document](../src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) configuration file that is provided by the AI Model partner.
+    - [Config file](../src/aimodels/custom_vision_object_detection_offline/config/config.json) specific to the AI Model that contains parameters to be passed to the AI Model.
+    - [Config file](../src/transforms/spark-jobs/raster_crop/config/config-aoi.json) for Crop transformation that container the Area of Interest to crop to.
+    - [Config file](../src/transforms/spark-jobs/raster_convert/config/config-img-convert-png.json) for GeoTiff to Png transform.
+    - [Config file](../src/transforms/spark-jobs/pool_geolocation/config/config-pool-geolocation.json) for pool gelocation transform which converts Image coordinates to Geolocation coordinates.
+
+    Another folder named `raw` with sample Geotiff to be processed by the pipeline. You can use this [Geotiff file](https://aoigeospatial.blob.core.windows.net/public/samples/sample_4326.tif) hosted as a sample or any Geotiff with CRS of EPSG 4326.
+
+    When using this sample file, update your [Crop Transform's Config file](../src/transforms/spark-jobs/raster_crop/config/config-aoi.json) with bbox of `[-117.063550, 32.749467, -116.999386, 32.812946]`.
+
 To run the pipeline, open the Synapse Studio for the Synapse workspace that you have created and follow the below listed steps.
 
 - Open the `E2E Custom Vision Model Flow` and click on debug button
@@ -274,3 +290,7 @@ NO_DELETE_ORCHESTRATION_RESOURCE_GROUP=true
 NO_DELETE_PIPELINE_RESOURCE_GROUP=true
 ./deploy/cleanup.sh <environmentCode>
 ```
+
+# Attributions And Disclaimers
+
+- [Geotiff file](https://aoigeospatial.blob.core.windows.net/public/samples/sample_4326.tif) provided as sample are attributed to NAIP Imagery available via [Planetary Computer](https://planetarycomputer.microsoft.com) They are covered under [USDA](https://ngda-imagery-geoplatform.hub.arcgis.com)
