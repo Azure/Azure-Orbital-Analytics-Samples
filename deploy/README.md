@@ -290,3 +290,7 @@ NO_DELETE_ORCHESTRATION_RESOURCE_GROUP=true
 NO_DELETE_PIPELINE_RESOURCE_GROUP=true
 ./deploy/cleanup.sh <environmentCode>
 ```
+
+# Attributions And Disclaimers
+
+- [Geotiff file](https://aoigeospatial.blob.core.windows.net/public/samples/sample_4326.tif) provided as sample are attributed to NAIP Imagery available via [Planetary Computer](https://planetarycomputer.microsoft.com) They are covered under [USDA](https://ngda-imagery-geoplatform.hub.arcgis.com)
