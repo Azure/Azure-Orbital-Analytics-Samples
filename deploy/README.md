@@ -68,6 +68,8 @@ For eg.
 
 ```
 
+Note: Currently, this deployment does not deploy Azure Database for PostgreSQL for post-analysis.
+
 # Using bicep template
 
 Users can also use bicep template directly instead of using the script `install.sh`
