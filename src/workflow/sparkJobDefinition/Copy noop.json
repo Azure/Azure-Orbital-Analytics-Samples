@@ -9,7 +9,7 @@
         "language": "python",
         "jobProperties": {
             "name": "Copy noop",
-            "file": "abfss://spark-jobs@__synapse_storage_account__.dfs.core.windows.net/copy_noop/src/mosaic.py",
+            "file": "abfss://spark-jobs@__synapse_storage_account__.dfs.core.windows.net/copy_noop/src/main.py",
             "conf": {
                 "spark.dynamicAllocation.enabled": "false",
                 "spark.dynamicAllocation.minExecutors": "1",
