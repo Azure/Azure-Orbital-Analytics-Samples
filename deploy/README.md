@@ -231,7 +231,7 @@ Once the above step completes, a zip file is generated. Upload the generated zip
 
 ## Running the pipeline
 
-Before starting the pipeline, prepare the storage account to create a container for the pipeline run.
+Before starting the pipeline, prepare the storage account in <environmentCode>-data-rg resource group by creating a container for the pipeline run.
 
 - Create a new container for every pipeline run. Make sure the container name does not exceed 8 characters.
 
@@ -255,12 +255,12 @@ To run the pipeline, open the Synapse Studio for the Synapse workspace that you 
 
 | parameter | description |
 |--|--|
-| Prefix | A random string for each run of the pipeline. Use a random string betwee 4 to 6 characters long. Example - hj4t3d |
-| StorageAccountName | Name of the Storage Account that hosts the Raw data |
-| StorageAccountKey | Access Key of the Storage Account that hosts the Raw data |
-| BatchAccountName | Name of the Batch Account to run the AI Model |
-| BatchJobName | Job name within the Batch Account that runs the AI Model |
-| BatchLocation | Location of the Batch Account that runs the AI Model |
+| Prefix | This is the Storage container name created in [Running the pipeline section](#running-the-pipeline) that hosts the Raw data|
+| StorageAccountName | Name of the Storage Account in <environmentCode>-data-rg resource group that hosts the Raw data |
+| StorageAccountKey | Access Key of the Storage Account in <environmentCode>-data-rg resource group that hosts the Raw data |
+| BatchAccountName | Name of the Batch Account in <environmentCode>-orc-rg resource group to run the AI Model |
+| BatchJobName | Job name within the Batch Account in <environmentCode>-orc-rg resource group that runs the AI Model |
+| BatchLocation | Location of the Batch Account in <environmentCode>-orc-rg resource group that runs the AI Model |
 
 - Once the parameters are entered, click ok to submit and kick off the pipeline.
 
