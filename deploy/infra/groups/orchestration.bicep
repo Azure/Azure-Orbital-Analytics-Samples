@@ -195,6 +195,21 @@ module synapseIdentityForBatchAccess '../modules/batch.account.role.assignment.b
   ]
 }]
 
+module batchAccountPoolCheck '../modules/batch.account.pool.exists.bicep' = {
+  name: '${namingPrefix}-batch-account-pool-exists'
+  params: {
+    batchAccountName: batchAccountNameVar
+    batchPoolName: batchAccountCpuOnlyPoolName
+    userManagedIdentityName: uami.name
+    userManagedIdentityResourcegroupName: resourceGroup().name
+    location: location
+  }
+  dependsOn: [
+    batchAccountAutoStorageAccount
+    batchAccount
+  ]
+}
+
 module batchAccountCpuOnlyPool '../modules/batch.account.pools.bicep' = {
   name: '${namingPrefix}-batch-account-data-fetch-pool'
   params: {
@@ -212,10 +227,12 @@ module batchAccountCpuOnlyPool '../modules/batch.account.pools.bicep' = {
     azureFileShareConfigurationAzureFileUrl: mountFileUrl
     azureFileShareConfigurationMountOptions: '-o vers=3.0,dir_mode=0777,file_mode=0777,sec=ntlmssp'
     azureFileShareConfigurationRelativeMountPath: 'S'
+    batchPoolExists: batchAccountPoolCheck.outputs.batchPoolExists
   }
   dependsOn: [
     batchAccountAutoStorageAccount
     batchAccount
+    batchAccountPoolCheck
   ]
 }
 
