@@ -6,7 +6,7 @@ param roleDefinitionId string
 
 param resourceName string
 
-param roleAssignmentId string = newGuid()
+param roleAssignmentId string = guid(principalId, roleDefinitionId, resourceName)
 
 resource existingResource 'Microsoft.Storage/storageAccounts@2021-08-01' existing = {
   name: resourceName
