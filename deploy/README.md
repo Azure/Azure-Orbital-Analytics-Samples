@@ -13,8 +13,6 @@ The deployment script uses following tools, please follow the links provided to 
 
 - This solution assumes no interference from Policies deployed to your tenant preventing resources from being deployed. 
 
-- The bicep templates included in this solution are not idempotent. Use the template for greenfield deployment only.
-
 - Get the repository to find the scripts. Clone the repository using following command.
 ```bash
 git clone git@github.com:Azure/Azure-Orbital-Analytics-Samples.git
