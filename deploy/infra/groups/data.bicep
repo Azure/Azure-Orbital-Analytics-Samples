@@ -46,6 +46,28 @@ param synapseMIStorageAccountRoles array = [
 ]
 param synapseMIPrincipalId string = ''
 
+// Name parameters for Postgres
+param serverName string = ''
+param administratorLogin string = ''
+param administratorLoginPassword string = '' 
+
+// Parameters with default values for Postgres
+param guidValue string = newGuid()
+param skuCapacity int = 2
+param skuName string = 'GP_Gen5_2'
+param skuSizeMB int = 51200
+param skuTier string = 'GeneralPurpose'
+param skuFamily string = 'Gen5'
+param postgresqlVersion string = '11'
+param backupRetentionDays int = 7
+param geoRedundantBackup string = 'Disabled'
+param postgresAdminPasswordSecretName string = 'PostgresAdminPassword'
+param utcValue string = utcNow()
+
+var administratorLoginPasswordVar = empty(administratorLoginPassword) ? '${toUpper(uniqueString(resourceGroup().id))}-${guidValue}' : administratorLoginPassword
+var administratorLoginVar = empty(administratorLogin) ? '${environmentCode}_admin_user' : administratorLogin
+var serverNameVar = empty(serverName) ? '${uniqueString(environmentCode)}-server-${substring(uniqueString(guidValue), 0, 6)}' : serverName
+
 var namingPrefix = '${environmentCode}-${projectName}'
 var dataResourceGroupNameVar = empty(dataResourceGroupName) ? '${namingPrefix}-rg' : dataResourceGroupName
 var nameSuffix = substring(uniqueString(dataResourceGroupNameVar), 0, 6)
@@ -122,6 +144,53 @@ module synapseIdentityForStorageAccess '../modules/storage-role-assignment.bicep
     rawDataStorageAccount
   ]
 }]
+
+module postgresqlServer '../modules/postgres.bicep' = {
+  name: '${namingPrefix}-postgres'
+  params: {
+    location: location
+    serverName: serverNameVar
+    administratorLogin: administratorLoginVar
+    administratorLoginPassword: administratorLoginPasswordVar
+    skuCapacity: skuCapacity
+    skuName: skuName
+    skuSizeMB: skuSizeMB
+    skuTier: skuTier
+    skuFamily: skuFamily
+    postgresqlVersion: postgresqlVersion
+    backupRetentionDays: backupRetentionDays
+    geoRedundantBackup: geoRedundantBackup
+  }
+}
+
+resource postgresql_server_resource 'Microsoft.DBforPostgreSQL/servers@2017-12-01' existing = {
+  name: serverNameVar
+}
+
+resource attach_subnet_to_postgresql 'Microsoft.DBforPostgreSQL/servers/virtualNetworkRules@2017-12-01' = {
+  name: 'AllowSubnet'
+  parent: postgresql_server_resource
+  properties: {
+    ignoreMissingVnetServiceEndpoint: true
+    virtualNetworkSubnetId: resourceId('${environmentCode}-network-rg', 'Microsoft.Network/virtualNetworks/subnets', '${environmentCode}-vnet', 'data-subnet')
+  }
+  dependsOn: [
+    postgresqlServer
+  ]
+}
+
+module pgAdministratorLoginPassword '../modules/akv.secrets.bicep' = {
+  name: 'pg-admin-login-pass-${utcValue}'
+  params: {
+    environmentName: environmentTag
+    keyVaultName: keyvaultNameVar
+    secretName: postgresAdminPasswordSecretName
+    secretValue: administratorLoginPasswordVar
+  }
+  dependsOn: [
+    postgresqlServer
+  ]
+}
 
 output rawStorageAccountName string = rawDataStorageAccountNameVar
 output rawStorageFileEndpointUri string = rawDataStorageAccount.outputs.fileEndpointUri
