@@ -7,7 +7,7 @@ targetScope='subscription'
 param location string
 
 @minLength(3)
-@maxLength(8)
+@maxLength(15)
 @description('Prefix to be used for naming all the resources in the deployment')
 param environmentCode string
 
