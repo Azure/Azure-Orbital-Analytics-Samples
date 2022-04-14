@@ -75,6 +75,4 @@ if __name__ == "__main__":
         # clean up the temporary placeholder on failed run
         mssparkutils.fs.append(f'abfss://{args.storage_container}@{args.storage_account_name}.dfs.core.windows.net/{dst_folder_name}/__processing__.txt', 'tiling  errored out', True)
         raise
-
-
     

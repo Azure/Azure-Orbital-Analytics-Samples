@@ -127,4 +127,4 @@ if __name__ == "__main__":
             f'{copy_src_file_name}.png.aux.xml',
             f'{copy_dst_file_name}.png.aux.xml',
             True
-        )        
+        )
