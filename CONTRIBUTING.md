@@ -26,6 +26,7 @@ Azure Orbital analytics has benefited from following developers (in alphabetic o
  - [Mandar Inamdar](https://github.com/mandarinamdar)
  - [Nikhil Manchanda](https://github.com/SlickNik)
  - [Safiyah Sadiq](https://github.com/safiyahs)
+ - [Seokwon Yang](https://github.com/sjyang18)
  - [Sushil Kumar](https://github.com/sushilkm)
  - [Tatyana Pearson](https://github.com/tpearson02)
  - [Taylor Corbett](https://github.com/TaylorCorbett)
