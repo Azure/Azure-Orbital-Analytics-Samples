@@ -39,7 +39,7 @@ az account set -s <subscription_id>
 ```
 
 Script has been written to be executed with minimalistic input, it requires following input
-- `environmentCode` which serves as the prefix for infrastructure services names.
+- `environmentCode` which serves as the prefix for infrastructure services names. Allows only alpha numeric(no special characters) and must be between 3 and 8 characters.
 - `location` which suggests which azure region infrastructure is deployed in.
 
 To install infrastructure execute install.sh script as follows
@@ -61,9 +61,7 @@ envTag | no | synapse\-\<environmentCode\>
 For eg.
 
 ```bash
-./deploy/install.sh aoi-demo westus demo
-
-
+./deploy/install.sh aoi westus demo
 ```
 
 Note: Currently, this deployment does not deploy Azure Database for PostgreSQL for post-analysis.
@@ -80,46 +78,46 @@ az deployment sub create -l <region_name> -n <deployment_name> -f main.bicep -p 
 
 For eg.
 ```bash
-az deployment sub create -l <region> -n aoi -f main.bicep -p location=<region> environmentCode=aoi-demo environment=devSynapse
+az deployment sub create -l <region> -n aoi -f main.bicep -p location=<region> environmentCode=aoi environment=synapse-aoi
 ```
 
 # Verifying infrastructure resources
 
 Once setup has been executed one can check for following resource-groups and resources to confirm the successful execution.
 
-Following is the list of resource-groups and resources that should be created if we executed the command `./deploy/install.sh aoi-demo`
+Following is the list of resource-groups and resources that should be created if we executed the command `./deploy/install.sh aoi <region>`
 
-- `aoi-demo-data-rg`
+- `aoi-data-rg`
 
     This resource group houses data resources.
 
     - Storage account named `rawdata<6-character-random-string>` to store raw input data for pipelines.
-    - Keyvault named `aoi-demo-data-kv` to store credentials as secrets.
+    - Keyvault named `aoi-data-kv` to store credentials as secrets.
 
-- `aoi-demo-monitor-rg`
+- `aoi-monitor-rg`
 
     This resource group houses monitoring resources.
 
-    - App Insights instance named `aoi-demo-monitor-appinsights` for monitoring.
-    - Log Analytics workspace named `aoi-demo-monitor-workspace` to store monitoring data.
+    - App Insights instance named `aoi-monitor-appinsights` for monitoring.
+    - Log Analytics workspace named `aoi-monitor-workspace` to store monitoring data.
 
-- `aoi-demo-network-rg`
+- `aoi-network-rg`
 
     This resource group houses networking resources.
 
-    - Virtual network named `aoi-demo-vnet` which has 3 subnets.
+    - Virtual network named `aoi-vnet` which has 3 subnets.
 
         - `pipeline-subnet`
         - `data-subnet`
         - `orchestration-subnet`
     - It also has a list security groups to restrict access on the network.
 
-- `aoi-demo-orc-rg`
+- `aoi-orc-rg`
 
     This resource group houses pipeline orchestration resources.
 
-    - Storage account named `aoi-demoorcbatchact` for batch account.
-    - Batch Account named `batchacc<6-character-random-string>`.
+    - Storage account named `batchacc<6-character-random-string>` for batch account.
+    - Batch Account named `aoiorcbatchact`.
 
         Also, go to the Batch Account and switch to the pools blade. Look for one or more pools created by the bicep template. Make sure the resizing of the pool is completed without any errors. 
         
@@ -130,17 +128,17 @@ Following is the list of resource-groups and resources that should be created if
 
         Note: The Bicep template adds the Synapse workspace's Managed Identity to the Batch Account as `Contributor`. Alternatively, Custom Role Definitions can be used to assign the Synapse workspace's Managed Identity to the Batch Account with required Azure RBAC operations.
 
-    - Keyvault named `aoi-demo-orc-kv`.
-    - User managed identity `aoi-demo8-orc-umi` for access and authentication.
-    - Azure Container registry instance named `aoi-demoorcacr` to store container images.
+    - Keyvault named `aoi-orc-kv`.
+    - User managed identity `aoi-orc-umi` for access and authentication.
+    - Azure Container registry instance named `aoiorcacr` to store container images.
 
-- `aoi-demo-pipeline-rg`
+- `aoi-pipeline-rg`
 
     This resource group houses Synapse pipeline resources.
 
-    - Keyvault instance named `aoi-demo-pipeline-kv` to hold secrets for pipeline.
+    - Keyvault instance named `aoi-pipeline-kv` to hold secrets for pipeline.
     - Storage account named `synhns<6-character-random-string>` for Synapse workspace.
-    - Synapse workspace named `aoi-demo-pipeline-syn-ws` to hold pipeline resources.
+    - Synapse workspace named `aoi-pipeline-syn-ws` to hold pipeline resources.
     - Synapse spark pool `pool<6-character-random-string>` to run analytics.
 
 
@@ -277,7 +275,7 @@ Execute the cleanup script as follows:
 
 For eg.
 ```bash
-./deploy/cleanup.sh aoi-demo
+./deploy/cleanup.sh aoi
 ```
 
 If one wants not to delete any specific resource group and thus resource they can use NO_DELETE_*_RESOURCE_GROUP environment variable, by setting it to true
