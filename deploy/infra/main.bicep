@@ -14,6 +14,12 @@ param environmentCode string
 @description('Environment will be used as Tag on the resource group')
 param environment string
 
+@description('Flag to set whether security resources such as Synapse managed vnet, NSG, etc are created or not')
+param securityEnabled bool = false
+
+@description('preventDataExfiltration for Synapse managed vnet')
+param preventDataExfiltration bool = false
+
 @description('Used for naming of the network resource group and its resources')
 param networkModulePrefix string = 'network'
 
@@ -105,6 +111,8 @@ module pipelineModule 'groups/pipeline.bicep' = {
     environmentCode: environmentCode
     environmentTag: environment
     logAnalyticsWorkspaceId: monitorModule.outputs.workspaceId
+    securityEnabled: securityEnabled
+    preventDataExfiltration: preventDataExfiltration
   }
   dependsOn: [
     networkModule
