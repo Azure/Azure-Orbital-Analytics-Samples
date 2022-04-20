@@ -39,7 +39,7 @@ az account set -s <subscription_id>
 ```
 
 Script has been written to be executed with minimalistic input, it requires following input
-- `environmentCode` which serves as the prefix for infrastructure services names. Allows only alpha numeric and must be between 3 and 8 characters.
+- `environmentCode` which serves as the prefix for infrastructure services names. Allows only alpha numeric(no special characters) and must be between 3 and 8 characters.
 - `location` which suggests which azure region infrastructure is deployed in.
 
 To install infrastructure execute install.sh script as follows
@@ -62,8 +62,6 @@ For eg.
 
 ```bash
 ./deploy/install.sh aoi westus demo
-
-
 ```
 
 Note: Currently, this deployment does not deploy Azure Database for PostgreSQL for post-analysis.
@@ -80,14 +78,14 @@ az deployment sub create -l <region_name> -n <deployment_name> -f main.bicep -p 
 
 For eg.
 ```bash
-az deployment sub create -l <region> -n aoi -f main.bicep -p location=<region> environmentCode=aoi environment=devSynapse
+az deployment sub create -l <region> -n aoi -f main.bicep -p location=<region> environmentCode=aoi environment=synapse-aoi
 ```
 
 # Verifying infrastructure resources
 
 Once setup has been executed one can check for following resource-groups and resources to confirm the successful execution.
 
-Following is the list of resource-groups and resources that should be created if we executed the command `./deploy/install.sh aoi`
+Following is the list of resource-groups and resources that should be created if we executed the command `./deploy/install.sh aoi <region>`
 
 - `aoi-data-rg`
 
