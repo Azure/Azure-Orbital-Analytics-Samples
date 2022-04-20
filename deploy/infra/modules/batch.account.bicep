@@ -103,11 +103,11 @@ var role = {
 }
 
 resource assignRole 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
-  name: guid(batchAccount.id, userManagedIdentityPrincipalId, role[toLower(assignRoleToUserManagedIdentity)])
+  name: guid(batchAccount.id, userManagedIdentityPrincipalId, assignRoleToUserManagedIdentity)
   scope: batchAccount
   properties: {
     principalId: userManagedIdentityPrincipalId
-    roleDefinitionId: role[toLower(assignRoleToUserManagedIdentity)]
+    roleDefinitionId: assignRoleToUserManagedIdentity
   }
 }
 

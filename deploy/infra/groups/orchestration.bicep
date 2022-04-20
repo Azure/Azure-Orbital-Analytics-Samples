@@ -161,6 +161,14 @@ module uami '../modules/managed.identity.user.bicep' = {
   }
 }
 
+module batchAccountCustomRole '../modules/batch.account.custom.role.bicep' = {
+  name: '${namingPrefix}-batch-account-custom-role'
+  scope: subscription()
+  params: {
+    batchAccountName: toLower(batchAccountNameVar)
+  }
+}
+
 module batchAccount '../modules/batch.account.bicep' = {
   name: '${namingPrefix}-batch-account'
   params: {
@@ -175,6 +183,7 @@ module batchAccount '../modules/batch.account.bicep' = {
     poolAllocationMode: batchAccountPoolAllocationMode
     publicNetworkAccess: batchAccountPublicNetworkAccess
     keyVaultName: keyvaultNameVar
+    assignRoleToUserManagedIdentity: batchAccountCustomRole.outputs.batchAccountCustomRoleName
   }
   dependsOn: [
     uami
