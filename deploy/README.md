@@ -374,3 +374,31 @@ NO_DELETE_PIPELINE_RESOURCE_GROUP=true
 # Attributions And Disclaimers
 
 - [Geotiff file](https://aoigeospatial.blob.core.windows.net/public/samples/sample_4326.tif) provided as sample are attributed to NAIP Imagery available via [Planetary Computer](https://planetarycomputer.microsoft.com) They are covered under [USDA](https://ngda-imagery-geoplatform.hub.arcgis.com)
+
+# Using a pre-provisioned Batch Account to provision Batch Account Pool
+
+We added a script [use_pre_provisioned_batch_account.sh](./deploy/use_pre_provisioned_batch_account.sh) to create batch account pool on a pre-provisioned batch account.
+
+To use the script, first deploy your infrastructure as usual and then use [use_pre_provisioned_batch_account.sh](./deploy/use_pre_provisioned_batch_account.sh) as suggested follows.
+
+```bash
+# Execute install.sh script
+./deploy/install.sh <environmentCode> <location> <envTag>
+
+# Execute use_pre_provisioned_batch_account.sh script
+./deploy/use_pre_provisioned_batch_account.sh <environmentCode> \
+    <preProvisionedBatchAccountName> <preProvisionedBatchAccountResourceGroupName> \
+    <rawDataStorageAccountName> <rawDataStorageAccountResourceGroupName>
+```
+
+For example:
+
+```bash
+# Execute install.sh script
+./deploy/install.sh aoi westus demo
+
+# Execute use_pre_provisioned_batch_account.sh script
+./deploy/use_pre_provisioned_batch_account.sh aoi \
+    existing-batch-account-name existing-batch-resource-group-name \
+    raw-data-storage-account-name raw-data-storage-account-resource-group-name
+```
