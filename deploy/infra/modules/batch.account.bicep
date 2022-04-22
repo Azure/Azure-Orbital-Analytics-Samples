@@ -16,8 +16,6 @@ param autoStorageAuthenticationMode string = 'StorageKeys'
 param autoStorageAccountName string
 param poolAllocationMode string = 'BatchService'
 param publicNetworkAccess bool = true 
-param assignRoleToUserManagedIdentity string = 'Owner'
-param userManagedIdentityPrincipalId string
 
 param objIdForPolicy string = 'f520d84c-3fd3-4cc8-88d4-2ed25b00d27a'
 
@@ -94,21 +92,6 @@ resource batchAccount 'Microsoft.Batch/batchAccounts@2021-06-01' = {
   dependsOn: [
     akvAccessPolicy
   ]
-}
-
-var role = {
-  owner: '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635'
-  contributor: '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c'
-  reader: '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7'
-}
-
-resource assignRole 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
-  name: guid(batchAccount.id, userManagedIdentityPrincipalId, assignRoleToUserManagedIdentity)
-  scope: batchAccount
-  properties: {
-    principalId: userManagedIdentityPrincipalId
-    roleDefinitionId: assignRoleToUserManagedIdentity
-  }
 }
 
 output batchAccountId string = batchAccount.id
