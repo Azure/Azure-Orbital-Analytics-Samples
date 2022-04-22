@@ -31,7 +31,7 @@ def assign_access_for_batch_account_to_principal_id(principal_id, batch_account_
     if batch_account_id == "":
         return az_batch_account_id_query_error
     _, role_assignment_error = assign_role_to_principal_id(principal_id, role, batch_account_id)
-    if(role_assignment_error):
+    if role_assignment_error and role_assignment_error.find('WARNING') == -1:
         return role_assignment_error
 
 args = parser.parse_args()
@@ -60,7 +60,7 @@ if umi_principal_id == "":
 
 print("\nAssigning " + args.batch_account_role + " role to principal-id \"" + umi_principal_id + "\" for deployment umi on batch account \"" + args.target_batch_account_name + "\"")
 assign_access_umi_error = assign_access_for_batch_account_to_principal_id(umi_principal_id, args.target_batch_account_name, args.target_batch_account_resource_group_name, args.batch_account_role)
-if assign_access_umi_error:
+if assign_access_umi_error and assign_access_umi_error.find('WARNING') == -1:
     print("\nError\n")
     print(assign_access_umi_error)
     exit(1)
