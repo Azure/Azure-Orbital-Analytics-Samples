@@ -402,3 +402,5 @@ For example:
     existing-batch-account-name existing-batch-resource-group-name \
     raw-data-storage-account-name raw-data-storage-account-resource-group-name
 ```
+
+**Note**: To use the script both the infrastructure(which includes syanpse workspace) and batch account should exist in **same location**.
