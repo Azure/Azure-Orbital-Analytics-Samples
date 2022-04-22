@@ -22,7 +22,7 @@ batch_account_role=${11:-"Contributor"}
 
 set -e
 
-python ${PRJ_ROOT}/deploy/batch_account.py \
+python3 ${PRJ_ROOT}/deploy/batch_account.py \
     --source_synapse_workspace_name ${source_synapse_workspace_name} \
     --source_synapse_workspace_resource_group_name ${source_synapse_resource_group_name} \
     --source_batch_account_query_umi_name ${source_batch_account_query_umi_name} \
