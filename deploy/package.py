@@ -16,6 +16,7 @@ parser.add_argument('--batch_storage_account_name', type=str, required=True, hel
 parser.add_argument('--batch_account', type=str, required=True, help="Batch Account name")
 parser.add_argument('--linked_key_vault', type=str, required=True, help="Key Vault to be added as Linked Service")
 parser.add_argument('--location', type=str, required=True, help="Batch Account Location")
+parser.add_argument('--pipeline_name', type=str, required=True, help="Name of the pipeline to package")
 
 #Parse Args
 args = parser.parse_args()
@@ -34,11 +35,11 @@ def replace(tokens_map: dict, body: str):
     
     return result
 
-def package(tokens_map: dict):
+def package(pipeline_name: str, tokens_map: dict):
 
     script_dirname = os.path.dirname(__file__)
-    src_folder_path = os.path.join(script_dirname, '..', 'src', 'workflow')
-    package_folder_path= os.path.join(os.getcwd(), 'package')
+    src_folder_path = os.path.join(script_dirname, '..', 'src', 'workflow', pipeline_name)
+    package_folder_path= os.path.join(os.getcwd(), 'pipeline_name')
 
     # mode
     mode = 0o766
@@ -75,7 +76,7 @@ def package(tokens_map: dict):
                             file_write.write(token_replaced_file_content)
 
     # zip the folder contents to package.zip
-    shutil.make_archive('package', 'zip', package_folder_path)
+    shutil.make_archive(pipeline_name, 'zip', package_folder_path)
 
     # finally clean up the package folder
     if os.path.exists(package_folder_path):
@@ -95,4 +96,4 @@ if __name__ == "__main__":
     }
 
     # invoke package method
-    package(tokens_map)
+    package(args.pipeline_name, tokens_map)

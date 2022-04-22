@@ -1,0 +1,11 @@
+{
+    "name": "AOI Pipeline Key Vault",
+    "type": "Microsoft.Synapse/workspaces/linkedservices",
+    "properties": {
+        "annotations": [],
+        "type": "AzureKeyVault",
+        "typeProperties": {
+            "baseUrl": "https://__linked_key_vault__.vault.azure.net/"
+        }
+    }
+}

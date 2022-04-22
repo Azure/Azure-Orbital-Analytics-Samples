@@ -1,0 +1,581 @@
+{
+    "name": "Custom Vision Object Detection v2",
+    "properties": {
+        "activities": [
+            {
+                "name": "Wait for Custom Vision",
+                "type": "Until",
+                "dependsOn": [
+                    {
+                        "activity": "Custom Vision",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "expression": {
+                        "value": "@and(and(not(equals(string(variables('FunctionCompleted')), 'running')), not(equals(string(variables('FunctionCompleted')), 'active'))), not(equals(string(variables('FunctionCompleted')), 'preparing')))",
+                        "type": "Expression"
+                    },
+                    "activities": [
+                        {
+                            "name": "Wait for Custom Vision Check",
+                            "type": "Wait",
+                            "dependsOn": [
+                                {
+                                    "activity": "Set FunctionCompleted Custom Vision",
+                                    "dependencyConditions": [
+                                        "Succeeded"
+                                    ]
+                                }
+                            ],
+                            "userProperties": [],
+                            "typeProperties": {
+                                "waitTimeInSeconds": 30
+                            }
+                        },
+                        {
+                            "name": "Check Status Custom Vision",
+                            "type": "WebActivity",
+                            "dependsOn": [],
+                            "policy": {
+                                "timeout": "7.00:00:00",
+                                "retry": 0,
+                                "retryIntervalInSeconds": 30,
+                                "secureOutput": false,
+                                "secureInput": false
+                            },
+                            "userProperties": [],
+                            "typeProperties": {
+                                "url": {
+                                    "value": "@concat('https://',pipeline().parameters.BatchName,'.',pipeline().parameters.BatchLocation,'.batch.azure.com/jobs/',pipeline().parameters.JobName,'/tasks/aoi-cv-task-', pipeline().RunId, '?api-version=2022-01-01.15.0')",
+                                    "type": "Expression"
+                                },
+                                "connectVia": {
+                                    "referenceName": "AutoResolveIntegrationRuntime",
+                                    "type": "IntegrationRuntimeReference"
+                                },
+                                "method": "GET",
+                                "authentication": {
+                                    "type": "MSI",
+                                    "resource": "https://batch.core.windows.net/"
+                                }
+                            }
+                        },
+                        {
+                            "name": "Set FunctionCompleted Custom Vision",
+                            "type": "SetVariable",
+                            "dependsOn": [
+                                {
+                                    "activity": "Check Status Custom Vision",
+                                    "dependencyConditions": [
+                                        "Succeeded"
+                                    ]
+                                }
+                            ],
+                            "userProperties": [],
+                            "typeProperties": {
+                                "variableName": "FunctionCompleted",
+                                "value": {
+                                    "value": "@activity('Check Status Custom Vision').output['state']",
+                                    "type": "Expression"
+                                }
+                            }
+                        },
+                        {
+                            "name": "Set FunctionError",
+                            "type": "SetVariable",
+                            "dependsOn": [
+                                {
+                                    "activity": "Check Status Custom Vision",
+                                    "dependencyConditions": [
+                                        "Failed"
+                                    ]
+                                }
+                            ],
+                            "userProperties": [],
+                            "typeProperties": {
+                                "variableName": "FunctionError",
+                                "value": {
+                                    "value": "@activity('Check Status Custom Vision').output['executionInfo']['failureInfo']",
+                                    "type": "Expression"
+                                }
+                            }
+                        }
+                    ],
+                    "timeout": "7.00:00:00"
+                }
+            },
+            {
+                "name": "Custom Vision",
+                "type": "WebActivity",
+                "dependsOn": [
+                    {
+                        "activity": "Copy Config file",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    },
+                    {
+                        "activity": "Copy Xml From Convert Transform",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "url": {
+                        "value": "@concat('https://',pipeline().parameters.BatchName,'.',pipeline().parameters.BatchLocation,'.batch.azure.com/jobs/',pipeline().parameters.JobName,'/tasks?api-version=2020-03-01.11.0')",
+                        "type": "Expression"
+                    },
+                    "connectVia": {
+                        "referenceName": "AutoResolveIntegrationRuntime",
+                        "type": "IntegrationRuntimeReference"
+                    },
+                    "method": "POST",
+                    "headers": {
+                        "Content-type": "application/json; odata=minimalmetadata; charset=utf-8"
+                    },
+                    "body": {
+                        "value": "@json(concat('{\n  \"id\": \"aoi-cv-task-', pipeline().RunId, '\",\n  \"commandLine\": \"\",\n  \"containerSettings\": {\n    \"imageName\": \"', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['algImageName'], '\",\n    \"containerRunOptions\": \"--rm --workdir / -v /mnt/batch/tasks/fsmounts/S/', pipeline().parameters.Prefix, ':', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['mountedDirectory'], '\"\n  },\n  \"environmentSettings\": [\n      {\n          \"name\": \"APP_INPUT_DIR\",\n          \"value\": \"/mnt/batch/tasks/fsmounts/S/', pipeline().parameters.Prefix,'/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['submissionDirectory'],'\"\n      },\n      {\n          \"name\": \"APP_OUTPUT_DIR\",\n          \"value\": \"/mnt/batch/tasks/fsmounts/S/', pipeline().parameters.Prefix,'/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['resultsDirectory'],'\"\n      },\n      {\n          \"name\": \"APP_CONFIG_DIR\",\n          \"value\": \"/mnt/batch/tasks/fsmounts/S/', pipeline().parameters.Prefix,'/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['contextFileName'],'\"\n      }\n  ]\n}'))",
+                        "type": "Expression"
+                    },
+                    "authentication": {
+                        "type": "MSI",
+                        "resource": "https://batch.core.windows.net/"
+                    }
+                }
+            },
+            {
+                "name": "Pool Geolocation",
+                "type": "SparkJob",
+                "dependsOn": [
+                    {
+                        "activity": "Copy Xml",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    },
+                    {
+                        "activity": "Copy Json",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "sparkJob": {
+                        "referenceName": "Pool Geolocation",
+                        "type": "SparkJobDefinitionReference"
+                    },
+                    "file": "abfss://spark-jobs@__synapse_storage_account__.dfs.core.windows.net/pool_geolocation/src/main.py",
+                    "args": [
+                        "--storage_account_name",
+                        "@pipeline().parameters.StorageAccountName",
+                        "--storage_container",
+                        "@pipeline().parameters.Prefix",
+                        "--src_folder_name",
+                        "detections",
+                        "--storage_account_key",
+                        "@pipeline().parameters.StorageAccountKey",
+                        "--config_file_name",
+                        "config-pool-geolocation.json"
+                    ],
+                    "targetBigDataPool": {
+                        "referenceName": "__synapse_pool_name__",
+                        "type": "BigDataPoolReference"
+                    },
+                    "executorSize": "Medium",
+                    "conf": {
+                        "spark.dynamicAllocation.minExecutors": 2,
+                        "spark.dynamicAllocation.maxExecutors": 3
+                    },
+                    "driverSize": "Medium",
+                    "numExecutors": 2
+                }
+            },
+            {
+                "name": "Copy Tiles",
+                "type": "SparkJob",
+                "dependsOn": [
+                    {
+                        "activity": "Read Spec Document",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "sparkJob": {
+                        "referenceName": "Copy noop",
+                        "type": "SparkJobDefinitionReference"
+                    },
+                    "file": "abfss://spark-jobs@__synapse_storage_account__.dfs.core.windows.net/copy_noop/src/main.py",
+                    "args": [
+                        "--storage_account_name",
+                        "@pipeline().parameters.StorageAccountName",
+                        "--src_container",
+                        "@pipeline().parameters.Prefix",
+                        "--src_folder",
+                        "tiles",
+                        "--storage_account_key",
+                        "@pipeline().parameters.StorageAccountKey",
+                        "--dst_fileshare",
+                        "volume-a",
+                        "--dst_folder",
+                        "@concat(pipeline().parameters.Prefix,'/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['submissionDirectory'])",
+                        "--folders_to_create",
+                        "@concat(pipeline().parameters.Prefix, '/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['submissionDirectory'])",
+                        "--folders_to_create",
+                        "@concat(pipeline().parameters.Prefix, '/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['resultsDirectory'])",
+                        "--folders_to_create",
+                        "@concat(pipeline().parameters.Prefix,'/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['logsDirectory'])"
+                    ],
+                    "targetBigDataPool": {
+                        "referenceName": "__synapse_pool_name__",
+                        "type": "BigDataPoolReference"
+                    },
+                    "executorSize": "Medium",
+                    "conf": {
+                        "spark.dynamicAllocation.minExecutors": 2,
+                        "spark.dynamicAllocation.maxExecutors": 3
+                    },
+                    "driverSize": "Medium",
+                    "numExecutors": 2
+                }
+            },
+            {
+                "name": "Copy Config file",
+                "type": "SparkJob",
+                "dependsOn": [
+                    {
+                        "activity": "Copy Tiles",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "sparkJob": {
+                        "referenceName": "Copy noop",
+                        "type": "SparkJobDefinitionReference"
+                    },
+                    "file": "abfss://spark-jobs@__synapse_storage_account__.dfs.core.windows.net/copy_noop/src/main.py",
+                    "args": [
+                        "--storage_account_name",
+                        "@pipeline().parameters.StorageAccountName",
+                        "--src_container",
+                        "@pipeline().parameters.Prefix",
+                        "--src_folder",
+                        "@concat('config/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['contextFileName'])",
+                        "--storage_account_key",
+                        "@pipeline().parameters.StorageAccountKey",
+                        "--dst_fileshare",
+                        "volume-a",
+                        "--dst_folder",
+                        "@concat(pipeline().parameters.Prefix, '/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['contextFileName'])"
+                    ],
+                    "targetBigDataPool": {
+                        "referenceName": "__synapse_pool_name__",
+                        "type": "BigDataPoolReference"
+                    },
+                    "executorSize": "Medium",
+                    "conf": {
+                        "spark.dynamicAllocation.minExecutors": 2,
+                        "spark.dynamicAllocation.maxExecutors": 3
+                    },
+                    "driverSize": "Medium",
+                    "numExecutors": 2
+                }
+            },
+            {
+                "name": "Copy Json",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "Wait for Custom Vision",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "BinarySource",
+                        "storeSettings": {
+                            "type": "AzureFileStorageReadSettings",
+                            "recursive": true,
+                            "wildcardFolderPath": {
+                                "value": "@concat(pipeline().parameters.Prefix, '/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['resultsDirectory'], '/json')",
+                                "type": "Expression"
+                            },
+                            "wildcardFileName": "*.json",
+                            "deleteFilesAfterCompletion": false
+                        },
+                        "formatSettings": {
+                            "type": "BinaryReadSettings"
+                        }
+                    },
+                    "sink": {
+                        "type": "BinarySink",
+                        "storeSettings": {
+                            "type": "AzureBlobFSWriteSettings"
+                        }
+                    },
+                    "enableStaging": false
+                },
+                "inputs": [
+                    {
+                        "referenceName": "gls",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "gld",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "DestinationFolderPath": "detections",
+                            "DestinationContainerName": {
+                                "value": "@pipeline().parameters.Prefix",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "Copy Xml",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "Wait for Custom Vision",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "BinarySource",
+                        "storeSettings": {
+                            "type": "AzureFileStorageReadSettings",
+                            "recursive": true,
+                            "wildcardFolderPath": {
+                                "value": "@concat(pipeline().parameters.Prefix, '/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['resultsDirectory'], '/other')",
+                                "type": "Expression"
+                            },
+                            "wildcardFileName": "*.xml",
+                            "deleteFilesAfterCompletion": false
+                        },
+                        "formatSettings": {
+                            "type": "BinaryReadSettings"
+                        }
+                    },
+                    "sink": {
+                        "type": "BinarySink",
+                        "storeSettings": {
+                            "type": "AzureBlobFSWriteSettings"
+                        }
+                    },
+                    "enableStaging": false
+                },
+                "inputs": [
+                    {
+                        "referenceName": "gls",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "gld",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "DestinationFolderPath": "detections",
+                            "DestinationContainerName": {
+                                "value": "@pipeline().parameters.Prefix",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "Read Spec Document",
+                "type": "ExecuteDataFlow",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "1.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "dataflow": {
+                        "referenceName": "ReadSpecDocumentFlow",
+                        "type": "DataFlowReference",
+                        "datasetParameters": {
+                            "source": {
+                                "filename": "custom_vision_object_detection.json",
+                                "folderpath": "config",
+                                "containername": {
+                                    "value": "@pipeline().parameters.Prefix",
+                                    "type": "Expression"
+                                }
+                            }
+                        }
+                    },
+                    "compute": {
+                        "coreCount": 8,
+                        "computeType": "General"
+                    },
+                    "traceLevel": "None",
+                    "cacheSinks": {
+                        "firstRowOnly": true
+                    }
+                }
+            },
+            {
+                "name": "Copy Xml From Convert Transform",
+                "type": "SparkJob",
+                "dependsOn": [
+                    {
+                        "activity": "Copy Tiles",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "sparkJob": {
+                        "referenceName": "Copy noop",
+                        "type": "SparkJobDefinitionReference"
+                    },
+                    "file": "abfss://spark-jobs@__synapse_storage_account__.dfs.core.windows.net/copy_noop/src/main.py",
+                    "args": [
+                        "--storage_account_name",
+                        "@pipeline().parameters.StorageAccountName",
+                        "--src_container",
+                        "@pipeline().parameters.Prefix",
+                        "--src_folder",
+                        "convert/output.png.aux.xml",
+                        "--storage_account_key",
+                        "@pipeline().parameters.StorageAccountKey",
+                        "--dst_fileshare",
+                        "volume-a",
+                        "--dst_folder",
+                        "@concat(pipeline().parameters.Prefix, '/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['submissionDirectory'], '/output.png.aux.xml')"
+                    ],
+                    "targetBigDataPool": {
+                        "referenceName": "__synapse_pool_name__",
+                        "type": "BigDataPoolReference"
+                    },
+                    "executorSize": "Medium",
+                    "conf": {
+                        "spark.dynamicAllocation.minExecutors": 2,
+                        "spark.dynamicAllocation.maxExecutors": 3
+                    },
+                    "driverSize": "Medium",
+                    "numExecutors": 2
+                }
+            }
+        ],
+        "parameters": {
+            "Prefix": {
+                "type": "string",
+                "defaultValue": ""
+            },
+            "BatchName": {
+                "type": "string",
+                "defaultValue": ""
+            },
+            "JobName": {
+                "type": "string",
+                "defaultValue": ""
+            },
+            "BatchLocation": {
+                "type": "string",
+                "defaultValue": ""
+            },
+            "StorageAccountName": {
+                "type": "string",
+                "defaultValue": ""
+            },
+            "StorageAccountKey": {
+                "type": "string",
+                "defaultValue": ""
+            }
+        },
+        "variables": {
+            "FunctionCompleted": {
+                "type": "String"
+            },
+            "FunctionError": {
+                "type": "String"
+            }
+        },
+        "annotations": [],
+        "lastPublishTime": "2022-03-06T05:52:44Z"
+    },
+    "type": "Microsoft.Synapse/workspaces/pipelines"
+}

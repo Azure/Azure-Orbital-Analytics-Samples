@@ -1,0 +1,37 @@
+{
+    "name": "ReadSpecDocumentFlow",
+    "properties": {
+        "type": "MappingDataFlow",
+        "typeProperties": {
+            "sources": [
+                {
+                    "dataset": {
+                        "referenceName": "spec_doc_specification",
+                        "type": "DatasetReference"
+                    },
+                    "name": "source"
+                }
+            ],
+            "sinks": [
+                {
+                    "name": "sink"
+                }
+            ],
+            "transformations": [],
+            "scriptLines": [
+                "source(allowSchemaDrift: true,",
+                "     validateSchema: false,",
+                "     ignoreNoFilesFound: false,",
+                "     documentForm: 'arrayOfDocuments') ~> source",
+                "source sink(allowSchemaDrift: true,",
+                "     validateSchema: false,",
+                "     skipDuplicateMapInputs: true,",
+                "     skipDuplicateMapOutputs: true,",
+                "     store: 'cache',",
+                "     format: 'inline',",
+                "     output: true,",
+                "     saveOrder: 1) ~> sink"
+            ]
+        }
+    }
+}

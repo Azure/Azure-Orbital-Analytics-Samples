@@ -27,7 +27,8 @@ PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/package.py --raw_storage_account_na
     --batch_account $BATCH_ACCT \
     --linked_key_vault $KEY_VAULT \
     --synapse_pool_name $SYNAPSE_POOL \
-    --location $BATCH_ACCT_LOCATION"
+    --location $BATCH_ACCT_LOCATION \
+    --pipeline_name $2"
 
 echo $PACKAGING_SCRIPT
 set -x
