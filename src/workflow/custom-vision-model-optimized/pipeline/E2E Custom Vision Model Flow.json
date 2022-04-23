@@ -22,8 +22,8 @@
                             "value": "@pipeline().parameters.StorageAccountName",
                             "type": "Expression"
                         },
-                        "StorageAccountKey": {
-                            "value": "@pipeline().parameters.StorageAccountKey",
+                        "AOI": {
+                            "value": "@pipeline().parameters.AOI",
                             "type": "Expression"
                         }
                     }
@@ -67,10 +67,6 @@
                         "StorageAccountName": {
                             "value": "@pipeline().parameters.StorageAccountName",
                             "type": "Expression"
-                        },
-                        "StorageAccountKey": {
-                            "value": "@pipeline().parameters.StorageAccountKey",
-                            "type": "Expression"
                         }
                     }
                 }
@@ -85,7 +81,7 @@
                 "type": "string",
                 "defaultValue": ""
             },
-            "StorageAccountKey": {
+            "AOI": {
                 "type": "string",
                 "defaultValue": ""
             },
