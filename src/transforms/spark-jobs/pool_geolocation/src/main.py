@@ -23,7 +23,7 @@ sys.path.append(os.getcwd())
 from utils import parse_config, init_logger
 from notebookutils import mssparkutils
 
-DEFAULT_CONFIG = {"probability_cutoff": 0.75, "width": 512.1, "height": 512, "tag_name": "object"}
+DEFAULT_CONFIG = {"probability_cutoff": 0.5, "width": 512.1, "height": 512, "tag_name": "object"}
 
 PKG_PATH = Path(__file__).parent
 PKG_NAME = PKG_PATH.name
@@ -177,6 +177,8 @@ if __name__ == "__main__":
     if args.config_file_name != None:
         config_path = f'/synfs/{jobId}/{args.storage_container}/config/{args.config_file_name}'
         logger.debug(f"config file path {config_path}")
+    else:
+        config_path = None
         
     output_path = f'/synfs/{jobId}/{args.storage_container}/{dst_folder_name}'
 
