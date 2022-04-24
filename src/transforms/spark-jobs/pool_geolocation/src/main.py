@@ -11,6 +11,7 @@ import rasterio as rio
 import shapely as shp
 import argparse, sys
 import xml.etree.ElementTree as ET
+from pyspark.sql import SparkSession
 
 from numpy import asarray
 from pathlib import Path
@@ -22,7 +23,7 @@ sys.path.append(os.getcwd())
 from utils import parse_config, init_logger
 from notebookutils import mssparkutils
 
-DEFAULT_CONFIG = {"probability_cutoff": 0.75}
+DEFAULT_CONFIG = {"probability_cutoff": 0.75, "width": 512.1, "height": 512, "tag_name": "object"}
 
 PKG_PATH = Path(__file__).parent
 PKG_NAME = PKG_PATH.name
@@ -32,10 +33,14 @@ dst_folder_name = 'pool-geolocation'
 # collect args
 parser = argparse.ArgumentParser(description='Arguments required to run pool geolocation function')
 parser.add_argument('--storage_account_name', type=str, required=True, help='Name of the storage account name where the input data resides')
-parser.add_argument('--storage_account_key', required=True, help='Key to the storage account where the input data resides')
+
 parser.add_argument('--storage_container', type=str, required=True, help='Container under which the input data resides')
 parser.add_argument('--src_folder_name', default=None, required=True, help='Folder containing the source file for cropping')
-parser.add_argument('--config_file_name', required=True, help='Config file name')
+parser.add_argument('--config_file_name', required=False, help='Config file name')
+
+parser.add_argument('--key_vault_name', type=str, required=True, help='Name of the Key Vault that stores the secrets')
+parser.add_argument('--storage_account_key_secret_name', type=str, required=True, help='Name of the secret in the Key Vault that stores storage account key')
+parser.add_argument('--linked_service_name', type=str, required=True, help='Name of the Linekd Service for the Key Vault')
 
 # parse Args
 args = parser.parse_args()
@@ -44,7 +49,10 @@ def get_pool_gelocations(input_path: str,
     output_path: str,
     config_path: str):
   
-    config = parse_config(config_path, DEFAULT_CONFIG)
+    if config_path is not None:
+        config = parse_config(config_path, DEFAULT_CONFIG)
+    else:
+        config = DEFAULT_CONFIG
 
     height = int(config["height"])
     width = int(config["width"])
@@ -148,6 +156,10 @@ if __name__ == "__main__":
 
     logger.info("starting pool geolocation, running ...")
 
+    sc = SparkSession.builder.getOrCreate()
+    token_library = sc._jvm.com.microsoft.azure.synapse.tokenlibrary.TokenLibrary
+    storage_account_key = token_library.getSecret(args.key_vault_name, args.storage_account_key_secret_name, args.linked_service_name)
+
     # if a mount to the same path is already present, then unmount it
     mssparkutils.fs.unmount(f'/{args.storage_container}') 
 
@@ -155,20 +167,22 @@ if __name__ == "__main__":
     mssparkutils.fs.mount( 
         f'abfss://{args.storage_container}@{args.storage_account_name}.dfs.core.windows.net', 
         f'/{args.storage_container}', 
-        {"accountKey": args.storage_account_key} 
+        {"accountKey": storage_account_key} 
     )
 
     jobId = mssparkutils.env.getJobId()
 
     # deriving the input, output and config path
     input_path = f'/synfs/{jobId}/{args.storage_container}/{args.src_folder_name}'
-    config_path = f'/synfs/{jobId}/{args.storage_container}/config/{args.config_file_name}'
+    if args.config_file_name != None:
+        config_path = f'/synfs/{jobId}/{args.storage_container}/config/{args.config_file_name}'
+        logger.debug(f"config file path {config_path}")
+        
     output_path = f'/synfs/{jobId}/{args.storage_container}/{dst_folder_name}'
 
     # debug purposes only
     logger.debug(f"input data directory {input_path}")
     logger.debug(f"output data directory {output_path}")
-    logger.debug(f"config file path {config_path}")
 
     # start by creating a placeholder file. we need this because creating files under a folder
     # that does not already existis fails without this.

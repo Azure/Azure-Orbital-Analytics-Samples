@@ -14,7 +14,7 @@ import shapely.geometry as geo
 from shapely.ops import transform
 from osgeo import gdal
 from pandas import array
-from notebookutils import mssparkutils 
+from notebookutils import mssparkutils
 from pyspark.sql import SparkSession
 
 from pathlib import Path
