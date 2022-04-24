@@ -28,6 +28,30 @@ The shell script runs an `az cli` command to invoke `bicep` tool.
 
 This command recieves the bicep template as input, and converts the bicep templates into an intermediate ARM template output which is then submitted to Azure APIs to create the Azure resources.
 
+# Overview of deployment and configuration
+
+Th deployment involves the following steps outlined below:
+
+1. Executing the script
+2. Deployment of Infrastructure using bicep template
+3. Configuring the Resources
+4. Packaging the Synapse pipline
+5. Verifying infrastructure resources
+6. Load the Custom Vision Model to your Container Registry (optional)
+
+Steps 2 through 4 can instead be deployed using a single script below:
+
+```bash
+./setup.sh <environmentCode> <location> <envTag> <pipelineName>
+
+```
+
+Arguments | Required | Sample value
+----------|-----------|-------
+environmentCode | yes | aoi
+location | yes | westus
+envTag | no | synapse\-\<environmentCode\>
+pipelineName | no | Allowed values: custom-vision-model, custom-vision-model-optimized
 
 # Executing the script
 
@@ -41,6 +65,8 @@ az account set -s <subscription_id>
 Script has been written to be executed with minimalistic input, it requires following input
 - `environmentCode` which serves as the prefix for infrastructure services names. Allows only alpha numeric(no special characters) and must be between 3 and 8 characters.
 - `location` which suggests which azure region infrastructure is deployed in.
+
+## Deployment of Infrastructure using bicep template
 
 To install infrastructure execute install.sh script as follows
 
@@ -66,8 +92,6 @@ For eg.
 
 Note: Currently, this deployment does not deploy Azure Database for PostgreSQL for post-analysis.
 
-# Using bicep template
-
 Users can also use bicep template directly instead of using the script `install.sh`
 
 To deploy the resources using the bicep template use the command as follows:
@@ -81,7 +105,33 @@ For eg.
 az deployment sub create -l <region> -n aoi -f main.bicep -p location=<region> environmentCode=aoi environment=synapse-aoi
 ```
 
-# Verifying infrastructure resources
+
+## Configuring the Resources
+
+Next step is to configure your resources and set them up with the required dependencies like Python files, Library requirements and so on, before importing the Synapse pipeline. Run the `configure.sh` script below to perform the configuration:
+
+```bash
+./deploy/configure.sh <environmentCode>
+```
+
+## Packaging the Synapse Pipeline
+
+To package the Synapse pipeline, run the `package.sh` script by following the syntax below:
+
+```bash
+./deploy/package.sh <environmentCode>
+```
+
+Once the above step completes, a zip file is generated. Upload the generated zip files to your Synapse Studio by following the steps below:
+
+1. Open the Synapse Studio
+2. Switch to Integrate tab on the left
+3. At the top of the left pane, click on the "+" dropdown and select "Import resources from support files"
+4. When prompted to select a file, pick the zip file generated in the previous step
+5. Pipelines and its dependencies are imported to the Synapse Studio. Validate the components being imported for any errors
+6. Click "Publish all" and wait for the imported components to be published
+
+## Verifying infrastructure resources
 
 Once setup has been executed one can check for following resource-groups and resources to confirm the successful execution.
 
@@ -142,7 +192,7 @@ Following is the list of resource-groups and resources that should be created if
     - Synapse spark pool `pool<6-character-random-string>` to run analytics.
 
 
-# Load the Custom Vision Model to your Container Registry
+## Load the Custom Vision Model to your Container Registry
 
 There are three ways to load an AI Model with this pipeline:
 
@@ -200,32 +250,8 @@ Note: When using a private Container Registry, update `containerSettings` proper
 
 - Configuration file - Each AI Model may require one or more parameters to run the model. This parameters driven by the end users are passed to the AI Model in the form of a configuration file. The schema of these configuration file is specific to the AI Model and hence we provide a template for the end user to plug-in their values.
 
-# Configuring the Resources
 
-Next step is to configure your resources and set them up with the required dependencies like Python files, Library requirements and so on, before importing the Synapse pipeline. Run the `configure.sh` script below to perform the configuration:
-
-```bash
-./deploy/configure.sh <environmentCode>
-```
-
-# Packaging the Synapse Pipeline
-
-To package the Synapse pipeline, run the `package.sh` script by following the syntax below:
-
-```bash
-./deploy/package.sh <environmentCode>
-```
-
-Once the above step completes, a zip file is generated. Upload the generated zip files to your Synapse Studio by following the steps below:
-
-1. Open the Synapse Studio
-2. Switch to Integrate tab on the left
-3. At the top of the left pane, click on the "+" dropdown and select "Import resources from support files"
-4. When prompted to select a file, pick the zip file generated in the previous step
-5. Pipelines and its dependencies are imported to the Synapse Studio. Validate the components being imported for any errors
-6. Click "Publish all" and wait for the imported components to be published
-
-## Running the pipeline
+# Running the pipeline
 
 Before starting the pipeline, prepare the storage account in <environmentCode>-data-rg resource group by creating a container for the pipeline run.
 
