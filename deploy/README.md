@@ -32,18 +32,20 @@ This command recieves the bicep template as input, and converts the bicep templa
 
 The deployment involves the following steps outlined below:
 
-1. Preparing to execute the script
-2. Deployment of Infrastructure using bicep template
-3. Configuring the Resources
-4. Packaging the Synapse pipline (optional)
-5. Importing from Git Repository (optional)
-6. Verifying infrastructure resources
-7. Load the Custom Vision Model to your Container Registry (optional)
+No | Step | Duration (approx.) | Required / Optional
+---|------|----------|---------------------
+1 | Preparing to execute the script | 1 minute | required
+2 | Deployment of Infrastructure using bicep template | 10 minutes | required
+3 | Configuring the Resources | 5 minutes | required
+4 | Packaging the Synapse pipline (optional) | 2 minutes | optional
+5 | Importing from Git Repository (optional) | 5 minutes | optional
+6 | Verifying infrastructure resources | 5 minutes | required
+7 | Load the Custom Vision Model to your Container Registry (optional) | 10 minutes | optional
 
 Steps 2 through 4 can instead be deployed using a single script below:
 
 ```bash
-./setup.sh <environmentCode> <location> <envTag> <pipelineName>
+./deploy/setup.sh <environmentCode> <location> <pipelineName> <envTag>
 
 ```
 
@@ -66,6 +68,8 @@ az account set -s <subscription_id>
 Script has been written to be executed with minimalistic input, it requires following input
 - `environmentCode` which serves as the prefix for infrastructure services names. Allows only alpha numeric(no special characters) and must be between 3 and 8 characters.
 - `location` which suggests which azure region infrastructure is deployed in.
+- `environmentTag` / `envTag` serves are a simple label / tag to all resources being deployed as part of the bicep template to your subscription.
+- `pipelineName` refers to the name of the pipeline that is to be package for deployment to your Synapse Workspace. Allowed values are custom-vision-model, custom-vision-model-v2.
 
 ## Deployment of Infrastructure using bicep template
 
