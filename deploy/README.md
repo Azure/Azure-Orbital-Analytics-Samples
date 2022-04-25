@@ -48,6 +48,7 @@ Steps 2 through 4 can instead be deployed using a single script below:
 ./deploy/setup.sh <environmentCode> <location> <pipelineName> <envTag>
 
 ```
+If you like to package other pipelines or re-package an updated/modified pipeline, follow the instructions under `Packaging the Synapse pipeline` section. The script mentioned in that section can be rerun multiple times.
 
 Arguments | Required | Sample value
 ----------|-----------|-------
