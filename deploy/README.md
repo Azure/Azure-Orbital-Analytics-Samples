@@ -32,7 +32,7 @@ This command recieves the bicep template as input, and converts the bicep templa
 
 Th deployment involves the following steps outlined below:
 
-1. Executing the script
+1. Preparing to execute the script
 2. Deployment of Infrastructure using bicep template
 3. Configuring the Resources
 4. Packaging the Synapse pipline
@@ -50,10 +50,10 @@ Arguments | Required | Sample value
 ----------|-----------|-------
 environmentCode | yes | aoi
 location | yes | westus
+pipelineName | yes | Allowed values: custom-vision-model, custom-vision-model-v2
 envTag | no | synapse\-\<environmentCode\>
-pipelineName | no | Allowed values: custom-vision-model, custom-vision-model-optimized
 
-# Executing the script
+# Preparing to execute the script
 
 Before executing the script one would need to login to azure using `az` cli and set the correct subscription in which they want to provision the resources.
 
