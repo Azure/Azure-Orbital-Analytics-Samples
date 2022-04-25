@@ -23,13 +23,6 @@ if [[ -z "$2" ]]
     exit 1
 fi
 
-if [[ -z "$3" ]]
-  then
-    echo "Pipeline name to package"
-    exit 1
-fi
-
-
 echo "Performing bicep template deployment"
 if [[ -z "$4" ]]
     then
@@ -41,7 +34,12 @@ fi
 echo "Performing configuration"
 ./configure.sh $1
 
-echo "Performing pipeline packaging"
-./package.sh $1 $3
+if [[ -z "$3" ]]
+  then
+    echo "Skipping pipeline packaging"
+  else
+    echo "Performing pipeline packaging"
+    ./package.sh $1 $3
+fi
 
 set +x

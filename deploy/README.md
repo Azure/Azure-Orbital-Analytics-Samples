@@ -30,14 +30,15 @@ This command recieves the bicep template as input, and converts the bicep templa
 
 # Overview of deployment and configuration
 
-Th deployment involves the following steps outlined below:
+The deployment involves the following steps outlined below:
 
 1. Preparing to execute the script
 2. Deployment of Infrastructure using bicep template
 3. Configuring the Resources
-4. Packaging the Synapse pipline
-5. Verifying infrastructure resources
-6. Load the Custom Vision Model to your Container Registry (optional)
+4. Packaging the Synapse pipline (optional)
+5. Importing from Git Repository (optional)
+6. Verifying infrastructure resources
+7. Load the Custom Vision Model to your Container Registry (optional)
 
 Steps 2 through 4 can instead be deployed using a single script below:
 
@@ -50,10 +51,10 @@ Arguments | Required | Sample value
 ----------|-----------|-------
 environmentCode | yes | aoi
 location | yes | westus
-pipelineName | yes | Allowed values: custom-vision-model, custom-vision-model-v2
+pipelineName | no | Allowed values: custom-vision-model, custom-vision-model-v2
 envTag | no | synapse\-\<environmentCode\>
 
-# Preparing to execute the script
+## Preparing to execute the script
 
 Before executing the script one would need to login to azure using `az` cli and set the correct subscription in which they want to provision the resources.
 
@@ -130,6 +131,10 @@ Once the above step completes, a zip file is generated. Upload the generated zip
 4. When prompted to select a file, pick the zip file generated in the previous step
 5. Pipelines and its dependencies are imported to the Synapse Studio. Validate the components being imported for any errors
 6. Click "Publish all" and wait for the imported components to be published
+
+## Importing from Git Repository
+
+Another way to get import pipeline into the Synape Studio is through Source Control repository like GitHub or Azure DevOps repository. Refer to the document on [Source Control](https://docs.microsoft.com/azure/synapse-analytics/cicd/source-control) to learn about Git Integration for Azure Synapse Analytics and how to setup.
 
 ## Verifying infrastructure resources
 
