@@ -199,9 +199,7 @@
                         "--storage_account_key_secret_name",
                         "GeospatialStorageAccountKey",
                         "--linked_service_name",
-                        "AOI Pipeline Key Vault",
-                        "--config_file_name",
-                        "config-pool-geolocation.json"
+                        "AOI Pipeline Key Vault"
                     ],
                     "targetBigDataPool": {
                         "referenceName": "__synapse_pool_name__",
