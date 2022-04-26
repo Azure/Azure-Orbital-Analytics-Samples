@@ -215,7 +215,7 @@ def crop(image_paths: array,
 
         out_meta_str = str(dst_meta).replace("\n", "")
 
-        output_file_name = os.path.basename(image_path)
+        output_file_name = "output.tif"
         dst_path = f'{output_path}/{output_file_name}'
 
         with rio.open(dst_path, "w", **dst_meta) as img_dst:
