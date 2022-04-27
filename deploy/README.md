@@ -69,7 +69,7 @@ az account set -s <subscription_id>
 Script has been written to be executed with minimalistic input, it requires following input
 - `environmentCode` which serves as the prefix for infrastructure services names. Allows only alpha numeric(no special characters) and must be between 3 and 8 characters.
 - `location` which suggests which azure region infrastructure is deployed in.
-- `environmentTag` / `envTag` serves are a simple label / tag to all resources being deployed as part of the bicep template to your subscription.
+- `environmentTag` / `envTag` serves as a simple label / tag to all resources being deployed as part of the bicep template to your subscription.
 - `pipelineName` refers to the name of the pipeline that is to be package for deployment to your Synapse Workspace. Allowed values are custom-vision-model, custom-vision-model-v2.
 
 ## Deployment of Infrastructure using bicep template
@@ -125,7 +125,7 @@ Next step is to configure your resources and set them up with the required depen
 To package the Synapse pipeline, run the `package.sh` script by following the syntax below:
 
 ```bash
-./deploy/package.sh <environmentCode>
+./deploy/package.sh <environmentCode> <pipelineName>
 ```
 
 Once the above step completes, a zip file is generated. Upload the generated zip files to your Synapse Studio by following the steps below:
