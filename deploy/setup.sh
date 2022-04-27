@@ -26,20 +26,20 @@ fi
 echo "Performing bicep template deployment"
 if [[ -z "$4" ]]
     then
-        ./install.sh $1 $2
+        ./deploy/install.sh $1 $2
     else
-        ./install.sh $1 $2 $4
+        ./deploy/install.sh $1 $2 $4
 fi
 
 echo "Performing configuration"
-./configure.sh $1
+./deploy/configure.sh $1
 
 if [[ -z "$3" ]]
   then
     echo "Skipping pipeline packaging"
   else
     echo "Performing pipeline packaging"
-    ./package.sh $1 $3
+    ./deploy/package.sh $1 $3
 fi
 
 set +x
