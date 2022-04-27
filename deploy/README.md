@@ -74,6 +74,8 @@ Script has been written to be executed with minimalistic input, it requires foll
 
 ## Deployment of Infrastructure using bicep template
 
+If you have deployed the solution using `setup.sh` script, you should skip this step. However, if you have not run the `setup.sh` script, the steps outlined in this section are required.
+
 To install infrastructure execute install.sh script as follows
 
 ```bash
@@ -114,6 +116,8 @@ az deployment sub create -l <region> -n aoi -f main.bicep -p location=<region> e
 
 ## Configuring the Resources
 
+If you have deployed the solution using `setup.sh` script, you should skip this step. However, if you have not run the `setup.sh` script, the steps outlined in this section are required.
+
 Next step is to configure your resources and set them up with the required dependencies like Python files, Library requirements and so on, before importing the Synapse pipeline. Run the `configure.sh` script below to perform the configuration:
 
 ```bash
@@ -121,6 +125,8 @@ Next step is to configure your resources and set them up with the required depen
 ```
 
 ## Packaging the Synapse Pipeline
+
+You may repeat the steps outlined in this section multiple times to package the pipeline irrespective of whether you have already run the `package.sh` script or `setup.sh` script before. 
 
 To package the Synapse pipeline, run the `package.sh` script by following the syntax below:
 
