@@ -142,7 +142,7 @@ Once the above step completes, a zip file is generated. Upload the generated zip
 4. When prompted to select a file, pick the zip file generated in the previous step
 5. Pipelines and its dependencies are imported to the Synapse Studio. Validate the components being imported for any errors
 6. Click "Publish all" and wait for the imported components to be published
-
+NOTE: You may run into this error during import "Invalid template, please check the template file". It is a known issue that we are working on with the product team. In the interim, we suggest importing from Git Repository as described below.  
 ## Importing from Git Repository
 
 Another way to get import pipeline into the Synape Studio is through Source Control repository like GitHub or Azure DevOps repository. Refer to the document on [Source Control](https://docs.microsoft.com/azure/synapse-analytics/cicd/source-control) to learn about Git Integration for Azure Synapse Analytics and how to setup.
