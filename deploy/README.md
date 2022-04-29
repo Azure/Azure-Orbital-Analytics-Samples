@@ -138,7 +138,7 @@ Once the above step completes, a zip file is generated. Upload the generated zip
 
 1. Open the Synapse Studio
 2. Switch to Integrate tab on the left
-3. At the top of the left pane, click on the "+" dropdown and select "Import resources from support files"
+3. At the top of the left pane, click on the "+" dropdown and select "Import from pipeline template"
 4. When prompted to select a file, pick the zip file generated in the previous step
 5. Pipelines and its dependencies are imported to the Synapse Studio. Validate the components being imported for any errors
 6. Click "Publish all" and wait for the imported components to be published
