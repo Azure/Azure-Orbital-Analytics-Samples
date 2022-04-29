@@ -6,6 +6,7 @@ import os
 import argparse
 import shutil
 from pathlib import Path
+from pyspark.sql import SparkSession
 
 from notebookutils import mssparkutils
 
@@ -15,7 +16,6 @@ PKG_NAME = PKG_PATH.name
 # collect args
 parser = argparse.ArgumentParser(description='Arguments required to run copy noop function')
 parser.add_argument('--storage_account_name', type=str, required=True, help='Name of the storage account name where the input data resides')
-parser.add_argument('--storage_account_key', required=True, help='Key to the storage account where the input data resides')
 
 parser.add_argument('--src_container', type=str, required=False, help='Source container in Azure Storage')
 parser.add_argument('--src_fileshare', type=str, required=False, help='Source File share in Azure Storage')
@@ -26,6 +26,10 @@ parser.add_argument('--dst_fileshare', type=str, required=False, help='Destinati
 parser.add_argument('--dst_folder', default=None, required=True, help='Destination folder path in Azure Storage Container or File Share')
 
 parser.add_argument('--folders_to_create', action='append', required=False, help='Folders to create in container or file share')
+
+parser.add_argument('--key_vault_name', type=str, required=True, help='Name of the Key Vault that stores the secrets')
+parser.add_argument('--storage_account_key_secret_name', type=str, required=True, help='Name of the secret in the Key Vault that stores storage account key')
+parser.add_argument('--linked_service_name', type=str, required=True, help='Name of the Linekd Service for the Key Vault')
 
 
 # parse Args
@@ -120,16 +124,20 @@ if __name__ == "__main__":
 
     logger = logging.getLogger("copy_noop")
 
+    sc = SparkSession.builder.getOrCreate()
+    token_library = sc._jvm.com.microsoft.azure.synapse.tokenlibrary.TokenLibrary
+    storage_account_key = token_library.getSecret(args.key_vault_name, args.storage_account_key_secret_name, args.linked_service_name)
+
     # map / mount the source container / file share in azure storage account
     src_mounted_path, src_unmounted_path = map_source(args.storage_account_name,
-        args.storage_account_key,
+        storage_account_key,
         args.src_container,
         args.src_fileshare,
         args.src_folder)
 
     # map / mount the destination container / file share in azure storage account
     dst_mounted_path, dst_unmounted_path = map_source(args.storage_account_name,
-        args.storage_account_key,
+        storage_account_key,
         args.dst_container,
         args.dst_fileshare,
         args.dst_folder)

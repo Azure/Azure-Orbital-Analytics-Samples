@@ -1,0 +1,74 @@
+{
+    "name": "Custom Vision Model Transforms v2",
+    "properties": {
+        "activities": [
+            {
+                "name": "Transforms",
+                "type": "SparkJob",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "sparkJob": {
+                        "referenceName": "Transforms",
+                        "type": "SparkJobDefinitionReference"
+                    },
+                    "file": "abfss://spark-jobs@__synapse_storage_account__.dfs.core.windows.net/customvision_transform/src/main.py",
+                    "args": [
+                        "--storage_account_name",
+                        "@pipeline().parameters.StorageAccountName",
+                        "--storage_container",
+                        "@pipeline().parameters.Prefix",
+                        "--key_vault_name",
+                        "__linked_key_vault__",
+                        "--storage_account_key_secret_name",
+                        "GeospatialStorageAccountKey",
+                        "--linked_service_name",
+                        "AOI Pipeline Key Vault",
+                        "--aoi",
+                        "@split(pipeline().parameters.AOI, ' ')[0]",
+						"@split(pipeline().parameters.AOI, ' ')[1]",
+						"@split(pipeline().parameters.AOI, ' ')[2]",
+						"@split(pipeline().parameters.AOI, ' ')[3]"
+                    ],
+                    "targetBigDataPool": {
+                        "referenceName": "__synapse_pool_name__",
+                        "type": "BigDataPoolReference"
+                    },
+                    "executorSize": "Medium",
+                    "conf": {
+                        "spark.dynamicAllocation.minExecutors": 2,
+                        "spark.dynamicAllocation.maxExecutors": 3
+                    },
+                    "driverSize": "Medium",
+                    "numExecutors": 2
+                }
+            }
+        ],
+        "parameters": {
+            "Prefix": {
+                "type": "string",
+                "defaultValue": ""
+            },
+            "StorageAccountName": {
+                "type": "string",
+                "defaultValue": ""
+            },
+            "AOI": {
+                "type": "string",
+                "defaultValue": ""
+            }
+        },
+        "variables": {
+        },
+        "annotations": [],
+        "lastPublishTime": "2022-03-06T06:06:58Z"
+    },
+    "type": "Microsoft.Synapse/workspaces/pipelines"
+}

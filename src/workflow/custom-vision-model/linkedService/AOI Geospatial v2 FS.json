@@ -1,0 +1,24 @@
+{
+    "name": "AOI Geospatial v2 FS",
+    "properties": {
+        "annotations": [],
+        "type": "AzureFileStorage",
+        "typeProperties": {
+            "connectionString": "DefaultEndpointsProtocol=https;AccountName=__raw_data_storage_account__;EndpointSuffix=core.windows.net;",
+            "accountKey": {
+                "type": "AzureKeyVaultSecret",
+                "store": {
+                    "referenceName": "AOI Pipeline Key Vault",
+                    "type": "LinkedServiceReference"
+                },
+                "secretName": "GeospatialStorageAccountKey"
+            },
+            "fileShare": "volume-a"
+        },
+        "connectVia": {
+            "referenceName": "AutoResolveIntegrationRuntime",
+            "type": "IntegrationRuntimeReference"
+        }
+    },
+    "type": "Microsoft.Synapse/workspaces/linkedservices"
+}
