@@ -91,11 +91,6 @@ module addSynapseSqlOnDemandPrivateEndpoint 'modules/privateendpoints.bicep' = {
   ]
 }
 
-output customVnetId string = customVnet.id
-output customVnetName string = customVnet.name
-output pipelineSubnetId string = pipelineSubnet.id
-output pipelineSubnetName string = pipelineSubnet.name
-output synapseWorkspaceProperties object = synapseWorkspace.properties
 
 
 

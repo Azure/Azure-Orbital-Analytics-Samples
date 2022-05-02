@@ -48,6 +48,12 @@ Steps 2 through 4 can instead be deployed using a single script below:
 ./deploy/setup.sh <environmentCode> <location> <pipelineName> <envTag>
 
 ```
+To enabled security features like Synapse managed VNET, managed private endpoints, and privates enpoints to 3 synapse endpoints, set 'SECURITY_ENABLED=true' when running setup.sh:
+```
+SECURITY_ENABLED=true ./deploy/setup.sh <environmentCode> <location> <pipelineName> <envTag>
+```
+**Note that if you turn on SECURITY_ENABLED during setup, Synapse endpoints are restricted to the custom VNET in the deployment environment. Thus, you need to create a Windows jumpbox inside the VNET to connect to Synapse Studio.**
+
 If you like to package other pipelines or re-package an updated/modified pipeline, follow the instructions under `Packaging the Synapse pipeline` section. The script mentioned in that section can be rerun multiple times.
 
 Arguments | Required | Sample value
@@ -83,6 +89,12 @@ To install infrastructure execute install.sh script as follows
 
 ```
 
+To enabled security features like Synapse managed VNET, managed private endpoints, and privates enpoints to 3 synapse endpoints, set 'SECURITY_ENABLED=true' when running install.sh:
+```
+SECURITY_ENABLED=true ./deploy/install.sh <environmentCode> <location> <envTag>
+```
+**Note that if you turn on SECURITY_ENABLED during setup, Synapse endpoints are restricted to the custom VNET in the deployment environment. Thus, you need to create a Windows jumpbox inside the VNET to connect to Synapse Studio.**
+
 Default values for the parameters are provided in the script itself.
 
 Arguments | Required | Sample value
@@ -113,6 +125,11 @@ For eg.
 az deployment sub create -l <region> -n aoi -f main.bicep -p location=<region> environmentCode=aoi environment=synapse-aoi
 ```
 
+To enabled security features like Synapse managed VNET, managed private endpoints, and privates enpoints to 3 Synapse endpoints, pass parameter 'securityEnabled=true' when running bicep:
+```
+bash
+az deployment sub create -l <region_name> -n <deployment_name> -f main.bicep -p location=<region_name> environmentCode=<environment_name_prefix> environment=<tag_value> securityEnabled=true
+```
 
 ## Configuring the Resources
 
@@ -142,7 +159,10 @@ Once the above step completes, a zip file is generated. Upload the generated zip
 4. When prompted to select a file, pick the zip file generated in the previous step
 5. Pipelines and its dependencies are imported to the Synapse Studio. Validate the components being imported for any errors
 6. Click "Publish all" and wait for the imported components to be published
-NOTE: You may run into this error during import "Invalid template, please check the template file". It is a known issue that we are working on with the product team. In the interim, we suggest importing from Git Repository as described below.  
+NOTE: You may run into this error during import "Invalid template, please check the template file". It is a known issue that we are working on with the product team. In the interim, we suggest importing from Git Repository as described below.
+
+**Note that if you turn on SECURITY_ENABLED during setup, Synapse endpoints are restricted to the custom VNET in the deployment environment. Thus, you need to create a Windows jumpbox inside the VNET to connect to Synapse Studio and import the package.**
+
 ## Importing from Git Repository
 
 Another way to get import pipeline into the Synape Studio is through Source Control repository like GitHub or Azure DevOps repository. Refer to the document on [Source Control](https://docs.microsoft.com/azure/synapse-analytics/cicd/source-control) to learn about Git Integration for Azure Synapse Analytics and how to setup.

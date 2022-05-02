@@ -22,8 +22,8 @@ envCode=${envCode:-"${1}"}
 location=${location:-"${2}"}
 envTag=${envTag:-"synapse-${envCode}"}
 deploymentName=${3:-"${envTag}-deploy"}
-securityEnabled=${securityEnabled:-false}
-preventDataExfiltration=${preventDataExfiltration:-false}
+SECURITY_ENABLED=${SECURITY_ENABLED:-false}
+PREVENT_DATA_EXFILTRATION=${PREVENT_DATA_EXFILTRATION:-false}
 
 DEPLOYMENT_SCRIPT="az deployment sub create -l $location -n $deploymentName \
     -f ./deploy/infra/main.bicep \
@@ -31,8 +31,8 @@ DEPLOYMENT_SCRIPT="az deployment sub create -l $location -n $deploymentName \
     location=$location \
     environmentCode=$envCode \
     environment=$envTag \
-    securityEnabled=$securityEnabled \
-    preventDataExfiltration=$preventDataExfiltration"
+    securityEnabled=$SECURITY_ENABLED \
+    preventDataExfiltration=$PREVENT_DATA_EXFILTRATION"
 $DEPLOYMENT_SCRIPT
 
 if [[ $securityEnabled ]]

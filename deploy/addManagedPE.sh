@@ -10,6 +10,25 @@ if [[ -z "$1" ]]
     exit 1
 fi
 ENVCODE=$1
+PE_APPROVAL_DESCRIPTION="Approved by script"
+
+approved_managed_private_endpoint_request_exists() {
+    local groupId=$1
+    local resourceName=$2
+    local resourceType=$3
+
+    local peList=$(az network private-endpoint-connection list \
+        -g $groupId -n $resourceName --type $resourceType -ojson 2>/dev/null || echo '')
+    local result=''
+    
+    if [[ -n peList ]];
+    then
+        result=$( echo $peList \
+            | jq -r ".[] | select (.properties.privateLinkServiceConnectionState.description == \"${PE_APPROVAL_DESCRIPTION}\").id" )
+        echo $result
+    fi
+    echo $result     
+}
 
 create_synapase_managed_private_endpoint() {
     local tmpfile=$(mktemp)
@@ -63,7 +82,7 @@ approve_synapase_managed_private_endpoint() {
         if [[ $PE_CONNECTION_APPROVAL_STATUS != "Approved" ]];
         then
             az network private-endpoint-connection approve \
-                --id $PE_CONNECTION_ID --description "Approved by script"
+                --id $PE_CONNECTION_ID --description "$PE_APPROVAL_DESCRIPTION"
             echo "$PE_CONNECTION_ID got approved"
         fi
     fi
@@ -76,7 +95,11 @@ do
    sleep 30
    SYNAPSE_STORAGE_ACCT=$(az storage account list --query "[?tags.store && tags.store == 'synapse'].name" -o tsv -g $ENVCODE-pipeline-rg)
 done
-approve_synapase_managed_private_endpoint $ENVCODE-pipeline-rg $SYNAPSE_STORAGE_ACCT "Microsoft.Storage/storageAccounts"
+result=$(approved_managed_private_endpoint_request_exists $ENVCODE-pipeline-rg $SYNAPSE_STORAGE_ACCT "Microsoft.Storage/storageAccounts")
+if [[ -z $result ]];
+then
+    approve_synapase_managed_private_endpoint $ENVCODE-pipeline-rg $SYNAPSE_STORAGE_ACCT "Microsoft.Storage/storageAccounts"
+fi
 
 # Create Managed Private Endpoints (PE) if not exist
 PIPELINE_KV=$(az keyvault list --query "[?tags.usage && tags.usage == 'linkedService']" -ojson -g $ENVCODE-pipeline-rg)
@@ -87,7 +110,12 @@ do
 done
 PIPELINE_KV_NAME=$(echo $PIPELINE_KV | jq -r '.[0].name')
 PIPELINE_KV_ID=$(echo $PIPELINE_KV | jq -r '.[0].id')
-create_synapase_managed_private_endpoint "$ENVCODE-pipeline-syn-ws" "$ENVCODE-mpe-pipeline-kv" "vault" "$PIPELINE_KV_ID"
+result=$(approved_managed_private_endpoint_request_exists $ENVCODE-pipeline-rg $PIPELINE_KV_NAME "Microsoft.Keyvault/vaults")
+if [[ -z $result ]]
+then
+    create_synapase_managed_private_endpoint "$ENVCODE-pipeline-syn-ws" "$ENVCODE-mpe-pipeline-kv" "vault" "$PIPELINE_KV_ID"
+    approve_synapase_managed_private_endpoint $ENVCODE-pipeline-rg $PIPELINE_KV_NAME "Microsoft.Keyvault/vaults"
+fi 
 
 DATA_STORAGE_ACCT=$(az storage account list --query "[?tags.store && tags.store == 'raw']" -ojson -g $ENVCODE-data-rg)
 while [[ $DATA_STORAGE_ACCT == '[]' ]]
@@ -97,7 +125,12 @@ do
 done
 DATA_STORAGE_ACCT_NAME=$(echo $DATA_STORAGE_ACCT | jq -r '.[0].name')
 DATA_STORAGE_ACCT_ID=$(echo $DATA_STORAGE_ACCT | jq -r '.[0].id')
-create_synapase_managed_private_endpoint "$ENVCODE-pipeline-syn-ws" "$ENVCODE-mpe-data-raw" "dfs" "$DATA_STORAGE_ACCT_ID"
+result=$(approved_managed_private_endpoint_request_exists $ENVCODE-data-rg $DATA_STORAGE_ACCT_NAME "Microsoft.Storage/storageAccounts")
+if [[ -z $result ]]
+then
+    create_synapase_managed_private_endpoint "$ENVCODE-pipeline-syn-ws" "$ENVCODE-mpe-data-raw" "dfs" "$DATA_STORAGE_ACCT_ID"
+    approve_synapase_managed_private_endpoint $ENVCODE-data-rg $DATA_STORAGE_ACCT_NAME "Microsoft.Storage/storageAccounts"
+fi
 
 DATA_KV=$(az keyvault list --query "[?tags.usage && tags.usage == 'general']" -ojson -g $ENVCODE-data-rg)
 while [[ $DATA_KV == '[]' ]];
@@ -107,10 +140,9 @@ do
 done
 DATA_KV_NAME=$(echo $DATA_KV | jq -r '.[0].name')
 DATA_KV_ID=$(echo $DATA_KV | jq -r '.[0].id')
-create_synapase_managed_private_endpoint "$ENVCODE-pipeline-syn-ws" "$ENVCODE-mpe-data-kv" "vault" "$DATA_KV_ID"
-
-
-# Approve remaining Managed Private Endpoints (PE)
-approve_synapase_managed_private_endpoint $ENVCODE-pipeline-rg $PIPELINE_KV_NAME "Microsoft.Keyvault/vaults"
-approve_synapase_managed_private_endpoint $ENVCODE-data-rg $DATA_STORAGE_ACCT_NAME "Microsoft.Storage/storageAccounts"
-approve_synapase_managed_private_endpoint $ENVCODE-data-rg $DATA_KV_NAME "Microsoft.Keyvault/vaults"
+result=$(approved_managed_private_endpoint_request_exists $ENVCODE-data-rg $DATA_KV_NAME "Microsoft.Keyvault/vaults")
+if [[ -z $result ]]
+then
+    create_synapase_managed_private_endpoint "$ENVCODE-pipeline-syn-ws" "$ENVCODE-mpe-data-kv" "vault" "$DATA_KV_ID"
+    approve_synapase_managed_private_endpoint $ENVCODE-data-rg $DATA_KV_NAME "Microsoft.Keyvault/vaults"
+fi
