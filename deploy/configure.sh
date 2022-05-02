@@ -34,7 +34,7 @@ if [[ -n $BATCH_ACCT ]]
 then
     az batch account login --name ${BATCH_ACCT} --resource-group ${ENVCODE}-orc-rg
     # create batch job for custom vision model
-    az batch job create --id 'custom-vision-model-job' --pool-id 'data-cpu-pool' --account-name ${BATCH_ACCT} --account-key ${BATCH_ACCT_KEY}
+    az batch job create --id ${ENVCODE}-data-cpu-pool --pool-id 'data-cpu-pool' --account-name ${BATCH_ACCT} --account-key ${BATCH_ACCT_KEY}
 fi
 SYNAPSE_STORAGE_ACCT=$(az storage account list --query "[?tags.store && tags.store == 'synapse'].name" -o tsv -g $1-pipeline-rg)
 echo $SYNAPSE_STORAGE_ACCT

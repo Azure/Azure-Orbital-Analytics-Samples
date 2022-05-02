@@ -7,8 +7,8 @@ param projectName string
 // Name parameters for infrastructure resources
 param batchAccountName string
 param batchAccountResourceGroup string
-param batchAccountPoolCheckUamiName string
-param batchAccountLocation string
+param batchAccountPoolCheckUamiName string = ''
+param batchAccountLocation string = resourceGroup().location
 
 // Mount options
 param batchAccountPoolMountAccountName string
@@ -23,7 +23,6 @@ param batchAccountCpuOnlyPoolImageReferencePublisher string = 'microsoft-azure-b
 param batchAccountCpuOnlyPoolImageReferenceOffer string = 'ubuntu-server-container'
 param batchAccountCpuOnlyPoolImageReferenceSku string = '20-04-lts'
 param batchAccountCpuOnlyPoolImageReferenceVersion string = 'latest'
-param batchAccountCpuOnlyPoolStartTaskCommandLine string = '/bin/bash -c "apt-get update && apt-get install -y python3-pip && pip install requests && pip install azure-storage-blob && pip install pandas"'
 
 var namingPrefix = '${environmentCode}-${projectName}'
 
@@ -38,7 +37,7 @@ module batchAccountPoolCheck 'modules/batch.account.pool.exists.bicep' = {
   params: {
     batchAccountName: batchAccountName
     batchPoolName: batchAccountCpuOnlyPoolName
-    userManagedIdentityName: batchAccountPoolCheckUamiName
+    userManagedIdentityName: batchAccountPoolCheckUamiName==''?'${namingPrefix}-orc-umi':batchAccountPoolCheckUamiName
     userManagedIdentityResourcegroupName: resourceGroup().name
     location: batchAccountLocation
   }
@@ -59,7 +58,6 @@ module batchAccountCpuOnlyPool 'modules/batch.account.pools.bicep' = {
     imageReferenceOffer: batchAccountCpuOnlyPoolImageReferenceOffer
     imageReferenceSku: batchAccountCpuOnlyPoolImageReferenceSku
     imageReferenceVersion: batchAccountCpuOnlyPoolImageReferenceVersion
-    startTaskCommandLine: batchAccountCpuOnlyPoolStartTaskCommandLine
     azureFileShareConfigurationAccountKey: batchAccountPoolMountAccountKey
     azureFileShareConfigurationAccountName: batchAccountPoolMountAccountName
     azureFileShareConfigurationAzureFileUrl: batchAccountPoolMountFileUrl
