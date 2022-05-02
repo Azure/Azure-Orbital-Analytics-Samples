@@ -3,10 +3,10 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-ENVCODE=$ENVCODE
-LOCATION=$LOCATION
-PIPELINE_NAME=$PIPELINE_NAME
-ENVTAG=$ENVTAG
+ENVCODE=$1
+LOCATION=$2
+PIPELINE_NAME=$3
+ENVTAG=$4
 
 
 set -x
