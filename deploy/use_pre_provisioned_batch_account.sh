@@ -9,9 +9,12 @@ environment_code=${1}
 
 target_batch_account_name=${2}
 target_batch_account_resource_group_name=${3}
+target_batch_account_storage_account_name=${4}
 
-target_batch_pool_mount_storage_account_name=${4}
-target_batch_pool_mount_storage_account_resource_group_name=${5}
+target_batch_pool_mount_storage_account_name=${5}
+target_batch_pool_mount_storage_account_resource_group_name=${6}
+
+pipeline_name= ${7}
 
 target_batch_account_pool_name=${10:-"${environment_code}-data-cpu-pool"}
 batch_account_role=${11:-"Contributor"}
@@ -52,3 +55,60 @@ az deployment group create --resource-group "${environment_code}-orc-rg" \
         batchAccountPoolMountAccountName=${target_batch_pool_mount_storage_account_name} \
         batchAccountPoolMountAccountKey=${target_batch_pool_mount_storage_account_key} \
         batchAccountPoolMountFileUrl="${target_batch_pool_mount_storage_account_file_url}volume-a"
+
+# Following steps will configure the resources as done in configure.sh script
+# get synapse workspace and pool
+source_synapse_pool=$(az synapse spark pool list \
+    --workspace-name ${source_synapse_workspace_name} \
+    --resource-group ${source_synapse_resource_group_name} \
+    --query "[?tags.poolId && tags.poolId == 'default'].name" -o tsv)
+
+if [[ -n $source_synapse_workspace_name ]] && [[ -n $source_synapse_resource_group_name ]] && [[ -n $source_synapse_pool ]]
+then
+    # upload synapse pool
+    az synapse spark pool update \
+        --name ${source_synapse_pool} \
+        --workspace-name ${source_synapse_workspace_name} \
+        --resource-group ${source_synapse_resource_group_name} \
+        --library-requirements "${PRJ_ROOT}/deploy/environment.yml"
+fi
+
+# get batch account key
+target_batch_account_key=$(az batch account keys list --name ${target_batch_account_name} --resource-group ${target_batch_account_resource_group_name} | jq ".primary")
+
+if [[ -n $target_batch_account_name ]]
+then
+    az batch account login \
+        --name ${target_batch_account_name} \
+        --resource-group ${target_batch_account_resource_group_name}
+    # create batch job for custom vision model
+    az batch job create \
+        --id ${target_batch_account_pool_name} \
+        --pool-id ${target_batch_account_pool_name} \
+        --account-name ${target_batch_account_name} \
+        --account-key ${target_batch_account_key}
+fi
+source_synapse_storage_account=$(az storage account list --query "[?tags.store && tags.store == 'synapse'].name" -o tsv -g ${source_synapse_resource_group_name})
+echo $source_synapse_storage_account
+
+if [[ -n $source_synapse_storage_account ]]
+then
+    # create a container to upload the spark job python files
+    az storage container create --name "spark-jobs" --account-name ${source_synapse_storage_account}
+    # uploads the spark job python files
+    az storage blob upload-batch --destination "spark-jobs" --account-name ${source_synapse_storage_account} --source "${PRJ_ROOT}/src/transforms/spark-jobs"
+fi
+
+# Following steps will package as done in package.sh script
+target_batch_account_storage_account=$(az storage account list --query "[?tags.store && tags.store == 'batch'].name" -o tsv -g $target_batch_account_resource_group_name)
+key_vault=$(az keyvault list --query "[?tags.usage && tags.usage == 'linkedService'].name" -o tsv -g $environment_code-pipeline-rg)
+source_synapse_pool=$(az synapse spark pool list --workspace-name $source_synapse_workspace_name --resource-group $source_synapse_resource_group_name --query "[?tags.poolId && tags.poolId == 'default'].name" -o tsv -g $source_synapse_resource_group_name)
+
+PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/package.py --raw_storage_account_name $target_batch_pool_mount_storage_account_name \
+    --synapse_storage_account_name $source_synapse_storage_account \
+    --batch_storage_account_name $target_batch_account_storage_account_name \
+    --batch_account $target_batch_account_name \
+    --linked_key_vault $key_vault \
+    --synapse_pool_name $source_synapse_pool \
+    --location $batch_account_location \
+    --pipeline_name $pipeline_name"

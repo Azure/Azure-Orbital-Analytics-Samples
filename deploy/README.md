@@ -387,10 +387,11 @@ To use the script, first deploy your infrastructure as usual and then use [use_p
 
 # Execute use_pre_provisioned_batch_account.sh script
 ./deploy/use_pre_provisioned_batch_account.sh <environmentCode> \
-    <preProvisionedBatchAccountName> <preProvisionedBatchAccountResourceGroupName> \
-    <rawDataStorageAccountName> <rawDataStorageAccountResourceGroupName>
+    <preProvisionedBatchAccountName> <preProvisionedBatchAccountResourceGroupName> <preProvisionedBatchAccountStorageAccountName> \
+    <rawDataStorageAccountName> <rawDataStorageAccountResourceGroupName> \
+    <pipelineName>
 ```
-
+refers to the name of the pipeline that is to be package for deployment to your Synapse Workspace. Allowed values are custom-vision-model, custom-vision-model-v2.
 For example:
 
 ```bash
@@ -399,8 +400,9 @@ For example:
 
 # Execute use_pre_provisioned_batch_account.sh script
 ./deploy/use_pre_provisioned_batch_account.sh aoi \
-    existing-batch-account-name existing-batch-resource-group-name \
-    raw-data-storage-account-name raw-data-storage-account-resource-group-name
+    existing-batch-account-name existing-batch-resource-group-name existing-batch-account-storage-account-name \
+    raw-data-storage-account-name raw-data-storage-account-resource-group-name \
+    custom-vision-model-v2
 ```
 
 **Note**: To use the script both the infrastructure(which includes syanpse workspace) and batch account should exist in **same location**.
