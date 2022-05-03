@@ -22,6 +22,12 @@ SYNAPSE_WORKSPACE_RG=$(az synapse workspace list --query "[?tags.workspaceId && 
 echo $SYNAPSE_WORKSPACE_RG
 SYNAPSE_POOL=$(az synapse spark pool list --workspace-name $SYNAPSE_WORKSPACE --resource-group $SYNAPSE_WORKSPACE_RG --query "[?tags.poolId && tags.poolId == 'default'].name" -o tsv -g $ENVCODE-pipeline-rg)
 echo $SYNAPSE_POOL
+DB_SERVER_NAME=$(az postgres server list --resource-group $ENVCODE-data-rg --query '[].fullyQualifiedDomainName' -o tsv)
+echo $DB_SERVER_NAME
+DB_NAME=$(az postgres server list --resource-group $ENVCODE-data-rg --query '[].name' -o tsv)
+echo $DB_NAME
+DB_USERNAME=$(az postgres server list --resource-group $ENVCODE-data-rg --query '[].administratorLogin' -o tsv)@$DB_NAME
+echo $DB_USERNAME
 
 echo 'Retrieved resource from Azure and ready to package'
 PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/package.py --raw_storage_account_name $RAW_STORAGE_ACCT \
@@ -31,7 +37,9 @@ PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/package.py --raw_storage_account_na
     --linked_key_vault $KEY_VAULT \
     --synapse_pool_name $SYNAPSE_POOL \
     --location $BATCH_ACCT_LOCATION \
-    --pipeline_name $PIPELINE_NAME"
+    --pipeline_name $PIPELINE_NAME \
+    --pg_db_username $DB_USERNAME \
+    --pg_db_server_name $DB_SERVER_NAME"
 
 echo $PACKAGING_SCRIPT
 set -x

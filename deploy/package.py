@@ -17,6 +17,8 @@ parser.add_argument('--batch_account', type=str, required=True, help="Batch Acco
 parser.add_argument('--linked_key_vault', type=str, required=True, help="Key Vault to be added as Linked Service")
 parser.add_argument('--location', type=str, required=True, help="Batch Account Location")
 parser.add_argument('--pipeline_name', type=str, required=True, help="Name of the pipeline to package")
+parser.add_argument('--pg_db_username', type=str, required=True, help="Username to login to postgres db")
+parser.add_argument('--pg_db_server_name', type=str, required=True, help="Server name to login to postgres db")
 
 #Parse Args
 args = parser.parse_args()
@@ -92,7 +94,9 @@ if __name__ == "__main__":
         '__linked_key_vault__': args.linked_key_vault,
         '__synapse_storage_account__': args.synapse_storage_account_name,
         '__synapse_pool_name__': args.synapse_pool_name,
-        '__location__': args.location
+        '__location__': args.location,
+        '__pg_db_username__': args.pg_db_username,
+        '__pg_db_server_name__': args.pg_db_server_name
     }
 
     # invoke package method

@@ -85,6 +85,11 @@ To install infrastructure execute install.sh script as follows
 
 ```
 
+You will be prompted to enter in a password for postgres. If left empty, an auto generated password will be created and stored in the keyvault. The password requirements are listed below:
+- Between 8 characters and 128 characters
+- Must contain characters from three of the following categories – English uppercase letters, English lowercase letters, numbers (0-9), and non-alphanumeric characters (!, $, #, %, etc.). 
+- Your password cannot contain all or part of the login name. Part of a login name is defined as three or more consecutive alphanumeric characters.
+
 Default values for the parameters are provided in the script itself.
 
 Arguments | Required | Sample value
@@ -162,6 +167,7 @@ Following is the list of resource-groups and resources that should be created if
 
     - Storage account named `rawdata<6-character-random-string>` to store raw input data for pipelines.
     - Keyvault named `aoi-data-kv` to store credentials as secrets.
+    - Postgres Single Server DB named `aoi-pg-server`
 
 - `aoi-monitor-rg`
 

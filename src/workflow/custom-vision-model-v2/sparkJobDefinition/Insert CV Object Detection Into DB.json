@@ -1,0 +1,29 @@
+{
+    "name": "Insert CV Object Detection Into DB",
+    "properties": {
+        "targetBigDataPool": {
+            "referenceName": "__synapse_pool_name__",
+            "type": "BigDataPoolReference"
+        },
+        "requiredSparkVersion": "3.1",
+        "language": "python",
+        "jobProperties": {
+            "name": "Insert CV Object Detection Into DB",
+            "file": "abfss://spark-jobs@__synapse_storage_account__.dfs.core.windows.net/geojson_to_db/main.py",
+            "conf": {
+                "spark.dynamicAllocation.enabled": "false",
+                "spark.dynamicAllocation.minExecutors": "1",
+                "spark.dynamicAllocation.maxExecutors": "2",
+                "spark.autotune.trackingId": "8770f448-802e-4855-885b-ac308124d9f1"
+            },
+            "args": [],
+            "jars": [],
+            "files": [],
+            "driverMemory": "56g",
+            "driverCores": 8,
+            "executorMemory": "56g",
+            "executorCores": 8,
+            "numExecutors": 1
+        }
+    }
+}

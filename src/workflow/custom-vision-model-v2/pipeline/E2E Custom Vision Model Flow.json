@@ -70,6 +70,65 @@
                         }
                     }
                 }
+            },
+            {
+                "name": "Insert CV Object Detection Data Into DB",
+                "type": "SparkJob",
+                "dependsOn": [
+                    {
+                        "activity": "Custom Vision Object Detection",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "sparkJob": {
+                        "referenceName": "Insert CV Object Detection Into DB",
+                        "type": "SparkJobDefinitionReference"
+                    },
+                    "args": [
+                        "--storage_account_name",
+                        "@pipeline().parameters.StorageAccountName",
+                        "--container_name",
+                        "@pipeline().parameters.Prefix",
+                        "--folder_path",
+                        "pool-geolocation",
+                        "--key_vault_name",
+                        "__linked_key_vault__",
+                        "--storage_account_key_secret_name",
+                        "GeospatialStorageAccountKey",
+                        "--linked_service_name",
+                        "AOI Pipeline Key Vault",
+                        "--db_password_secret_name",
+                        "PostgresAdminPassword",
+                        "--db_username",
+                        "__pg_db_username__",
+                        "--db_host",
+                        "__pg_db_server_name__",
+                        "--db_name",
+                        "postgres"
+                    ],
+                    "targetBigDataPool": {
+                        "referenceName": "__synapse_pool_name__",
+                        "type": "BigDataPoolReference"
+                    },
+                    "executorSize": "Medium",
+                    "conf": {
+                        "spark.dynamicAllocation.minExecutors": 1,
+                        "spark.dynamicAllocation.maxExecutors": 2
+                    },
+                    "driverSize": "Medium",
+                    "numExecutors": 2
+                }
             }
         ],
         "parameters": {
