@@ -16,8 +16,10 @@ target_batch_pool_mount_storage_account_resource_group_name=${5}
 target_batch_account_pool_name=${10:-"${environment_code}-data-cpu-pool"}
 batch_account_role=${11:-"Contributor"}
 
-set -e
+set -ex
 
+source_synapse_workspace_name="${environment_code}-pipeline-syn-ws"
+source_synapse_resource_group_name="${environment_code}-pipeline-rg"
 # Verify that infrastructure and batch account are in same location
 batch_account_location=$(az batch account show  --name ${target_batch_account_name} --resource-group ${target_batch_account_resource_group_name} --query "location" --output tsv)
 synapse_workspace_location=$(az synapse workspace show --name ${source_synapse_workspace_name} --resource-group ${source_synapse_resource_group_name} --query "location" --output tsv)
@@ -28,7 +30,7 @@ fi
 
 # Grant access to batch account for Managed Identities
 python3 ${PRJ_ROOT}/deploy/batch_account.py \
-    --env_code ${env_code} \
+    --env_code ${environment_code} \
     --target_batch_account_name ${target_batch_account_name} \
     --target_batch_account_resource_group_name ${target_batch_account_resource_group_name} \
     --batch_account_role ${batch_account_role}
