@@ -37,7 +37,7 @@ module batchAccountPoolCheck 'modules/batch.account.pool.exists.bicep' = {
   params: {
     batchAccountName: batchAccountName
     batchPoolName: batchAccountCpuOnlyPoolName
-    userManagedIdentityName: batchAccountPoolCheckUamiName==''?'${namingPrefix}-orc-umi':batchAccountPoolCheckUamiName
+    userManagedIdentityName: batchAccountPoolCheckUamiName==''?'${namingPrefix}-umi':batchAccountPoolCheckUamiName
     userManagedIdentityResourcegroupName: resourceGroup().name
     location: batchAccountLocation
   }

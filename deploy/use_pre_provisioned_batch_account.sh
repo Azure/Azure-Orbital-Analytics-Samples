@@ -16,7 +16,7 @@ target_batch_pool_mount_storage_account_resource_group_name=${5}
 target_batch_account_pool_name=${10:-"${environment_code}-data-cpu-pool"}
 batch_account_role=${11:-"Contributor"}
 
-set -ex
+set -e
 
 source_synapse_workspace_name="${environment_code}-pipeline-syn-ws"
 source_synapse_resource_group_name="${environment_code}-pipeline-rg"
@@ -45,7 +45,7 @@ az deployment group create --resource-group "${environment_code}-orc-rg" \
     --template-file ${PRJ_ROOT}/deploy/infra/create_cpu_batch_account_pool.bicep \
     --parameters \
         environmentCode=${environment_code} \
-        projectName="${environment_code}-orc" \
+        projectName="orc" \
         batchAccountName=${target_batch_account_name} \
         batchAccountResourceGroup=${target_batch_account_resource_group_name} \
         batchAccountCpuOnlyPoolName="${target_batch_account_pool_name}" \
