@@ -10,7 +10,7 @@ if [[ -z "$1" ]]
     exit 1
 fi
 ENVCODE=$1
-PE_APPROVAL_DESCRIPTION="Approved by script"
+PE_APPROVAL_DESCRIPTION="Approved by addManagedPE.sh script"
 
 approved_managed_private_endpoint_request_exists() {
     local groupId=$1
@@ -33,14 +33,14 @@ approved_managed_private_endpoint_request_exists() {
 create_synapase_managed_private_endpoint() {
     local tmpfile=$(mktemp)
     local synpaseWorkspace=$1
-    local peName=$2
+    local synapseManagedPrivateEndpointName=$2
     local groupId=$3
     local privateLinkResourceId=$4
 
-    echo "creating MPE if not exist for $peName"
-    # check if peName exists
+    echo "creating MPE if not exist for $synapseManagedPrivateEndpointName"
+    # check if synapseManagedPrivateEndpointName exists
     local checkPeExists=$(az synapse managed-private-endpoints show \
-     --pe-name $peName -otsv --query "id" --workspace-name $synpaseWorkspace 2>/dev/null || echo '')
+     --pe-name $synapseManagedPrivateEndpointName -otsv --query "id" --workspace-name $synpaseWorkspace 2>/dev/null || echo '')
     
     if [[ -z $checkPeExists ]];
     then
@@ -51,18 +51,18 @@ create_synapase_managed_private_endpoint() {
 
         az synapse managed-private-endpoints create \
             --file @$tmpfile \
-            --pe-name $peName \
+            --pe-name $synapseManagedPrivateEndpointName \
             --workspace-name $1
 
         sleep 60
-        local provisioningState=$(az synapse managed-private-endpoints show --pe-name $peName \
+        local provisioningState=$(az synapse managed-private-endpoints show --pe-name $synapseManagedPrivateEndpointName \
             --workspace-name $synpaseWorkspace -o tsv --query "properties.provisioningState")
         while [[ $provisioningState != "Succeeded" ]];
         do
             sleep 10
-            provisioningState=$(az synapse managed-private-endpoints show --pe-name $peName \
+            provisioningState=$(az synapse managed-private-endpoints show --pe-name $synapseManagedPrivateEndpointName \
             --workspace-name $synpaseWorkspace -o tsv --query "properties.provisioningState")
-            echo "provisioningState of $peName: $provisioningState"
+            echo "provisioningState of $synapseManagedPrivateEndpointName: $provisioningState"
         done
     fi    
 }
@@ -87,19 +87,6 @@ approve_synapase_managed_private_endpoint() {
         fi
     fi
 }
-
-# wait for SYNAPSE_STORAGE_ACCT showing up in azcli and approve its managed private endpoint first.
-SYNAPSE_STORAGE_ACCT=$(az storage account list --query "[?tags.store && tags.store == 'synapse'].name" -o tsv -g $ENVCODE-pipeline-rg)
-while [[ -z $SYNAPSE_STORAGE_ACCT ]];
-do
-   sleep 30
-   SYNAPSE_STORAGE_ACCT=$(az storage account list --query "[?tags.store && tags.store == 'synapse'].name" -o tsv -g $ENVCODE-pipeline-rg)
-done
-result=$(approved_managed_private_endpoint_request_exists $ENVCODE-pipeline-rg $SYNAPSE_STORAGE_ACCT "Microsoft.Storage/storageAccounts")
-if [[ -z $result ]];
-then
-    approve_synapase_managed_private_endpoint $ENVCODE-pipeline-rg $SYNAPSE_STORAGE_ACCT "Microsoft.Storage/storageAccounts"
-fi
 
 # Create Managed Private Endpoints (PE) if not exist
 PIPELINE_KV=$(az keyvault list --query "[?tags.usage && tags.usage == 'linkedService']" -ojson -g $ENVCODE-pipeline-rg)
