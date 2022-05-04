@@ -87,6 +87,18 @@ approve_synapase_managed_private_endpoint() {
         fi
     fi
 }
+# wait for SYNAPSE_STORAGE_ACCT showing up in azcli and approve its managed private endpoint first.
+SYNAPSE_STORAGE_ACCT=$(az storage account list --query "[?tags.store && tags.store == 'synapse'].name" -o tsv -g $ENVCODE-pipeline-rg)
+while [[ -z $SYNAPSE_STORAGE_ACCT ]];
+do
+   sleep 30
+   SYNAPSE_STORAGE_ACCT=$(az storage account list --query "[?tags.store && tags.store == 'synapse'].name" -o tsv -g $ENVCODE-pipeline-rg)
+done
+result=$(approved_managed_private_endpoint_request_exists $ENVCODE-pipeline-rg $SYNAPSE_STORAGE_ACCT "Microsoft.Storage/storageAccounts")
+if [[ -z $result ]];
+then
+    approve_synapase_managed_private_endpoint $ENVCODE-pipeline-rg $SYNAPSE_STORAGE_ACCT "Microsoft.Storage/storageAccounts"
+fi
 
 # Create Managed Private Endpoints (PE) if not exist
 PIPELINE_KV=$(az keyvault list --query "[?tags.usage && tags.usage == 'linkedService']" -ojson -g $ENVCODE-pipeline-rg)
