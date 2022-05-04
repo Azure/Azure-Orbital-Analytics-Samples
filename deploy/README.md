@@ -52,7 +52,7 @@ To enabled security features like Synapse managed VNET, managed private endpoint
 ```
 SECURITY_ENABLED=true ./deploy/setup.sh <environmentCode> <location> <pipelineName> <envTag>
 ```
-**Note that if you turn on SECURITY_ENABLED during setup, Synapse endpoints are restricted to the custom VNET in the deployment environment. Thus, you need to create a Windows jumpbox inside the VNET to connect to Synapse Studio.**
+Before opting in security features, we advise you to get familiar with restrictions we listed below [restrictions-with-security-features](#restrictions-with-security-features)
 
 If you like to package other pipelines or re-package an updated/modified pipeline, follow the instructions under `Packaging the Synapse pipeline` section. The script mentioned in that section can be rerun multiple times.
 
@@ -93,7 +93,6 @@ To enabled security features like Synapse managed VNET, managed private endpoint
 ```
 SECURITY_ENABLED=true ./deploy/install.sh <environmentCode> <location> <envTag>
 ```
-**Note that if you turn on SECURITY_ENABLED during setup, Synapse endpoints are restricted to the custom VNET in the deployment environment. Thus, you need to create a Windows jumpbox inside the VNET to connect to Synapse Studio.**
 
 Default values for the parameters are provided in the script itself.
 
@@ -125,12 +124,6 @@ For eg.
 az deployment sub create -l <region> -n aoi -f main.bicep -p location=<region> environmentCode=aoi environment=synapse-aoi
 ```
 
-To enabled security features like Synapse managed VNET, managed private endpoints, and privates enpoints to 3 Synapse endpoints, pass parameter 'securityEnabled=true' when running bicep:
-```
-bash
-az deployment sub create -l <region_name> -n <deployment_name> -f main.bicep -p location=<region_name> environmentCode=<environment_name_prefix> environment=<tag_value> securityEnabled=true
-```
-
 ## Configuring the Resources
 
 If you have deployed the solution using `setup.sh` script, you should skip this step. However, if you have not run the `setup.sh` script, the steps outlined in this section are required.
@@ -160,8 +153,6 @@ Once the above step completes, a zip file is generated. Upload the generated zip
 5. Pipelines and its dependencies are imported to the Synapse Studio. Validate the components being imported for any errors
 6. Click "Publish all" and wait for the imported components to be published
 NOTE: You may run into this error during import "Invalid template, please check the template file". It is a known issue that we are working on with the product team. In the interim, we suggest importing from Git Repository as described below.
-
-**Note that if you turn on SECURITY_ENABLED during setup, Synapse endpoints are restricted to the custom VNET in the deployment environment. Thus, you need to create a Windows jumpbox inside the VNET to connect to Synapse Studio and import the package.**
 
 ## Importing from Git Repository
 
@@ -323,6 +314,13 @@ To run the pipeline, open the Synapse Studio for the Synapse workspace that you 
 - Once the parameters are entered, click ok to submit and kick off the pipeline.
 
 - Wait for the pipeline to complete.
+
+
+# Restrictions with security features
+- Once SECURITY_ENABLED is turned on during setup/install, Synapse endpoints are restricted to the custom VNET in the deployment environment. Thus, you need to create a Windows jumpbox inside the VNET to connect to Synapse Studio. For more details, refer to [synapse-security-diagram](https://docs.microsoft.com/en-us/azure/synapse-analytics/guidance/media/security-white-paper-network-security/private-endpoints.png) and [synapse-network-securiy-section](https://docs.microsoft.com/en-us/azure/synapse-analytics/guidance/security-white-paper-network-security).
+- Existing Azure Synapse workspace can not convert to security-enabled one. And, the reverse (i.e. secured one to public one) is not supported either. You cannot change Synapse workspace configuration after the workspace is created. Please refer to [Azure-Synapse-Documentation](https://docs.microsoft.com/en-us/azure/synapse-analytics/security/synapse-workspace-managed-vnet#managed-workspace-virtual-network). 
+- Once security feature is enabled, azure-cli that goes to Azure Synapse Studio like `az synapse managed-private-endpoints` may only work inside the custom VNET and Azure VM attached to it. 
+
 
 # Cleanup Script
 

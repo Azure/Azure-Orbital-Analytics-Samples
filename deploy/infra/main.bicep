@@ -20,6 +20,9 @@ param securityEnabled bool = false
 @description('preventDataExfiltration for Synapse managed vnet')
 param preventDataExfiltration bool = false
 
+@description('Flag to determine whether VNET and Subnet will be created or re-created')
+param createVnetSubnets bool = true
+
 @description('Used for naming of the network resource group and its resources')
 param networkModulePrefix string = 'network'
 
@@ -51,7 +54,7 @@ module networkResourceGroup 'modules/resourcegroup.bicep' = {
   }
 }
 
-module networkModule 'groups/networking.bicep' = {
+module networkModule 'groups/networking.bicep' = if (createVnetSubnets) {
   name: '${networkModulePrefix}-module'
   scope: resourceGroup(networkResourceGroup.name)
   params: {

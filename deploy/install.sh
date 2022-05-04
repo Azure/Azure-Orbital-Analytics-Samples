@@ -24,6 +24,18 @@ envTag=${envTag:-"synapse-${envCode}"}
 deploymentName=${3:-"${envTag}-deploy"}
 SECURITY_ENABLED=${SECURITY_ENABLED:-false}
 PREVENT_DATA_EXFILTRATION=${PREVENT_DATA_EXFILTRATION:-false}
+# Check if vnet exists.
+# This is needed since vnet template tries to delete existing private enpoints
+# from the security enabled vnet when re-running its template.
+VNET_ID=$(az network vnet show \
+  -n "${envCode}-vnet" -g "${envCode}-network-rg" --query id -otsv \
+  2>/dev/null || echo '')
+if [[ -z "${VNET_ID}" ]]
+then
+  CREATE_VNET_SUBNETS=true
+else
+  CREATE_VNET_SUBNETS=false
+fi
 
 DEPLOYMENT_SCRIPT="az deployment sub create -l $location -n $deploymentName \
     -f ./deploy/infra/main.bicep \
@@ -31,6 +43,7 @@ DEPLOYMENT_SCRIPT="az deployment sub create -l $location -n $deploymentName \
     location=$location \
     environmentCode=$envCode \
     environment=$envTag \
+    createVnetSubnets=$CREATE_VNET_SUBNETS \
     securityEnabled=$SECURITY_ENABLED \
     preventDataExfiltration=$PREVENT_DATA_EXFILTRATION"
 $DEPLOYMENT_SCRIPT
