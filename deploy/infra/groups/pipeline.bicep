@@ -84,6 +84,8 @@ param synapseMIStorageAccountRoles array = [
 ]
 
 param logAnalyticsWorkspaceId string
+param securityEnabled bool = false
+param preventDataExfiltration bool = false
 
 var namingPrefix = '${environmentCode}-${projectName}'
 var synapseResourceGroupNameVar = empty(synapseResourceGroupName) ? '${namingPrefix}-rg' : synapseResourceGroupName
@@ -129,8 +131,6 @@ module synapseHnsStorageAccount '../modules/storage.hns.bicep' = {
   }
 }
 
-
-
 module synapseWorkspace '../modules/synapse.workspace.bicep' = {
   name: '${namingPrefix}-workspace'
   params:{
@@ -153,6 +153,8 @@ module synapseWorkspace '../modules/synapse.workspace.bicep' = {
     gitRepoRootFolder: synapseGitRepoRootFolder
     gitRepoVstsTenantId: synapseGitRepoVstsTenantId
     gitRepoType: synapseGitRepoType
+    createManagedVnet: securityEnabled
+    preventDataExfiltration: preventDataExfiltration
   }
   dependsOn: [
     synapseHnsStorageAccount

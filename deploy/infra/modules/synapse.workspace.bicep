@@ -26,6 +26,46 @@ param synapseSqlAdminPasswordSecretName string = 'synapse-sqladmin-password'
 param utcValue string = utcNow()
 param workspaceId string = 'default'
 
+param createManagedVnet bool = false
+@allowed([
+  'default'
+  ''
+])
+param managedVirtualNetwork string = 'default'
+param preventDataExfiltration bool = false
+param managedVirtualNetworkSettings object = {
+  managedVirtualNetworkSettings : {
+    allowedAadTenantIdsForLinking: []
+    preventDataExfiltration: preventDataExfiltration
+  }
+  managedVirtualNetwork : managedVirtualNetwork
+}
+
+var defaultDataLakeStorageSettings = {
+  resourceId: hnsStorage.id
+  accountUrl: hnsStorage.properties.primaryEndpoints.dfs
+  filesystem: hnsStorageFileSystem
+  createManagedPrivateEndpoint: createManagedVnet
+}
+
+var synapseCommonProperties = {
+  defaultDataLakeStorage: defaultDataLakeStorageSettings
+  sqlAdministratorLogin: sqlAdminLogin
+  sqlAdministratorLoginPassword: sqlAdminLoginPassword
+  workspaceRepositoryConfiguration:(empty(gitRepoType))? {}: {
+    accountName: gitRepoAccountName
+    collaborationBranch: gitRepoCollaborationBranch
+    hostName: gitRepoHostName
+    lastCommitId: gitRepoLastCommitId
+    projectName: gitRepoVstsProjectName
+    repositoryName: gitRepoRepositoryName
+    rootFolder: gitRepoRootFolder
+    tenantId: gitRepoVstsTenantId
+    type: gitRepoType
+  }
+}
+var selectedSynapseProperties = createManagedVnet ? union(synapseCommonProperties, managedVirtualNetworkSettings) : synapseCommonProperties
+
 resource hnsStorage 'Microsoft.Storage/storageAccounts@2021-08-01' existing = {
   name: hnsStorageAccountName
 }
@@ -40,26 +80,7 @@ resource synapseWorspace 'Microsoft.Synapse/workspaces@2021-06-01' = {
   identity: {
     type: 'SystemAssigned'
   }
-  properties: {
-    defaultDataLakeStorage: {
-      resourceId: hnsStorage.id
-      accountUrl: hnsStorage.properties.primaryEndpoints.dfs
-      filesystem: hnsStorageFileSystem
-    }
-    sqlAdministratorLogin: sqlAdminLogin
-    sqlAdministratorLoginPassword: sqlAdminLoginPassword
-    workspaceRepositoryConfiguration:(empty(gitRepoType))? {}: {
-      accountName: gitRepoAccountName
-      collaborationBranch: gitRepoCollaborationBranch
-      hostName: gitRepoHostName
-      lastCommitId: gitRepoLastCommitId
-      projectName: gitRepoVstsProjectName
-      repositoryName: gitRepoRepositoryName
-      rootFolder: gitRepoRootFolder
-      tenantId: gitRepoVstsTenantId
-      type: gitRepoType
-    }
-  }
+  properties: selectedSynapseProperties
 }
 
 resource synapseWorkspaceFwRules 'Microsoft.Synapse/workspaces/firewallRules@2021-06-01' = {
