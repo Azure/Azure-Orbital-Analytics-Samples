@@ -14,12 +14,48 @@ target_batch_account_storage_account_name=${4}
 target_batch_pool_mount_storage_account_name=${5}
 target_batch_pool_mount_storage_account_resource_group_name=${6}
 
-pipeline_name= ${7}
+pipeline_name=${7}
 
 target_batch_account_pool_name=${10:-"${environment_code}-data-cpu-pool"}
 batch_account_role=${11:-"Contributor"}
 
 set -e
+
+if [[ -z "$environment_code" ]]
+  then
+    echo "Environment Code value not supplied"
+    exit 1
+fi
+
+if [[ -z "$target_batch_account_name" ]]
+  then
+    echo "Batch Account Name value not supplied"
+    exit 1
+fi
+
+if [[ -z "$target_batch_account_resource_group_name" ]]
+  then
+    echo "Batch Account Resource Group Name value not supplied"
+    exit 1
+fi
+
+if [[ -z "$target_batch_account_storage_account_name" ]]
+  then
+    echo "Batch Account Storage Account Storage Account Name value not supplied"
+    exit 1
+fi
+
+if [[ -z "$target_batch_pool_mount_storage_account_name" ]]
+  then
+    echo "Storage Account Name For Mounting to Batch Pool not supplied"
+    exit 1
+fi
+
+if [[ -z "$target_batch_pool_mount_storage_account_resource_group_name" ]]
+  then
+    echo "Storage Account Resource Group Name For Mounting to Batch Pool not supplied"
+    exit 1
+fi
 
 source_synapse_workspace_name="${environment_code}-pipeline-syn-ws"
 source_synapse_resource_group_name="${environment_code}-pipeline-rg"
@@ -112,3 +148,15 @@ PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/package.py --raw_storage_account_na
     --synapse_pool_name $source_synapse_pool \
     --location $batch_account_location \
     --pipeline_name $pipeline_name"
+
+if [[ -z "$pipeline_name" ]]
+  then
+    echo "Pipeline Name value not supplied!!! So not packaging the Pipeline"
+    echo
+    echo "Please execute following command suffixed with pipeline to package the pipeline"
+    echo
+    echo $PACKAGING_SCRIPT
+    exit 1
+fi
+
+$PACKAGING_SCRIPT
