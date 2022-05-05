@@ -6,20 +6,15 @@
 PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/..; pwd)"
 
 environment_code=${1}
-
 target_batch_account_name=${2}
-target_batch_account_resource_group_name=${3}
-target_batch_account_storage_account_name=${4}
 
-target_batch_pool_mount_storage_account_name=${5}
-target_batch_pool_mount_storage_account_resource_group_name=${6}
+pipeline_name=${3:-'custom-vision-model-v2'}
+target_batch_account_role=${4:-"Contributor"}
+target_batch_account_pool_name=${5:-"${environment_code}-data-cpu-pool"}
+target_batch_account_storage_account_name=${6:-""}
 
-pipeline_name=${7}
-
-target_batch_account_pool_name=${10:-"${environment_code}-data-cpu-pool"}
-batch_account_role=${11:-"Contributor"}
-
-set -e
+target_batch_pool_mount_storage_account_name=${7:-""}
+target_batch_pool_mount_storage_account_resource_group_name=${8:-""}
 
 if [[ -z "$environment_code" ]]
   then
@@ -33,30 +28,13 @@ if [[ -z "$target_batch_account_name" ]]
     exit 1
 fi
 
-if [[ -z "$target_batch_account_resource_group_name" ]]
-  then
-    echo "Batch Account Resource Group Name value not supplied"
-    exit 1
-fi
+set -e
 
-if [[ -z "$target_batch_account_storage_account_name" ]]
-  then
-    echo "Batch Account Storage Account Storage Account Name value not supplied"
-    exit 1
-fi
-
-if [[ -z "$target_batch_pool_mount_storage_account_name" ]]
-  then
-    echo "Storage Account Name For Mounting to Batch Pool not supplied"
-    exit 1
-fi
-
-if [[ -z "$target_batch_pool_mount_storage_account_resource_group_name" ]]
-  then
-    echo "Storage Account Resource Group Name For Mounting to Batch Pool not supplied"
-    exit 1
-fi
-
+target_batch_account_id=$(az batch account list --query "[?name == '${target_batch_account_name}'].id" -o tsv)
+target_batch_account_resource_group_name=$(az resource show --ids ${target_batch_account_id} --query resourceGroup -o tsv)
+target_batch_account_storage_account_name=$(az storage account list --resource-group $target_batch_account_resource_group_name --query [0].name -o tsv)
+target_batch_pool_mount_storage_account_resource_group_name="${environment_code}-data-rg"
+target_batch_pool_mount_storage_account_name=$(az storage account list --resource-group $target_batch_pool_mount_storage_account_resource_group_name --query [0].name -o tsv)
 source_synapse_workspace_name="${environment_code}-pipeline-syn-ws"
 source_synapse_resource_group_name="${environment_code}-pipeline-rg"
 # Verify that infrastructure and batch account are in same location
@@ -72,7 +50,7 @@ python3 ${PRJ_ROOT}/deploy/batch_account.py \
     --env_code ${environment_code} \
     --target_batch_account_name ${target_batch_account_name} \
     --target_batch_account_resource_group_name ${target_batch_account_resource_group_name} \
-    --batch_account_role ${batch_account_role}
+    --batch_account_role ${target_batch_account_role}
 
 # Deploy Batch Pool
 target_batch_pool_mount_storage_account_key=$(az storage account keys list --resource-group ${target_batch_pool_mount_storage_account_resource_group_name} --account-name ${target_batch_pool_mount_storage_account_name} --query "[0].value" --output tsv)
@@ -85,6 +63,7 @@ az deployment group create --resource-group "${environment_code}-orc-rg" \
     --parameters \
         environmentCode=${environment_code} \
         projectName="orc" \
+        acrName="${environment_code}orcacr"\
         batchAccountName=${target_batch_account_name} \
         batchAccountResourceGroup=${target_batch_account_resource_group_name} \
         batchAccountCpuOnlyPoolName="${target_batch_account_pool_name}" \
@@ -148,15 +127,5 @@ PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/package.py --raw_storage_account_na
     --synapse_pool_name $source_synapse_pool \
     --location $batch_account_location \
     --pipeline_name $pipeline_name"
-
-if [[ -z "$pipeline_name" ]]
-  then
-    echo "Pipeline Name value not supplied!!! So not packaging the Pipeline"
-    echo
-    echo "Please execute following command suffixed with pipeline to package the pipeline"
-    echo
-    echo $PACKAGING_SCRIPT
-    exit 1
-fi
 
 $PACKAGING_SCRIPT

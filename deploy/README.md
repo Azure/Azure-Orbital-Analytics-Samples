@@ -386,12 +386,10 @@ To use the script, first deploy your infrastructure as usual and then use [use_p
 ./deploy/install.sh <environmentCode> <location> <envTag>
 
 # Execute use_pre_provisioned_batch_account.sh script
-./deploy/use_pre_provisioned_batch_account.sh <environmentCode> \
-    <preProvisionedBatchAccountName> <preProvisionedBatchAccountResourceGroupName> <preProvisionedBatchAccountStorageAccountName> \
-    <rawDataStorageAccountName> <rawDataStorageAccountResourceGroupName> \
-    <pipelineName>
+./deploy/use_pre_provisioned_batch_account.sh <environmentCode> <preProvisionedBatchAccountName> <pipelineName>
 ```
-refers to the name of the pipeline that is to be package for deployment to your Synapse Workspace. Allowed values are custom-vision-model, custom-vision-model-v2.
+`pipelineName`: refers to the name of the pipeline that is to be package for deployment to your Synapse Workspace. Allowed values are `custom-vision-model`, `custom-vision-model-v2`(default).
+
 For example:
 
 ```bash
@@ -399,10 +397,7 @@ For example:
 ./deploy/install.sh aoi westus demo
 
 # Execute use_pre_provisioned_batch_account.sh script
-./deploy/use_pre_provisioned_batch_account.sh aoi \
-    existing-batch-account-name existing-batch-resource-group-name existing-batch-account-storage-account-name \
-    raw-data-storage-account-name raw-data-storage-account-resource-group-name \
-    custom-vision-model-v2
+./deploy/use_pre_provisioned_batch_account.sh aoi existing-batch-account-name custom-vision-model-v2
 ```
 
 **Note**: To use the script both the infrastructure(which includes syanpse workspace) and batch account should exist in **same location**.
