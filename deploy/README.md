@@ -126,26 +126,22 @@ Next step is to configure your resources and set them up with the required depen
 
 ## Packaging the Synapse Pipeline
 
-You may repeat the steps outlined in this section multiple times to package the pipeline irrespective of whether you have already run the `package.sh` script or `setup.sh` script before. 
+You may repeat the steps outlined in this section multiple times to package the pipeline irrespective of whether you have already run the `package.sh` script or `setup.sh` script. 
 
 To package the Synapse pipeline, run the `package.sh` script by following the syntax below:
 
 ```bash
 ./deploy/package.sh <environmentCode> <pipelineName>
 ```
+Unzip the contents of the ZIP file and use the contents to load them to your repository.
 
-Once the above step completes, a zip file is generated. Upload the generated zip files to your Synapse Studio by following the steps below:
+**Note**: Do not bring the contents of the pipeline from [workflow folder](../src/workflow/custom-vision-model-v2) directly into your repository. You will need to run `package.sh` or `setup.sh` to replace placeholder in one or more files before checking-in the files to your repository.
 
-1. Open the Synapse Studio
-2. Switch to Integrate tab on the left
-3. At the top of the left pane, click on the "+" dropdown and select "Import from pipeline template"
-4. When prompted to select a file, pick the zip file generated in the previous step
-5. Pipelines and its dependencies are imported to the Synapse Studio. Validate the components being imported for any errors
-6. Click "Publish all" and wait for the imported components to be published
-NOTE: You may run into this error during import "Invalid template, please check the template file". It is a known issue that we are working on with the product team. In the interim, we suggest importing from Git Repository as described below.  
 ## Importing from Git Repository
 
-Another way to get import pipeline into the Synape Studio is through Source Control repository like GitHub or Azure DevOps repository. Refer to the document on [Source Control](https://docs.microsoft.com/azure/synapse-analytics/cicd/source-control) to learn about Git Integration for Azure Synapse Analytics and how to setup.
+To import pipeline into the Synape Studio is through Source Control repository like GitHub or Azure DevOps repository, refer to the document on [Source Control](https://docs.microsoft.com/azure/synapse-analytics/cicd/source-control) to learn about Git Integration for Azure Synapse Analytics and how to setup.
+
+**Note**: Once the Synapse Studio is linked to your repository, make sure you publish all the components. Failure to publish the components imported by linked Synapse Studio to Github / ADO repository, will result in errors when running the pipeline.
 
 ## Verifying infrastructure resources
 
@@ -266,8 +262,7 @@ Note: When using a private Container Registry, update `containerSettings` proper
 
 - Configuration file - Each AI Model may require one or more parameters to run the model. This parameters driven by the end users are passed to the AI Model in the form of a configuration file. The schema of these configuration file is specific to the AI Model and hence we provide a template for the end user to plug-in their values.
 
-
-# Running the pipeline
+# Running the pipeline (Custom Vision Model)
 
 Before starting the pipeline, prepare the storage account in <environmentCode>-data-rg resource group by creating a container for the pipeline run.
 
@@ -296,6 +291,41 @@ To run the pipeline, open the Synapse Studio for the Synapse workspace that you 
 | Prefix | This is the Storage container name created in [Running the pipeline section](#running-the-pipeline) that hosts the Raw data|
 | StorageAccountName | Name of the Storage Account in <environmentCode>-data-rg resource group that hosts the Raw data |
 | StorageAccountKey | Access Key of the Storage Account in <environmentCode>-data-rg resource group that hosts the Raw data |
+| BatchAccountName | Name of the Batch Account in <environmentCode>-orc-rg resource group to run the AI Model |
+| BatchJobName | Job name within the Batch Account in <environmentCode>-orc-rg resource group that runs the AI Model |
+| BatchLocation | Location of the Batch Account in <environmentCode>-orc-rg resource group that runs the AI Model |
+
+- Once the parameters are entered, click ok to submit and kick off the pipeline.
+
+- Wait for the pipeline to complete.
+
+# Running the pipeline (Custom Vision Model V2)
+
+Before starting the pipeline, prepare the storage account in <environmentCode>-data-rg resource group by creating a container for the pipeline run.
+
+- Create a new container for every pipeline run. Make sure the container name does not exceed 8 characters.
+
+- Under the newly created container, add two folders. One folder named `config` with the following configuration files:
+
+    - [Specification document](../src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) configuration file that is provided by the AI Model partner.
+    - [Config file](../src/aimodels/custom_vision_object_detection_offline/config/config.json) specific to the AI Model that contains parameters to be passed to the AI Model.
+    coordinates.
+
+    Another folder named `raw` with sample Geotiff to be processed by the pipeline. You can use this [Geotiff file](https://aoigeospatial.blob.core.windows.net/public/samples/sample_4326.tif) hosted as a sample or any Geotiff with CRS of EPSG 4326.
+
+    When using this sample file, update your `AOI` parameter when kicking off the workflow with bbox value of `-117.063550 32.749467 -116.999386 32.812946`.
+
+To run the pipeline, open the Synapse Studio for the Synapse workspace that you have created and follow the below listed steps.
+
+- Open the `E2E Custom Vision Model Flow` and click on debug button
+
+- When presented with the parameters, fill out the values. Below table provide the details on that each parameter represents.
+
+| parameter | description |
+|--|--|
+| Prefix | This is the Storage container name created in [Running the pipeline section](#running-the-pipeline) that hosts the Raw data|
+| StorageAccountName | Name of the Storage Account in <environmentCode>-data-rg resource group that hosts the Raw data |
+| AOI | Area of Interest over which the AI Model is run |
 | BatchAccountName | Name of the Batch Account in <environmentCode>-orc-rg resource group to run the AI Model |
 | BatchJobName | Job name within the Batch Account in <environmentCode>-orc-rg resource group that runs the AI Model |
 | BatchLocation | Location of the Batch Account in <environmentCode>-orc-rg resource group that runs the AI Model |
