@@ -206,7 +206,9 @@ Following is the list of resource-groups and resources that should be created if
 
 ## Load the Custom Vision Model to your Container Registry
 
-There are three ways to load an AI Model with this pipeline:
+There are three ways to load an AI Model with this pipeline. Below are the three options. 
+
+Use one of the three options listed below. For option b and option c, either use `registry` property to pass credentials (requires update to the pipeline) or have your Batch Account pool configured with the ACR credentials when setting up the Batch Account pool.
 
 a. Use the publicly hosted Custom Vision Model as GitHub Packages. 
 
@@ -246,7 +248,6 @@ docker push <container-registry-name>.azurecr.io/custom_vision_offline:latest
 ```
 Update the `algImageName` value in [Specification document](../src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) to point to the new image location.
 
-
 Note: When using a private Container Registry, update `containerSettings` property in your [Custom Vision Object Detection v2](/src/workflow/pipeline/Custom%20Vision%20Object%20Detection%20v2.json) pipeline and add the following sub-property in order to authenticate to Container Registry :
 ```json
 "registry": {
@@ -255,6 +256,8 @@ Note: When using a private Container Registry, update `containerSettings` proper
         "password": ""
     }
 ```
+
+The above change will need to be made to the `Custom Vision Model Transform v2` pipeline. Look for activity named `Custom Vision` of type Web activity and update the body property (under Settings tab) for that activity.
 
 [Specification document](../src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) and [Configuration file](../src/aimodels/custom_vision_object_detection_offline/config/config.json) required to run the Custom Vision Model.
 
