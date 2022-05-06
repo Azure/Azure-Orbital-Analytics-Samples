@@ -20,3 +20,27 @@ Solution:
 
 
 
+## Missing / Invalid reference to Linked Services (Key Vault)
+
+Error: 
+
+Access token couldn't be obtained {"result":"DependencyError","errorId":"BadRequest","errorMessage":"LSRServiceException is [{
+    "StatusCode":400,
+    "ErrorResponse":{
+        "code":"LSRLinkedServiceFailure","message":"Could not find Linked Service AOI Pipeline Key Vault; the linked service does not exist or is not published.","target":"AOI Pipeline Key Vault"
+        }
+    ...
+    }] 
+...
+}
+
+![Missing / Invalid reference to Linked Services (Key Vault)](./images/synapse-pipeline-missing-linked-service.png)
+
+Cause:
+
+Linked Services need to be published to be able to use them in your pipeline either via Spark Job Definition or ADF Activity.
+
+Solution:
+
+After importing your pipeline from your repository or pipeline template approach, please use "Publish" or "Publish All" to publish your pipeline and its associated components like Linked Services.
+
