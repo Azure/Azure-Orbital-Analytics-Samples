@@ -57,6 +57,8 @@ location | yes | westus
 pipelineName | no | Allowed values: custom-vision-model, custom-vision-model-v2
 envTag | no | synapse\-\<environmentCode\>
 
+**Note**: If you do not pass the optional pipelineName paramter value, no zip file will be generated. You may however run the `package.sh` script to generate a zip file after running the `setup.sh` script to generate the zip file.
+
 ## Preparing to execute the script
 
 Before executing the script one would need to login to azure using `az` cli and set the correct subscription in which they want to provision the resources.
@@ -133,11 +135,16 @@ To package the Synapse pipeline, run the `package.sh` script by following the sy
 ```bash
 ./deploy/package.sh <environmentCode> <pipelineName>
 ```
-Unzip the contents of the ZIP file and use the contents to load them to your repository.
-
-**Note**: Do not bring the contents of the pipeline from [workflow folder](../src/workflow/custom-vision-model-v2) directly into your repository. You will need to run `package.sh` or `setup.sh` to replace placeholder in one or more files before checking-in the files to your repository.
 
 ## Importing from Git Repository
+
+Unzip the contents of the ZIP file generate by running the `package.sh` or `setup.sh` with pipelineName and use the contents to load them to your repository.
+
+A few things to consider prior to integration of Git / GitHub Repository with Synapse Studio:
+
+* Do not bring the files from [workflow folder](../src/workflow) directly into your repository that you will use to integrate with Synapse Studio. You will need to run `package.sh` or `setup.sh` to replace placeholders in one or more files before checking-in the files to your repository to be used with the Synapse Studio. 
+* You can either create a new repository or use a forked version of the [Azure Orbital Analytics Sample](https://github.com/Azure/Azure-Orbital-Analytics-Samples) repository. If you use a new repository, use the Unzipped contents of the ZIP file to load into your new repository. If you use forked version of the [Azure Orbital Analytics Sample](https://github.com/Azure/Azure-Orbital-Analytics-Samples) repository, overwrite the contents of [Custom vision model v2 workflow folder](../src/workflow/custom-vision-model-v2) or [custom vision model workflow folder](../src/workflow/custom-vision-model) (depending on the pipeline being imported) with the Unzipped contents.
+
 
 To import pipeline into the Synape Studio is through Source Control repository like GitHub or Azure DevOps repository, refer to the document on [Source Control](https://docs.microsoft.com/azure/synapse-analytics/cicd/source-control) to learn about Git Integration for Azure Synapse Analytics and how to setup.
 
