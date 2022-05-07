@@ -48,7 +48,7 @@ DEPLOYMENT_SCRIPT="az deployment sub create -l $location -n $deploymentName \
     preventDataExfiltration=$PREVENT_DATA_EXFILTRATION"
 $DEPLOYMENT_SCRIPT
 
-if [[ $SECURITY_ENABLED ]]
+if [[ "$SECURITY_ENABLED" == "true" ]]
 then
   # make sure to add synapse managed private endpoints before adding
   # private endpoints for synapse to custom vnet

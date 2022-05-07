@@ -317,9 +317,10 @@ To run the pipeline, open the Synapse Studio for the Synapse workspace that you 
 
 
 # Restrictions with security features
-- Once SECURITY_ENABLED is turned on during setup/install, Synapse endpoints are restricted to the custom VNET in the deployment environment. Thus, you need to create a Windows jumpbox inside the VNET to connect to Synapse Studio. For more details, refer to [synapse-security-diagram](https://docs.microsoft.com/en-us/azure/synapse-analytics/guidance/media/security-white-paper-network-security/private-endpoints.png) and [synapse-network-securiy-section](https://docs.microsoft.com/en-us/azure/synapse-analytics/guidance/security-white-paper-network-security).
 - Existing Azure Synapse workspace can not convert to security-enabled one. And, the reverse (i.e. secured one to public one) is not supported either. You cannot change Synapse workspace configuration after the workspace is created. Please refer to [Azure-Synapse-Documentation](https://docs.microsoft.com/en-us/azure/synapse-analytics/security/synapse-workspace-managed-vnet#managed-workspace-virtual-network). 
-- Once security feature is enabled, azure-cli that goes to Azure Synapse Studio like `az synapse managed-private-endpoints` may only work inside the custom VNET and Azure VM attached to it. 
+- Once SECURITY_ENABLED is turned on during setup/install, Synapse endpoints are restricted to a VNET in the the same region. Thus, you need to create a Windows jumpbox inside the VNET to connect to Synapse Studio. For more details, refer to [synapse-security-diagram](https://docs.microsoft.com/en-us/azure/synapse-analytics/guidance/media/security-white-paper-network-security/private-endpoints.png) and [synapse-network-securiy-section](https://docs.microsoft.com/en-us/azure/synapse-analytics/guidance/security-white-paper-network-security). And, in order to furthur restriction network access to the VNET of your cluster, you also need to restrict the public access of your Synapse workspace. We may achieve this task from azure portal (i.e. Synapse workspace -> Networking -> Public network access -> select 'Disabled').
+- Once security feature is enabled, azure-cli that goes to Azure Synapse like `az synapse managed-private-endpoints` may only work inside the custom VNET and Azure VM attached to it.
+- Once public access to your Synapse workspace is disabled, you may get 'PublicNetworkAccessDenied' error. Enable the public network access for re-deployment and restrict public access afterwards.
 
 
 # Cleanup Script
