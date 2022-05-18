@@ -73,7 +73,7 @@
             },
             {
                 "name": "Insert CV Object Detection Data Into DB",
-                "type": "SparkJob",
+                "type": "SynapseNotebook",
                 "dependsOn": [
                     {
                         "activity": "Custom Vision Object Detection",
@@ -91,43 +91,71 @@
                 },
                 "userProperties": [],
                 "typeProperties": {
-                    "sparkJob": {
-                        "referenceName": "Insert CV Object Detection Into DB",
-                        "type": "SparkJobDefinitionReference"
+                    "notebook": {
+                        "referenceName": "Insert CV Object Detection Data Into DB Notebook Job",
+                        "type": "NotebookReference"
                     },
-                    "args": [
-                        "--storage_account_name",
-                        "@pipeline().parameters.StorageAccountName",
-                        "--container_name",
-                        "@pipeline().parameters.Prefix",
-                        "--folder_path",
-                        "pool-geolocation",
-                        "--key_vault_name",
-                        "__linked_key_vault__",
-                        "--storage_account_key_secret_name",
-                        "GeospatialStorageAccountKey",
-                        "--linked_service_name",
-                        "AOI Pipeline Key Vault",
-                        "--db_password_secret_name",
-                        "PostgresAdminPassword",
-                        "--db_username",
-                        "__pg_db_username__",
-                        "--db_host",
-                        "__pg_db_server_name__",
-                        "--db_name",
-                        "postgres"
-                    ],
-                    "targetBigDataPool": {
+                    "parameters": {
+                        "storage_account_name": {
+                            "value": {
+                                "value": "@pipeline().parameters.StorageAccountName",
+                                "type": "Expression"
+                            },
+                            "type": "string"
+                        },
+                        "container_name": {
+                            "value": {
+                                "value": "@pipeline().parameters.Prefix",
+                                "type": "Expression"
+                            },
+                            "type": "string"
+                        },
+                        "folder_path": {
+                            "value": "pool-geolocation",
+                            "type": "string"
+                        },
+                        "key_vault_name": {
+                            "value": "__linked_key_vault__",
+                            "type": "string"
+                        },
+                        "storage_account_key_secret_name": {
+                            "value": "GeospatialStorageAccountKey",
+                            "type": "string"
+                        },
+                        "linked_service_name": {
+                            "value": "AOI Pipeline Key Vault",
+                            "type": "string"
+                        },
+                        "db_password_secret_name": {
+                            "value": "PostgresAdminPassword",
+                            "type": "string"
+                        },
+                        "db_username": {
+                            "value": "__pg_db_username__",
+                            "type": "string"
+                        },
+                        "db_host": {
+                            "value": "__pg_db_server_name__",
+                            "type": "string"
+                        },
+                        "db_name": {
+                            "value": "postgres",
+                            "type": "string"
+                        },
+                        "db_port": {
+                            "value": "5432",
+                            "type": "int"
+                        },
+                        "ssl_root_path": {
+                            "value": "/opt/src/BaltimoreCyberTrustRoot.crt.pem",
+                            "type": "string"
+                        }
+                    },
+                    "snapshot": true,
+                    "sparkPool": {
                         "referenceName": "__synapse_pool_name__",
                         "type": "BigDataPoolReference"
-                    },
-                    "executorSize": "Medium",
-                    "conf": {
-                        "spark.dynamicAllocation.minExecutors": 1,
-                        "spark.dynamicAllocation.maxExecutors": 2
-                    },
-                    "driverSize": "Medium",
-                    "numExecutors": 2
+                    }
                 }
             }
         ],

@@ -18,6 +18,8 @@ BATCH_ACCT_LOCATION=$(az batch account list --query "[?tags.type && tags.type ==
 KEY_VAULT=$(az keyvault list --query "[?tags.usage && tags.usage == 'linkedService'].name" -o tsv -g $ENVCODE-pipeline-rg)
 SYNAPSE_WORKSPACE=$(az synapse workspace list --query "[?tags.workspaceId && tags.workspaceId == 'default'].name" -o tsv -g $ENVCODE-pipeline-rg)
 echo $SYNAPSE_WORKSPACE
+SYNAPSE_WORKSPACE_ID=$(az synapse workspace list --query "[?tags.workspaceId && tags.workspaceId == 'default'].id" -o tsv -g $ENVCODE-pipeline-rg)
+echo $SYNAPSE_WORKSPACE_ID
 SYNAPSE_WORKSPACE_RG=$(az synapse workspace list --query "[?tags.workspaceId && tags.workspaceId == 'default'].resourceGroup" -o tsv -g $ENVCODE-pipeline-rg)
 echo $SYNAPSE_WORKSPACE_RG
 SYNAPSE_POOL=$(az synapse spark pool list --workspace-name $SYNAPSE_WORKSPACE --resource-group $SYNAPSE_WORKSPACE_RG --query "[?tags.poolId && tags.poolId == 'default'].name" -o tsv -g $ENVCODE-pipeline-rg)
@@ -36,6 +38,8 @@ PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/package.py --raw_storage_account_na
     --batch_account $BATCH_ACCT \
     --linked_key_vault $KEY_VAULT \
     --synapse_pool_name $SYNAPSE_POOL \
+    --synapse_workspace $SYNAPSE_WORKSPACE \
+    --synapse_workspace_id $SYNAPSE_WORKSPACE_ID \
     --location $BATCH_ACCT_LOCATION \
     --pipeline_name $PIPELINE_NAME \
     --pg_db_username $DB_USERNAME \

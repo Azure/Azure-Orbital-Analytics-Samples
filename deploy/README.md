@@ -105,8 +105,6 @@ For eg.
 ./deploy/install.sh aoi westus demo
 ```
 
-Note: Currently, this deployment does not deploy Azure Database for PostgreSQL for post-analysis.
-
 Users can also use bicep template directly instead of using the script `install.sh`
 
 To deploy the resources using the bicep template use the command as follows:
@@ -314,6 +312,18 @@ To run the pipeline, open the Synapse Studio for the Synapse workspace that you 
 - Once the parameters are entered, click ok to submit and kick off the pipeline.
 
 - Wait for the pipeline to complete.
+# Reviewing data in Postgres (Custom Vision Model Pipeline)
+
+- To review the data in Postgres, you can use Azure Data Studio following this [guide](https://docs.microsoft.com/en-us/sql/azure-data-studio/quickstart-postgres?view=sql-server-ver15).
+- You will need the following information to connect:
+  - The server name: `<environmentCode>-pg-server.postgres.database.azure.com`
+  - user name: `<environmentCode>_admin_user@<environmentCode>-pg-server`
+  - password used at the start of the deployment
+
+- Example Queries
+  - If you would like to query distances from a given lat, long against data in the db you could use the following query and a third column "dist" will display the distances from the point provided in the query to the data in the location column
+    > SELECT *, ST_Distance(ST_SetSRID(ST_MakePoint(given_long, given_lat), 4326), location) AS dist FROM aioutputmodelschema.cvmodel
+  - More documentation on queries can be found [here](https://postgis.net/workshops/postgis-intro/geography.html)
 
 # Running the pipeline (Custom Vision Model V2)
 

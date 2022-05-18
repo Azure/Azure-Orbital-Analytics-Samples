@@ -76,10 +76,6 @@ var dataResourceGroupNameVar = empty(dataResourceGroupName) ? '${namingPrefix}-r
 var nameSuffix = substring(uniqueString(dataResourceGroupNameVar), 0, 6)
 var keyvaultNameVar = empty(keyvaultName) ? '${namingPrefix}-kv' : keyvaultName
 var rawDataStorageAccountNameVar = empty(rawDataStorageAccountName) ? 'rawdata${nameSuffix}' : rawDataStorageAccountName
-
-param firewallAllowEndIP string = '255.255.255.255'
-param firewallAllowStartIP string = '0.0.0.0'
-
 module keyVault '../modules/akv.bicep' = {
   name: '${namingPrefix}-akv'
   params: {
@@ -151,7 +147,7 @@ module synapseIdentityForStorageAccess '../modules/storage-role-assignment.bicep
   ]
 }]
 
-module postgresqlServer '../modules/postgres.bicep' = {
+module postgresqlServer '../modules/postgres.single.svc.bicep' = {
   name: '${namingPrefix}-postgres'
   params: {
     location: location
@@ -173,12 +169,12 @@ resource postgresql_server_resource 'Microsoft.DBforPostgreSQL/servers@2017-12-0
   name: serverNameVar
 }
 
-resource open_postgres_firewall 'Microsoft.DBforPostgreSQL/servers/firewallRules@2017-12-01' = {
-  name: 'allowAll'
+resource azurerm_postgresql_firewall_rule 'Microsoft.DBforPostgreSQL/servers/firewallRules@2017-12-01' = {
+  name: 'AllowAccessToAzureServices'
   parent: postgresql_server_resource
   properties: {
-    endIpAddress: firewallAllowEndIP
-    startIpAddress: firewallAllowStartIP
+    endIpAddress: '0.0.0.0'
+    startIpAddress: '0.0.0.0'
   }
   dependsOn: [
     postgresqlServer
@@ -219,6 +215,7 @@ module createContainerForTableCreation '../modules/aci.bicep' = {
   }
   dependsOn: [
     postgresqlServer
+    azurerm_postgresql_firewall_rule
     dataUami
   ]
 }

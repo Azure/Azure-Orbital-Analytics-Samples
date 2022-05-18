@@ -5,7 +5,7 @@
 param serverName string
 
 @description('Database administrator login name')
-@minLength(1)
+@minLength(5)
 param administratorLogin string
 
 @description('Database administrator password')
@@ -68,6 +68,7 @@ resource postgresql_server_resource 'Microsoft.DBforPostgreSQL/servers@2017-12-0
     version: postgresqlVersion
     administratorLogin: administratorLogin
     administratorLoginPassword: administratorLoginPassword
+    publicNetworkAccess: 'Enabled'
     storageProfile: {
       storageMB: skuSizeMB
       backupRetentionDays: backupRetentionDays
@@ -78,4 +79,3 @@ resource postgresql_server_resource 'Microsoft.DBforPostgreSQL/servers@2017-12-0
 
 output pgServerName string = '${serverName}.postgres.database.azure.com'
 output pgUserName string = '${administratorLogin}@${serverName}'
-
