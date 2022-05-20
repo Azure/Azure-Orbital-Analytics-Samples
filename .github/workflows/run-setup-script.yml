@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-on: [push, workflow_dispatch]
+on: [push, pull_request]
 name: Azure ARM
 jobs:
   build-and-deploy:
@@ -24,26 +24,20 @@ jobs:
         echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
-    # - name: Install Azure Infrastructure
-    #   run: ./deploy/setup.sh pr${{ steps.vars.outputs.sha_short }} eastus custom-vision-model-v2 pr${{ steps.vars.outputs.sha_short }}-environment stellarbatchdev
-    #   shell: bash
-
-    # - name: Grant Admin role for synapse workspace to service-principal
-    #   run: az synapse role assignment create --workspace-name pr${{ steps.vars.outputs.sha_short }}-pipeline-syn-ws --role "Synapse Administrator" --assignee 8c0d8761-c477-4ab0-b1b1-eb25d7355294
-    #   shell: bash
-
-    # - name: Grant Admin role for synapse workspace to TM-Stellar AAD group
-    #   run: az synapse role assignment create --workspace-name pr${{ steps.vars.outputs.sha_short }}-pipeline-syn-ws --role "Synapse Administrator" --assignee 68144578-3bde-4d74-b0dd-2a44972ea2f3
-    #   shell: bash
-
-    - name: Package the content
-      run: ./deploy/package.sh pr6742b2c custom-vision-model-v2 stellarbatchdev
+    - name: Install Azure Infrastructure
+      run: ./deploy/setup.sh pr${{ steps.vars.outputs.sha_short }} eastus custom-vision-model-v2 pr${{ steps.vars.outputs.sha_short }}-environment stellarbatchdev
       shell: bash
 
-    - name: Wait for pipeline to finish
-      run: ./test/deploy-prepare-and-test-pipeline.sh pr6742b2c
+    - name: Grant Admin role for synapse workspace to github service-principal and TM-Stellar AAD group
+      run: |
+        az synapse role assignment create --workspace-name pr${{ steps.vars.outputs.sha_short }}-pipeline-syn-ws --role "Synapse Administrator" --assignee 8c0d8761-c477-4ab0-b1b1-eb25d7355294
+        az synapse role assignment create --workspace-name pr${{ steps.vars.outputs.sha_short }}-pipeline-syn-ws --role "Synapse Administrator" --assignee 68144578-3bde-4d74-b0dd-2a44972ea2f3
+      shell: bash
+
+    - name: Execute pipeline
+      run: ./test/deploy-prepare-and-test-pipeline.sh pr${{ steps.vars.outputs.sha_short }}
       shell: bash
 
     - name: Cleanup the resources
-      run: ./deploy/cleanup.sh pr6742b2c stellarbatchdev
+      run: ./deploy/cleanup.sh pr${{ steps.vars.outputs.sha_short }} stellarbatchdev custom-vision-model-v2
       shell: bash

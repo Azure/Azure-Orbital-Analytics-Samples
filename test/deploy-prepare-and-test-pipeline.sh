@@ -20,9 +20,9 @@ SYNAPSE_RESOURCE_GROUP_NAME=${10:-${SYNAPSE_RESOURCE_GROUP_NAME:-"${ENV_CODE}-pi
 SYNAPSE_WORKSPACE_NAME=${11:-${SYNAPSE_WORKSPACE_NAME:-"${ENV_CODE}-pipeline-syn-ws"}}
 BATCH_JOB_NAME=${12:-${BATCH_JOB_NAME:-"${ENV_CODE}-data-cpu-pool"}}
 AOI_PARAMETER_VALUE=${13:-${AOI_PARAMETER_VALUE:-"-117.063550 32.749467 -116.999386 32.812946"}}
-PIPELINE_FILE_NAME=${15:-${PIPELINE_FILE_NAME:-"E2E Custom Vision Model Flow.json"}}
-PARAMETER_FILE_PATH=${14:-${PARAMETER_FILE_PATH:-"${PRJ_ROOT}/test/${PIPELINE_NAME}-parameters.json"}}
-SUBSTITUTE_PARAMS=${15:-${SUBSTITUTE_PARAMS:-"true"}}
+PIPELINE_FILE_NAME=${14:-${PIPELINE_FILE_NAME:-"E2E Custom Vision Model Flow.json"}}
+PARAMETER_FILE_PATH=${15:-${PARAMETER_FILE_PATH:-"${PRJ_ROOT}/test/${PIPELINE_NAME}-parameters.json"}}
+SUBSTITUTE_PARAMS=${16:-${SUBSTITUTE_PARAMS:-"true"}}
 
 set -ex
 
@@ -121,7 +121,7 @@ chmod +x /tmp/install-pipeline.sh
 python3 ${PRJ_ROOT}/test/create-pipeline-install-commands.py \
     --file_name "/tmp/packaged-pipeline/pipeline/${PIPELINE_FILE_NAME}" \
     --resource_group_name ${SYNAPSE_RESOURCE_GROUP_NAME} \
-    --workspace_name ${SYNAPSE_WORKSPACE_NAME} >> install-pipeline.sh
+    --workspace_name ${SYNAPSE_WORKSPACE_NAME} >> /tmp/install-pipeline.sh
 
 echo "Installing pipeline components"
 /tmp/install-pipeline.sh
