@@ -4,49 +4,66 @@
 # Licensed under the MIT license.
 
 PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/..; pwd)"
-ENVCODE=$1
+ENV_CODE=${1:-${ENV_CODE}}
+
+BATCH_ACCOUNT_NAME=${2:-${BATCH_ACCOUNT_NAME}}
+BATCH_ACCOUNT_RG_NAME=${3:-$BATCH_ACCOUNT_RG_NAME}
+BATCH_ACCOUNT_KEY=${4:-${BATCH_ACCOUNT_KEY}}
+BATCH_ACCOUNT_POOL_NAME=${5:-${BATCH_ACCOUNT_POOL_NAME:-"${ENV_CODE}-data-cpu-pool"}}
+
+SYNAPSE_WORKSPACE_RG=${6:-${SYNAPSE_WORKSPACE_RG:-"${ENV_CODE}-pipeline-rg"}}
+SYNAPSE_WORKSPACE=${7:-${SYNAPSE_WORKSPACE:-"${ENV_CODE}-pipeline-syn-ws"}}
+SYNAPSE_POOL=${8:-${SYNAPSE_POOL}}
+SYNAPSE_STORAGE_ACCOUNT=${9:-${SYNAPSE_STORAGE_ACCOUNT}}
+
 
 echo "configuration started ..."
-
-set -x
+set -ex
 
 # get synapse workspace and pool
-SYNAPSE_WORKSPACE=$(az synapse workspace list --query "[?tags.workspaceId && tags.workspaceId == 'default'].name" -o tsv -g $1-pipeline-rg)
-echo $SYNAPSE_WORKSPACE
-SYNAPSE_WORKSPACE_RG=$(az synapse workspace list --query "[?tags.workspaceId && tags.workspaceId == 'default'].resourceGroup" -o tsv -g $1-pipeline-rg)
-echo $SYNAPSE_WORKSPACE_RG
-SYNAPSE_POOL=$(az synapse spark pool list --workspace-name ${SYNAPSE_WORKSPACE} --resource-group ${SYNAPSE_WORKSPACE_RG} --query "[?tags.poolId && tags.poolId == 'default'].name" -o tsv -g $1-pipeline-rg)
-echo $SYNAPSE_POOL
-
+if [[ -z "$SYNAPSE_WORKSPACE" ]]; then
+    SYNAPSE_WORKSPACE=$(az synapse workspace list --query "[?tags.workspaceId && tags.workspaceId == 'default'].name" -o tsv -g ${SYNAPSE_WORKSPACE_RG})
+fi
+if [[ -z "$SYNAPSE_POOL" ]]; then
+    SYNAPSE_POOL=$(az synapse spark pool list --workspace-name ${SYNAPSE_WORKSPACE} --resource-group ${SYNAPSE_WORKSPACE_RG} --query "[?tags.poolId && tags.poolId == 'default'].name" -o tsv)
+fi
 if [[ -n $SYNAPSE_WORKSPACE ]] && [[ -n $SYNAPSE_WORKSPACE_RG ]] && [[ -n $SYNAPSE_POOL ]]
 then
     # upload synapse pool 
-    az synapse spark pool update --name ${SYNAPSE_POOL} --workspace-name ${SYNAPSE_WORKSPACE} --resource-group ${ENVCODE}-pipeline-rg --library-requirements "${PRJ_ROOT}/deploy/environment.yml"
+    az synapse spark pool update --name ${SYNAPSE_POOL} --workspace-name ${SYNAPSE_WORKSPACE} --resource-group ${SYNAPSE_WORKSPACE_RG} --library-requirements "${PRJ_ROOT}/deploy/environment.yml"
 fi
 
 # get batch account
-BATCH_ACCT=$(az batch account list --query "[?tags.type && tags.type == 'batch'].name" -o tsv -g ${ENVCODE}-orc-rg)
-echo $BATCH_ACCT
-
-BATCH_ACCT_KEY=$(az batch account keys list --name ${BATCH_ACCT} --resource-group ${ENVCODE}-orc-rg | jq ".primary")
-
-if [[ -n $BATCH_ACCT ]]
-then
-    az batch account login --name ${BATCH_ACCT} --resource-group ${ENVCODE}-orc-rg
-    # create batch job for custom vision model
-    az batch job create --id 'custom-vision-model-job' --pool-id 'data-cpu-pool' --account-name ${BATCH_ACCT} --account-key ${BATCH_ACCT_KEY}
+if [[ -z "$BATCH_ACCOUNT_NAME" ]] && [[ -z "$BATCH_ACCOUNT_RG_NAME" ]]; then
+    BATCH_ACCOUNT_RG_NAME="${ENV_CODE}-orc-rg"
 fi
-SYNAPSE_STORAGE_ACCT=$(az storage account list --query "[?tags.store && tags.store == 'synapse'].name" -o tsv -g $1-pipeline-rg)
-echo $SYNAPSE_STORAGE_ACCT
+if [[ -z "$BATCH_ACCOUNT_NAME" ]]; then
+    BATCH_ACCOUNT_NAME=$(az batch account list --query "[?tags.type && tags.type == 'batch'].name" -o tsv -g ${BATCH_ACCOUNT_RG_NAME})
+fi
+if [[ -z "$BATCH_ACCOUNT_RG_NAME" ]]; then
+    BATCH_ACCOUNT_ID=$(az batch account list --query "[?name == '${BATCH_ACCOUNT_NAME}'].id" -o tsv)
+    BATCH_ACCOUNT_RG_NAME=$(az resource show --ids ${BATCH_ACCOUNT_ID} --query resourceGroup -o tsv)
+fi
+if [[ -z "$BATCH_ACCOUNT_KEY" ]]; then
+    BATCH_ACCOUNT_KEY=$(az batch account keys list --name ${BATCH_ACCOUNT_NAME} --resource-group ${BATCH_ACCOUNT_RG_NAME} | jq ".primary")
+fi
+if [[ -n $BATCH_ACCOUNT_NAME ]] && [[ -n $BATCH_ACCOUNT_KEY ]]
+then
+    az batch account login --name ${BATCH_ACCOUNT_NAME} --resource-group ${BATCH_ACCOUNT_RG_NAME}
+    # create batch job for custom vision model
+    az batch job create --id ${BATCH_ACCOUNT_POOL_NAME} --pool-id ${BATCH_ACCOUNT_POOL_NAME} --account-name ${BATCH_ACCOUNT_NAME} --account-key ${BATCH_ACCOUNT_KEY}
+fi
 
-if [[ -n $SYNAPSE_STORAGE_ACCT ]]
+if [[ -z "$SYNAPSE_STORAGE_ACCOUNT" ]]; then
+    SYNAPSE_STORAGE_ACCOUNT=$(az storage account list --query "[?tags.store && tags.store == 'synapse'].name" -o tsv -g ${SYNAPSE_WORKSPACE_RG})
+fi
+
+if [[ -n $SYNAPSE_STORAGE_ACCOUNT ]]
 then
     # create a container to upload the spark job python files
-    az storage container create --name "spark-jobs" --account-name ${SYNAPSE_STORAGE_ACCT}
+    az storage container create --name "spark-jobs" --account-name ${SYNAPSE_STORAGE_ACCOUNT}
     # uploads the spark job python files
-    az storage blob upload-batch --destination "spark-jobs" --account-name ${SYNAPSE_STORAGE_ACCT} --source "${PRJ_ROOT}/src/transforms/spark-jobs"
+    az storage blob upload-batch --destination "spark-jobs" --account-name ${SYNAPSE_STORAGE_ACCOUNT} --source "${PRJ_ROOT}/src/transforms/spark-jobs"
 fi
-
-set +x
 
 echo "configuration completed!"

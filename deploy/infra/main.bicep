@@ -7,7 +7,7 @@ targetScope='subscription'
 param location string
 
 @minLength(3)
-@maxLength(8)
+@maxLength(9)
 @description('Prefix to be used for naming all the resources in the deployment')
 param environmentCode string
 
@@ -28,6 +28,9 @@ param pipelineModulePrefix string = 'pipeline'
 
 @description('Used for naming of the orchestration resource group and its resources')
 param orchestrationModulePrefix string = 'orc'
+
+@description('Specify whether or not to deploy batch account')
+param deployBatchAccount bool = true
 
 var networkResourceGroupName = '${environmentCode}-${networkModulePrefix}-rg'
 var dataResourceGroupName = '${environmentCode}-${dataModulePrefix}-rg'
@@ -160,6 +163,7 @@ module orchestrationModule 'groups/orchestration.bicep' = {
     environmentTag: environment
     logAnalyticsWorkspaceId: monitorModule.outputs.workspaceId
     mountAccountKey: dataModule.outputs.rawStoragePrimaryKey
+    deployBatchAccount: deployBatchAccount
     mountAccountName: dataModule.outputs.rawStorageAccountName
     mountFileUrl: '${dataModule.outputs.rawStorageFileEndpointUri}volume-a'
     pipelineResourceGroupName: pipelineResourceGroup.name
