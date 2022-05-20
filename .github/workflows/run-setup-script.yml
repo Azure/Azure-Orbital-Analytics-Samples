@@ -24,44 +24,22 @@ jobs:
         echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
-    - name: Install Azure Infrastructure
-      run: ./deploy/setup.sh pr${{ steps.vars.outputs.sha_short }} eastus custom-vision-model-v2 pr${{ steps.vars.outputs.sha_short }}-environment stellarbatchdev
-      shell: bash
-
-    - name: Grant Admin role for synapse workspace to service-principal
-      run: az synapse role assignment create --workspace-name pr${{ steps.vars.outputs.sha_short }}-pipeline-syn-ws --role "Synapse Administrator" --assignee 8c0d8761-c477-4ab0-b1b1-eb25d7355294
-      shell: bash
-
-    - name: Grant Admin role for synapse workspace to TM-Stellar AAD group
-      run: az synapse role assignment create --workspace-name pr${{ steps.vars.outputs.sha_short }}-pipeline-syn-ws --role "Synapse Administrator" --assignee 68144578-3bde-4d74-b0dd-2a44972ea2f3
-      shell: bash
-
-    # - name: Package the content
-    #   run: ./deploy/package.sh pr${{ steps.vars.outputs.sha_short }} custom-vision-model-v2 stellarbatchdev
+    # - name: Install Azure Infrastructure
+    #   run: ./deploy/setup.sh pr${{ steps.vars.outputs.sha_short }} eastus custom-vision-model-v2 pr${{ steps.vars.outputs.sha_short }}-environment stellarbatchdev
     #   shell: bash
 
-    - name: Upload data to storage container
-      run: ./test/create-container-and-upload-files.sh pr${{ steps.vars.outputs.sha_short }} custom-vision-model-v2
-      shell: bash
+    # - name: Grant Admin role for synapse workspace to service-principal
+    #   run: az synapse role assignment create --workspace-name pr${{ steps.vars.outputs.sha_short }}-pipeline-syn-ws --role "Synapse Administrator" --assignee 8c0d8761-c477-4ab0-b1b1-eb25d7355294
+    #   shell: bash
 
-    - name: Install pipeline
-      run: |
-        mkdir packaged-pipeline
-        unzip custom-vision-model-v2.zip -d ./packaged-pipeline/
-        echo "#!/usr/bin/env bash" > install-pipeline.sh
-        echo "set -ex" >> install-pipeline.sh
-        chmod +x install-pipeline.sh
-        python3 ./test/create-pipeline-install-commands.py --file_name "./packaged-pipeline/pipeline/E2E Custom Vision Model Flow.json"   --resource_group_name pr${{ steps.vars.outputs.sha_short }}-pipeline-rg --workspace_name pr${{ steps.vars.outputs.sha_short }}-pipeline-syn-ws >> install-pipeline.sh
-        cat install-pipeline.sh
-        ./install-pipeline.sh
-      shell: bash
+    # - name: Grant Admin role for synapse workspace to TM-Stellar AAD group
+    #   run: az synapse role assignment create --workspace-name pr${{ steps.vars.outputs.sha_short }}-pipeline-syn-ws --role "Synapse Administrator" --assignee 68144578-3bde-4d74-b0dd-2a44972ea2f3
+    #   shell: bash
 
-    - name: Execute pipeline
-      id: execute_pipeline
-      run: |
-        echo "##[set-output name=pipeline_run_id;]$(./test/execute-pipeline.sh pr${{ steps.vars.outputs.sha_short }} stellarbatchdev custom-vision-model-v2)"
+    - name: Package the content
+      run: ./deploy/package.sh pr6742b2c custom-vision-model-v2 stellarbatchdev
       shell: bash
 
     - name: Wait for pipeline to finish
-      run: ./test/check-pipeline-status.sh pr${{ steps.vars.outputs.sha_short }} ${{ steps.execute_pipeline.outputs.pipeline_run_id }}
+      run: ./test/test-pipeline.sh pr6742b2c
       shell: bash
