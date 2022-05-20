@@ -41,5 +41,9 @@ jobs:
       shell: bash
 
     - name: Wait for pipeline to finish
-      run: ./test/test-pipeline.sh pr6742b2c
+      run: ./test/deploy-prepare-and-test-pipeline.sh pr6742b2c
+      shell: bash
+
+    - name: Cleanup the resources
+      run: ./deploy/cleanup.sh pr6742b2c stellarbatchdev
       shell: bash
