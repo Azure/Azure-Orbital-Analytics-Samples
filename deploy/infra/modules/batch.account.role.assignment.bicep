@@ -4,17 +4,17 @@
 param principalId string
 param roleDefinitionId string
 
-param resourceName string
+param batchAccountName string
 
-param roleAssignmentId string = guid(principalId, roleDefinitionId, resourceName)
+param roleAssignmentId string = guid(principalId, roleDefinitionId, batchAccountName)
 
-resource existingResource 'Microsoft.Batch/batchAccounts@2021-06-01' existing = {
-  name: resourceName
+resource batchAccount 'Microsoft.Batch/batchAccounts@2021-06-01' existing = {
+  name: batchAccountName
 }
 
-resource symbolicname 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
+resource assignRole 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
   name: roleAssignmentId
-  scope: existingResource
+  scope: batchAccount
   properties: {
     principalId: principalId
     roleDefinitionId: roleDefinitionId

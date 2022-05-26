@@ -9,13 +9,6 @@ param location string
 
 param synapseMIPrincipalId string
 
-// Guid to role definitions to be used during role
-// assignments including the below roles definitions:
-// Contributor
-param synapseMIBatchAccountRoles array = [
-  'b24988ac-6180-42a0-ab88-20f7382dd24c'
-]
-
 // Name parameters for infrastructure resources
 param orchestrationResourceGroupName string = ''
 param keyvaultName string = ''
@@ -161,6 +154,14 @@ module uami '../modules/managed.identity.user.bicep' = {
   }
 }
 
+module batchAccountCustomRole '../modules/batch.account.custom.role.bicep' = {
+  name: '${namingPrefix}-batch-account-custom-role'
+  scope: subscription()
+  params: {
+    batchAccountName: toLower(batchAccountNameVar)
+  }
+}
+
 module batchAccount '../modules/batch.account.bicep' = {
   name: '${namingPrefix}-batch-account'
   params: {
@@ -168,7 +169,6 @@ module batchAccount '../modules/batch.account.bicep' = {
     location: location
     batchAccountName: toLower(batchAccountNameVar)
     userManagedIdentityId: uami.outputs.uamiId
-    userManagedIdentityPrincipalId: uami.outputs.uamiPrincipalId
     allowedAuthenticationModes: batchAccountPoolAllocationMode == 'BatchService' ? allowedAuthenticationModesBatchSvc : allowedAuthenticationModesUsrSub
     autoStorageAuthenticationMode: batchAccountAutoStorageAuthenticationMode
     autoStorageAccountName: batchAccountAutoStorageAccountNameVar
@@ -183,17 +183,29 @@ module batchAccount '../modules/batch.account.bicep' = {
   ]
 }
 
-module synapseIdentityForBatchAccess '../modules/batch.account.role.assignment.bicep' = [ for role in synapseMIBatchAccountRoles: {
-  name: '${namingPrefix}-batch-account-role-assgn'
+module synapseIdentityForBatchAccess '../modules/batch.account.role.assignment.bicep' = {
+  name: '${namingPrefix}-batch-account-synapse-role-assign'
   params: {
-    resourceName: toLower(batchAccountNameVar)
+    batchAccountName: toLower(batchAccountNameVar)
     principalId: synapseMIPrincipalId
-    roleDefinitionId: '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/${role}'
+    roleDefinitionId: batchAccountCustomRole.outputs.batchAccountCustomRoleName
   }
   dependsOn: [
     batchAccount
   ]
-}]
+}
+
+module userManagedIdentityForBatchAccess '../modules/batch.account.role.assignment.bicep' = {
+  name: '${namingPrefix}-batch-account-umi-role-assign'
+  params: {
+    batchAccountName: toLower(batchAccountNameVar)
+    principalId: uami.outputs.uamiPrincipalId
+    roleDefinitionId: batchAccountCustomRole.outputs.batchAccountCustomRoleName
+  }
+  dependsOn: [
+    batchAccount
+  ]
+}
 
 module batchAccountPoolCheck '../modules/batch.account.pool.exists.bicep' = {
   name: '${namingPrefix}-batch-account-pool-exists'
@@ -207,6 +219,7 @@ module batchAccountPoolCheck '../modules/batch.account.pool.exists.bicep' = {
   dependsOn: [
     batchAccountAutoStorageAccount
     batchAccount
+    userManagedIdentityForBatchAccess
   ]
 }
 
@@ -232,6 +245,7 @@ module batchAccountCpuOnlyPool '../modules/batch.account.pools.bicep' = {
   dependsOn: [
     batchAccountAutoStorageAccount
     batchAccount
+    userManagedIdentityForBatchAccess
     batchAccountPoolCheck
   ]
 }

@@ -195,8 +195,22 @@ Following is the list of resource-groups and resources that should be created if
 
         Wait for all pools to complete resizing before moving to the next steps.
 
-        Note: The Bicep template adds the Synapse workspace's Managed Identity to the Batch Account as `Contributor`. Alternatively, Custom Role Definitions can be used to assign the Synapse workspace's Managed Identity to the Batch Account with required Azure RBAC operations.
-
+        Note: The Bicep template adds the Synapse workspace's Managed Identity to the Batch Account with a Custom Role Access.
+        
+        Following is the default list of permissions assigned to the custom role created.
+        ```
+        Microsoft.Batch/batchAccounts/pools/write
+        Microsoft.Batch/batchAccounts/pools/read
+        Microsoft.Batch/batchAccounts/pools/delete
+        Microsoft.Batch/batchAccounts/read
+        Microsoft.Batch/batchAccounts/listKeys/action
+        Microsoft.Batch/batchAccounts/jobSchedules/write
+        Microsoft.Batch/batchAccounts/jobSchedules/delete
+        Microsoft.Batch/batchAccounts/jobSchedules/read
+        Microsoft.Batch/batchAccounts/jobs/write
+        Microsoft.Batch/batchAccounts/jobs/delete
+        Microsoft.Batch/batchAccounts/jobs/read
+        ```
     - Keyvault named `aoi-orc-kv`.
     - User managed identity `aoi-orc-umi` for access and authentication.
     - Azure Container registry instance named `aoiorcacr` to store container images.
