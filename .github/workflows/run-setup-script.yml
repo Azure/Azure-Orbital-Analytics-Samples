@@ -30,7 +30,9 @@ jobs:
 
     - name: Grant Admin role for synapse workspace to github service-principal and TM-Stellar AAD group
       run: |
+        # Granting role to principal-id used in github workflow
         az synapse role assignment create --workspace-name pr${{ steps.vars.outputs.sha_short }}-pipeline-syn-ws --role "Synapse Administrator" --assignee 8c0d8761-c477-4ab0-b1b1-eb25d7355294
+        # Granting role to principal-id used in TM-Stellar AAD group
         az synapse role assignment create --workspace-name pr${{ steps.vars.outputs.sha_short }}-pipeline-syn-ws --role "Synapse Administrator" --assignee 68144578-3bde-4d74-b0dd-2a44972ea2f3
       shell: bash
 
