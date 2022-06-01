@@ -1,0 +1,202 @@
+{
+    "name": "Insert CV Object Detection Data Into DB Notebook Job",
+    "properties": {
+        "nbformat": 4,
+        "nbformat_minor": 2,
+        "bigDataPool": {
+            "referenceName": "__synapse_pool_name__",
+            "type": "BigDataPoolReference"
+        },
+        "sessionProperties": {
+            "driverMemory": "56g",
+            "driverCores": 8,
+            "executorMemory": "56g",
+            "executorCores": 8,
+            "numExecutors": 2,
+            "conf": {
+                "spark.dynamicAllocation.enabled": "false",
+                "spark.dynamicAllocation.minExecutors": "2",
+                "spark.dynamicAllocation.maxExecutors": "2",
+                "spark.autotune.trackingId": "2d4c91ee-a607-4614-a073-c8889edb97be"
+            }
+        },
+        "metadata": {
+            "saveOutput": true,
+            "enableDebugMode": false,
+            "kernelspec": {
+                "name": "synapse_pyspark",
+                "display_name": "Synapse PySpark"
+            },
+            "language_info": {
+                "name": "python"
+            },
+            "a365ComputeOptions": {
+                "id": "__synapse_workspace_id__/bigDataPools/__synapse_pool_name__",
+                "name": "__synapse_pool_name__",
+                "type": "Spark",
+                "endpoint": "https://__synapse_workspace__.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/__synapse_pool_name__",
+                "auth": {
+                    "type": "AAD",
+                    "authResource": "https://dev.azuresynapse.net"
+                },
+                "sparkVersion": "3.1",
+                "nodeCount": 3,
+                "cores": 8,
+                "memory": 56
+            },
+            "sessionKeepAliveTimeout": 30
+        },
+        "cells": [
+            {
+                "cell_type": "code",
+                "metadata": {
+                    "jupyter": {
+                        "source_hidden": false,
+                        "outputs_hidden": false
+                    },
+                    "nteract": {
+                        "transient": {
+                            "deleting": false
+                        }
+                    },
+                    "tags": [
+                        "parameters"
+                    ]
+                },
+                "source": [
+                    "storage_account_name = ''\n",
+                    "container_name = ''\n",
+                    "folder_path = 'pool-geolocation'\n",
+                    "key_vault_name = ''\n",
+                    "storage_account_key_secret_name = 'GeospatialStorageAccountKey'\n",
+                    "linked_service_name = 'AOI Pipeline Key Vault'\n",
+                    "db_password_secret_name = 'PostgresAdminPassword'\n",
+                    "db_username = ''\n",
+                    "db_host = ''\n",
+                    "db_name = 'postgres'\n",
+                    "db_port = '5432'\n",
+                    "ssl_root_path = '/opt/src/BaltimoreCyberTrustRoot.crt.pem'"
+                ],
+                "outputs": [],
+                "execution_count": null
+            },
+            {
+                "cell_type": "code",
+                "metadata": {
+                    "tags": []
+                },
+                "source": [
+                    "# Copyright (c) Microsoft Corporation.\n",
+                    "# Licensed under the MIT license.\n",
+                    "\n",
+                    "import json\n",
+                    "import psycopg2\n",
+                    "from azure.storage.blob import BlobServiceClient\n",
+                    "from notebookutils import mssparkutils\n",
+                    "from pyspark.sql import SparkSession\n",
+                    "\n",
+                    "def save_blob(file_name: str, file_content):\n",
+                    "\n",
+                    "    # Get full path to the file\n",
+                    "    download_file_path = file_name\n",
+                    "\n",
+                    "    # for nested blobs, create local path as well!\n",
+                    "    # os.makedirs(os.path.dirname(download_file_path), exist_ok=True)\n",
+                    "    with open(download_file_path, \"wb\") as file:\n",
+                    "      file.write(file_content)\n",
+                    "\n",
+                    "def download_file_from_storage_account(storage_account_name: str, storage_account_key: str, container_name: str, folder_path: str,  file_name: str):\n",
+                    "\n",
+                    "    storage_account_url = f'https://{storage_account_name}.blob.core.windows.net'\n",
+                    "\n",
+                    "    blob_service_client_instance = BlobServiceClient(\n",
+                    "        account_url=storage_account_url, credential=storage_account_key)\n",
+                    "\n",
+                    "    blob_client_instance = blob_service_client_instance.get_blob_client(\n",
+                    "        container_name, f'{folder_path}/{file_name}', snapshot=None)\n",
+                    "\n",
+                    "    blob_data = blob_client_instance.download_blob()\n",
+                    "    \n",
+                    "    data = blob_data.readall()\n",
+                    "\n",
+                    "    save_blob(file_name, data)\n",
+                    "\n",
+                    "if __name__ == \"__main__\":\n",
+                    "\n",
+                    "    sc = SparkSession.builder.getOrCreate()\n",
+                    "    token_library = sc._jvm.com.microsoft.azure.synapse.tokenlibrary.TokenLibrary\n",
+                    "\n",
+                    "    print(db_password_secret_name)\n",
+                    "    storage_account_key = token_library.getSecret(key_vault_name, storage_account_key_secret_name, linked_service_name)\n",
+                    "    db_password = token_library.getSecret(key_vault_name, db_password_secret_name, linked_service_name)\n",
+                    "\n",
+                    "    mssparkutils.fs.mount(\n",
+                    "        f'abfss://{container_name}@{storage_account_name}.dfs.core.windows.net', \n",
+                    "        f'/{container_name}', \n",
+                    "        {\"accountKey\": storage_account_key}\n",
+                    "    )\n",
+                    "\n",
+                    "    mssparkutils.fs.unmount(f'/{container_name}') \n",
+                    "    files = mssparkutils.fs.ls(f'abfss://{container_name}@{storage_account_name}.dfs.core.windows.net/{folder_path}')\n",
+                    "\n",
+                    "    try:\n",
+                    "        connection = psycopg2.connect(user=db_username,\n",
+                    "                                    password=db_password,\n",
+                    "                                    host=db_host,\n",
+                    "                                    port=db_port,\n",
+                    "                                    database=db_name,\n",
+                    "                                    sslmode='require',\n",
+                    "                                    sslrootcert=ssl_root_path)\n",
+                    "        cursor = connection.cursor()\n",
+                    "\n",
+                    "        for file in files:\n",
+                    "            if not file.isDir and file.name.endswith('.geojson'):\n",
+                    "\n",
+                    "                download_file_from_storage_account(storage_account_name, storage_account_key, container_name, folder_path, file.name)\n",
+                    "\n",
+                    "                # Opening JSON file\n",
+                    "                f = open(file.name)\n",
+                    "\n",
+                    "                # returns JSON object as a dictionary\n",
+                    "                json_data = json.load(f)\n",
+                    "                data = json.dumps(json_data)\n",
+                    "\n",
+                    "                postgres_insert_query = \"\"\"\n",
+                    "                    WITH data AS (SELECT '__data_from_file__'::json AS fc)\n",
+                    "                    INSERT INTO aioutputmodelschema.cvmodel (id, location, probability, tagid, tagname, tile)\n",
+                    "                    (SELECT\n",
+                    "                    row_number() OVER () AS id,\n",
+                    "                    ST_SetSRID(ST_AsText(ST_GeomFromGeoJSON(feat->>'geometry')), 4326) AS location,\n",
+                    "                    (feat->'properties'->'probability')::jsonb::numeric AS probability,\n",
+                    "                    feat->'properties'->'tagId' AS tagid,\n",
+                    "                    feat->'properties'->'tagName' AS tagname,\n",
+                    "                    feat->'properties'->'tile' AS tile\n",
+                    "                    FROM (\n",
+                    "                    SELECT json_array_elements(fc->'features') AS feat\n",
+                    "                    FROM data\n",
+                    "                    ) AS f);\n",
+                    "                    \"\"\"\n",
+                    "                postgres_insert_query = postgres_insert_query.replace('__data_from_file__', data)\n",
+                    "\n",
+                    "                cursor.execute(postgres_insert_query)\n",
+                    "\n",
+                    "                connection.commit()\n",
+                    "                count = cursor.rowcount\n",
+                    "                print(f'{count} records from {file.name} were successfully inserted into the cvmodel table')\n",
+                    "\n",
+                    "    except (Exception, psycopg2.Error) as error:\n",
+                    "        print(\"Failed to insert record into cvmodel table\", error)\n",
+                    "\n",
+                    "    finally:\n",
+                    "        # closing database connection.\n",
+                    "        if connection:\n",
+                    "            cursor.close()\n",
+                    "            connection.close()\n",
+                    "            print(\"PostgreSQL connection is closed\")"
+                ],
+                "outputs": [],
+                "execution_count": null
+            }
+        ]
+    }
+}
