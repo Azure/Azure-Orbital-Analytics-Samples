@@ -77,5 +77,4 @@ if [[ ! -z "$PRE_PROVISIONED_BATCH_ACCOUNT_NAME" ]] && [ "${NO_BATCH_ACCOUNT_POO
             --account-name ${PRE_PROVISIONED_BATCH_ACCOUNT_NAME} \
             --account-key ${BATCH_ACCOUNT_KEY}
     fi
-
 fi
