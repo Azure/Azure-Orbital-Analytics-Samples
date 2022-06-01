@@ -47,7 +47,7 @@ if [[ "${BATCH_ACCOUNT_LOCATION}" != ${SYNAPSE_WORKSPACE_LOCATION} ]]; then
 fi
 
 # Grant access to batch account for Managed Identities
-python3 ${PRJ_ROOT}/deploy/batch_account.py \
+python3 ${PRJ_ROOT}/test/batch_account.py \
     --env_code ${ENV_CODE} \
     --target_batch_account_name ${DESTINATION_BATCH_ACCOUNT_NAME} \
     --target_batch_account_resource_group_name ${DESTINATION_BATCH_ACCOUNT_RG_NAME} \

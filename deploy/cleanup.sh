@@ -70,7 +70,7 @@ if [[ ! -z "$PRE_PROVISIONED_BATCH_ACCOUNT_NAME" ]] && [ "${NO_BATCH_ACCOUNT_POO
         --job-id ${BATCH_ACCOUNT_POOL_NAME} \
         --account-name ${PRE_PROVISIONED_BATCH_ACCOUNT_NAME} \
         --account-key ${BATCH_ACCOUNT_KEY}
-    if [[ $? ==0 ]]; then
+    if [[ $? == 0 ]]; then
         echo "Cleanup the batch pool: ${BATCH_ACCOUNT_POOL_NAME}"
         az batch pool delete --yes \
             --pool-id ${BATCH_ACCOUNT_POOL_NAME} \
