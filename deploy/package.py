@@ -12,11 +12,15 @@ parser = argparse.ArgumentParser(description='Arguments required to run packagin
 parser.add_argument('--raw_storage_account_name', type=str, required=True, help='Name of the Raw data hosting Storage Account')
 parser.add_argument('--synapse_storage_account_name', type=str, required=True, help='Name of the Raw data hosting Storage Account')
 parser.add_argument('--synapse_pool_name', type=str, required=True, help='Name of the Synapse pool in the Synapse workspace to use as default')
+parser.add_argument('--synapse_workspace_id', type=str, required=True, help='Id for the Synapse workspace')
+parser.add_argument('--synapse_workspace', type=str, required=True, help='Synapse pool name')
 parser.add_argument('--batch_storage_account_name', type=str, required=True, help='Name of the Batch Storage Account')
 parser.add_argument('--batch_account', type=str, required=True, help="Batch Account name")
 parser.add_argument('--linked_key_vault', type=str, required=True, help="Key Vault to be added as Linked Service")
 parser.add_argument('--location', type=str, required=True, help="Batch Account Location")
 parser.add_argument('--pipeline_name', type=str, required=True, help="Name of the pipeline to package")
+parser.add_argument('--pg_db_username', type=str, required=True, help="Username to login to postgres db")
+parser.add_argument('--pg_db_server_name', type=str, required=True, help="Server name to login to postgres db")
 
 #Parse Args
 args = parser.parse_args()
@@ -53,7 +57,7 @@ def package(pipeline_name: str, tokens_map: dict):
     shutil.copytree(src_folder_path, package_folder_path)
 
     # set of folder names are fixed for synapse pipelines and hence hardcoding them
-    for folder in ['linkedService', 'sparkJobDefinition', 'pipeline', 'bigDataPool']:
+    for folder in ['linkedService', 'sparkJobDefinition', 'pipeline', 'bigDataPool', 'notebook']:
 
         # iterate through all file
         for file in os.listdir(f'{package_folder_path}/{folder}'):
@@ -92,7 +96,11 @@ if __name__ == "__main__":
         '__linked_key_vault__': args.linked_key_vault,
         '__synapse_storage_account__': args.synapse_storage_account_name,
         '__synapse_pool_name__': args.synapse_pool_name,
-        '__location__': args.location
+        '__synapse_workspace_id__':args.synapse_workspace_id,
+        '__synapse_workspace__':args.synapse_workspace,
+        '__location__': args.location,
+        '__pg_db_username__': args.pg_db_username,
+        '__pg_db_server_name__': args.pg_db_server_name
     }
 
     # invoke package method
