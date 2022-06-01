@@ -27,6 +27,8 @@ param uamiName string = ''
 param pipelineResourceGroupName string
 param pipelineLinkedSvcKeyVaultName string
 
+param deployBatchAccount bool = true
+
 // Mount options
 param mountAccountName string
 param mountAccountKey string
@@ -127,7 +129,7 @@ module keyVault '../modules/akv.bicep' = {
   }
 }
 
-module batchAccountAutoStorageAccount '../modules/storage.bicep' = {
+module batchAccountAutoStorageAccount '../modules/storage.bicep' = if(deployBatchAccount) {
   name: '${namingPrefix}-batch-account-auto-storage'
   params: {
     storageAccountName: batchAccountAutoStorageAccountNameVar
@@ -137,7 +139,7 @@ module batchAccountAutoStorageAccount '../modules/storage.bicep' = {
   }
 }
 
-module batchStorageAccountCredentials '../modules/storage.credentials.to.keyvault.bicep' = {
+module batchStorageAccountCredentials '../modules/storage.credentials.to.keyvault.bicep' = if(deployBatchAccount) {
   name: '${namingPrefix}-batch-storage-credentials'
   params: {
     environmentName: environmentTag
@@ -161,7 +163,7 @@ module uami '../modules/managed.identity.user.bicep' = {
   }
 }
 
-module batchAccount '../modules/batch.account.bicep' = {
+module batchAccount '../modules/batch.account.bicep' = if(deployBatchAccount) {
   name: '${namingPrefix}-batch-account'
   params: {
     environmentName: environmentTag
@@ -183,7 +185,7 @@ module batchAccount '../modules/batch.account.bicep' = {
   ]
 }
 
-module synapseIdentityForBatchAccess '../modules/batch.account.role.assignment.bicep' = [ for role in synapseMIBatchAccountRoles: {
+module synapseIdentityForBatchAccess '../modules/batch.account.role.assignment.bicep' = [ for role in synapseMIBatchAccountRoles: if(deployBatchAccount) {
   name: '${namingPrefix}-batch-account-role-assgn'
   params: {
     resourceName: toLower(batchAccountNameVar)
@@ -195,7 +197,7 @@ module synapseIdentityForBatchAccess '../modules/batch.account.role.assignment.b
   ]
 }]
 
-module batchAccountPoolCheck '../modules/batch.account.pool.exists.bicep' = {
+module batchAccountPoolCheck '../modules/batch.account.pool.exists.bicep' = if(deployBatchAccount) {
   name: '${namingPrefix}-batch-account-pool-exists'
   params: {
     batchAccountName: batchAccountNameVar
@@ -210,7 +212,7 @@ module batchAccountPoolCheck '../modules/batch.account.pool.exists.bicep' = {
   ]
 }
 
-module batchAccountCpuOnlyPool '../modules/batch.account.pools.bicep' = {
+module batchAccountCpuOnlyPool '../modules/batch.account.pools.bicep' = if(deployBatchAccount) {
   name: '${namingPrefix}-batch-account-data-fetch-pool'
   params: {
     batchAccountName: batchAccountNameVar
@@ -227,7 +229,7 @@ module batchAccountCpuOnlyPool '../modules/batch.account.pools.bicep' = {
     azureFileShareConfigurationAzureFileUrl: mountFileUrl
     azureFileShareConfigurationMountOptions: '-o vers=3.0,dir_mode=0777,file_mode=0777,sec=ntlmssp'
     azureFileShareConfigurationRelativeMountPath: 'S'
-    batchPoolExists: batchAccountPoolCheck.outputs.batchPoolExists
+    batchPoolExists: deployBatchAccount?batchAccountPoolCheck.outputs.batchPoolExists:false
   }
   dependsOn: [
     batchAccountAutoStorageAccount
@@ -260,7 +262,7 @@ module acrCredentials '../modules/acr.credentials.to.keyvault.bicep' = {
   ]
 }
 
-module batchAccountCredentials '../modules/batch.account.to.keyvault.bicep' = {
+module batchAccountCredentials '../modules/batch.account.to.keyvault.bicep' = if(deployBatchAccount) {
   name: '${namingPrefix}-batch-account-credentials'
   params: {
     environmentName: environmentTag
@@ -274,7 +276,7 @@ module batchAccountCredentials '../modules/batch.account.to.keyvault.bicep' = {
   ]
 }
 
-module batchDiagnosticSettings '../modules/batch-diagnostic-settings.bicep' = {
+module batchDiagnosticSettings '../modules/batch-diagnostic-settings.bicep' = if(deployBatchAccount) {
   name: '${namingPrefix}-synapse-diag-settings'
   params: {
     batchAccountName: batchAccountNameVar

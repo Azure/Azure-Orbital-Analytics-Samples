@@ -1,0 +1,8 @@
+{
+    "Prefix":"$RAW_DATA_STORAGE_ACCOUNT_CONTAINER_NAME",
+    "StorageAccountName":"$RAW_DATA_STORAGE_ACCOUNT_NAME",
+    "AOI":"$AOI",
+    "BatchAccountName":"$BATCH_ACCOUNT_NAME",
+    "BatchJobName":"$BATCH_JOB_NAME",
+    "BatchLocation":"$BATCH_ACCOUNT_LOCATION"
+}

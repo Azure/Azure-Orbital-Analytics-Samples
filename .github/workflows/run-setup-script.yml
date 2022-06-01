@@ -1,0 +1,45 @@
+
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
+on: [push, pull_request]
+name: Azure ARM
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+
+      # Checkout code
+    - uses: actions/checkout@main
+
+      # Log into Azure
+    - uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Get git info
+      id: vars
+      shell: bash
+      run: |
+        echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+
+    - name: Install Azure Infrastructure
+      run: ./deploy/setup.sh pr${{ steps.vars.outputs.sha_short }} eastus custom-vision-model-v2 pr${{ steps.vars.outputs.sha_short }}-environment ${{ secrets.CI_BATCH_ACCOUNT_NAME }}
+      shell: bash
+
+    - name: Grant Admin role for synapse workspace to github service-principal and AAD group
+      run: |
+        # Granting role to principal-id used in github workflow
+        az synapse role assignment create --workspace-name pr${{ steps.vars.outputs.sha_short }}-pipeline-syn-ws --role "Synapse Administrator" --assignee $(${{ secrets.AZURE_CREDENTIALS }} | jq '.clientId')
+        # Granting role to principal-id used in AAD group
+        az synapse role assignment create --workspace-name pr${{ steps.vars.outputs.sha_short }}-pipeline-syn-ws --role "Synapse Administrator" --assignee ${{ secrets.AAD_GROUP_PRINCIPAL_ID }}
+      shell: bash
+
+    - name: Execute pipeline
+      run: BATCH_ACCOUNT_NAME=${{ secrets.CI_BATCH_ACCOUNT_NAME }} SOURCE_STORAGE_ACCOUNT_NAME=${{ secrets.CI_STORAGE_ACCOUNT }} ./test/deploy-prepare-and-test-pipeline.sh pr${{ steps.vars.outputs.sha_short }}
+      shell: bash
+
+    - name: Cleanup the resources
+      run: ./deploy/cleanup.sh pr${{ steps.vars.outputs.sha_short }} ${{ secrets.CI_BATCH_ACCOUNT_NAME }} custom-vision-model-v2
+      shell: bash

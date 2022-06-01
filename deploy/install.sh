@@ -3,7 +3,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-set -x
+set -ex
 
 if [[ -z "$1" ]]
   then
@@ -18,17 +18,19 @@ if [[ -z "$2" ]]
 fi
 
 # Setup parameters
-envCode=${envCode:-"${1}"}
-location=${location:-"${2}"}
-envTag=${envTag:-"synapse-${envCode}"}
-deploymentName=${3:-"${envTag}-deploy"}
+envCode=${1:-${envCode}}
+location=${2:-${location}}
+deploymentName=${3:-${deploymentName:-"${envTag}-deploy"}}
+envTag=${4:-${envTag:-"synapse-${envCode}"}}
+deployBatchAccount=${5:-${deployBatchAccount:-"true"}}
 
 DEPLOYMENT_SCRIPT="az deployment sub create -l $location -n $deploymentName \
     -f ./deploy/infra/main.bicep \
     -p \
     location=$location \
     environmentCode=$envCode \
-    environment=$envTag"
+    environment=$envTag \
+    deployBatchAccount=$deployBatchAccount"
 $DEPLOYMENT_SCRIPT
 set +x
 
