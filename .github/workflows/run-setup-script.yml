@@ -2,8 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-name: Docker
-
+name: Azure ARM
 on:
   push:
   # Runs tests for pushes to main branch.
@@ -13,7 +12,6 @@ on:
   pull_request:
     branches:
       - main
-name: Azure ARM
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
