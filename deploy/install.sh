@@ -20,8 +20,8 @@ fi
 # Setup parameters
 envCode=${1:-${envCode}}
 location=${2:-${location}}
-deploymentName=${3:-${deploymentName:-"${envTag}-deploy"}}
-envTag=${4:-${envTag:-"synapse-${envCode}"}}
+envTag=${3:-${envTag:-"synapse-${envCode}"}}
+deploymentName=${4:-${deploymentName:-"${envTag}-deploy"}}
 deployBatchAccount=${5:-${deployBatchAccount:-"true"}}
 
 DEPLOYMENT_SCRIPT="az deployment sub create -l $location -n $deploymentName \
