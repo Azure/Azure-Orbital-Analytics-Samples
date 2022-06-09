@@ -20,7 +20,7 @@ param skuCapacity int = 2
 param skuName string = 'GP_Gen5_2'
 
 @description('Azure database for PostgreSQL Sku Size ')
-param skuSizeMB int = 51200
+param skuSizeMB string = '51200'
 
 @description('Azure database for PostgreSQL pricing tier')
 @allowed([

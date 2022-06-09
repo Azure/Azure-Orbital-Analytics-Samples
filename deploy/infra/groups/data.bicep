@@ -54,7 +54,7 @@ param postgresAdminLoginPass string = ''
 // Parameters with default values for Postgres
 param skuCapacity int = 2
 param skuName string = 'GP_Gen5_2'
-param skuSizeMB int = 51200
+param skuSizeMB string = '51200'
 param skuTier string = 'GeneralPurpose'
 param skuFamily string = 'Gen5'
 param postgresqlVersion string = '11'
