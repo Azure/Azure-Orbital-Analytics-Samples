@@ -7,11 +7,11 @@ on:
   push:
   # Runs tests for pushes to main branch.
     branches:
-      - main
+      - '*'
   # Runs tests for any PRs.
   pull_request:
     branches:
-      - main
+      - '*'
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
