@@ -18,19 +18,19 @@ if [[ -z "$2" ]]
 fi
 
 # Setup parameters
-envCode=${1:-${envCode}}
-location=${2:-${location}}
-envTag=${3:-${envTag:-"synapse-${envCode}"}}
-deploymentName=${4:-${deploymentName:-"${envTag}-deploy"}}
-deployBatchAccount=${5:-${deployBatchAccount:-"true"}}
+ENV_CODE=${1:-${ENV_CODE}}
+LOCATION=${2:-${LOCATION}}
+ENV_TAG=${3:-${ENV_TAG:-"synapse-${ENV_CODE}"}}
+DEPLOYMENT_NAME=${4:-${DEPLOYMENT_NAME:-"${ENV_TAG}-deploy"}}
+DEPLOY_BATCH_ACCOUNT=${5:-${DEPLOY_BATCH_ACCOUNT:-"true"}}
 
-DEPLOYMENT_SCRIPT="az deployment sub create -l $location -n $deploymentName \
+DEPLOYMENT_SCRIPT="az deployment sub create -l $LOCATION -n $DEPLOYMENT_NAME \
     -f ./deploy/infra/main.bicep \
     -p \
-    location=$location \
-    environmentCode=$envCode \
-    environment=$envTag \
-    deployBatchAccount=$deployBatchAccount \
+    location=$LOCATION \
+    environmentCode=$ENV_CODE \
+    environment=$ENV_TAG \
+    deployBatchAccount=$DEPLOY_BATCH_ACCOUNT \
     postgresAdminLoginPass=$POSTGRES_ADMIN_LOGIN_PASS"
 $DEPLOYMENT_SCRIPT
 set +x
