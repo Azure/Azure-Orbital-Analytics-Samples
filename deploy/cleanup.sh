@@ -63,18 +63,15 @@ if [[ ! -z "$PRE_PROVISIONED_BATCH_ACCOUNT_NAME" ]] && [ "${NO_BATCH_ACCOUNT_POO
     echo "Getting the batch account details"
     BATCH_ACCOUNT_ID=$(az batch account list --query "[?name == '${PRE_PROVISIONED_BATCH_ACCOUNT_NAME}'].id" -o tsv)
     BATCH_ACCOUNT_RG_NAME=$(az resource show --ids ${BATCH_ACCOUNT_ID} --query resourceGroup -o tsv)
-    BATCH_ACCOUNT_KEY=$(az batch account keys list --name ${PRE_PROVISIONED_BATCH_ACCOUNT_NAME} --resource-group ${BATCH_ACCOUNT_RG_NAME} | jq ".primary")
+    AZURE_BATCH_ACCESS_KEY=$(az batch account keys list --name ${PRE_PROVISIONED_BATCH_ACCOUNT_NAME} --resource-group ${BATCH_ACCOUNT_RG_NAME} | jq ".primary")
 
+    set -x
     echo "Cleaning the batch job: ${BATCH_ACCOUNT_POOL_NAME}"
     az batch job delete --yes \
-        --job-id ${BATCH_ACCOUNT_POOL_NAME} \
-        --account-name ${PRE_PROVISIONED_BATCH_ACCOUNT_NAME} \
-        --account-key ${BATCH_ACCOUNT_KEY}
+        --job-id ${BATCH_ACCOUNT_POOL_NAME}
     if [[ $? == 0 ]]; then
         echo "Cleanup the batch pool: ${BATCH_ACCOUNT_POOL_NAME}"
         az batch pool delete --yes \
-            --pool-id ${BATCH_ACCOUNT_POOL_NAME} \
-            --account-name ${PRE_PROVISIONED_BATCH_ACCOUNT_NAME} \
-            --account-key ${BATCH_ACCOUNT_KEY}
+            --pool-id ${BATCH_ACCOUNT_POOL_NAME}
     fi
 fi
