@@ -41,7 +41,8 @@ if [[ -z "$ENV_TAG" ]]
           ./deploy/install.sh "$ENV_CODE" "$LOCATION" "$ENV_TAG"
 fi
 
-if [[ "${USE_PRE_PROVISIONED_BATCH_ACCOUNT}"=="false" ]]; then
+if [[ "$USE_PRE_PROVISIONED_BATCH_ACCOUNT" == "false" ]]; then
+  echo "Setting up the batch account!!!"
   ./test/use-pre-provisioned-batch-account.sh \
     "$ENV_CODE" \
     "$PRE_PROVISIONED_BATCH_ACCOUNT_NAME" \
