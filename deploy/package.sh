@@ -23,6 +23,7 @@ SYNAPSE_POOL=${12:-${SYNAPSE_POOL}}
 
 set -ex
 
+
 if [[ -z "$BATCH_ACCOUNT_NAME" ]] && [[ -z "$BATCH_ACCOUNT_RG_NAME" ]]; then
     BATCH_ACCOUNT_RG_NAME="${ENV_CODE}-orc-rg"
 fi
@@ -53,10 +54,21 @@ if [[ -z "$KEY_VAULT_NAME" ]]; then
 fi
 if [[ -z "$SYNAPSE_WORKSPACE_NAME" ]]; then
     SYNAPSE_WORKSPACE_NAME=$(az synapse workspace list --query "[?tags.workspaceId && tags.workspaceId == 'default'].name" -o tsv -g $SYNAPSE_WORKSPACE_RG)
+    SYNAPSE_WORKSPACE_ID=$(az synapse workspace list --query "[?tags.workspaceId && tags.workspaceId == 'default'].id" -o tsv -g $SYNAPSE_WORKSPACE_RG)
+else
+    SYNAPSE_WORKSPACE_ID=$(az synapse workspace list --query "[?name == '${BATCH_ACCOUNT_NAME}'].id" -o tsv -g $SYNAPSE_WORKSPACE_RG)
 fi
 if [[ -z "$SYNAPSE_POOL" ]]; then
     SYNAPSE_POOL=$(az synapse spark pool list --workspace-name $SYNAPSE_WORKSPACE_NAME --resource-group $SYNAPSE_WORKSPACE_RG --query "[?tags.poolId && tags.poolId == 'default'].name" -o tsv)
 fi
+
+DB_SERVER_NAME=$(az postgres server list --resource-group $RAW_STORAGE_ACCOUNT_RG --query '[].fullyQualifiedDomainName' -o tsv)
+echo $DB_SERVER_NAME
+DB_NAME=$(az postgres server list --resource-group $RAW_STORAGE_ACCOUNT_RG --query '[].name' -o tsv)
+echo $DB_NAME
+DB_USERNAME=$(az postgres server list --resource-group $RAW_STORAGE_ACCOUNT_RG --query '[].administratorLogin' -o tsv)@$DB_NAME
+echo $DB_USERNAME
+
 
 echo 'Retrieved resource from Azure and ready to package'
 PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/package.py --raw_storage_account_name $RAW_STORAGE_ACCOUNT_NAME \
@@ -66,7 +78,11 @@ PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/package.py --raw_storage_account_na
     --linked_key_vault $KEY_VAULT_NAME \
     --synapse_pool_name $SYNAPSE_POOL \
     --location $BATCH_ACCOUNT_LOCATION \
-    --pipeline_name $PIPELINE_NAME"
+    --pipeline_name $PIPELINE_NAME \
+    --synapse_workspace $SYNAPSE_WORKSPACE_NAME \
+    --synapse_workspace_id $SYNAPSE_WORKSPACE_ID \
+    --pg_db_username $DB_USERNAME \
+    --pg_db_server_name $DB_SERVER_NAME"
 
 echo $PACKAGING_SCRIPT
 echo 'Starting packaging script ...'

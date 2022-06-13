@@ -85,6 +85,11 @@ To install infrastructure execute install.sh script as follows
 
 ```
 
+You will be prompted to enter in a password for postgres. If left empty, an auto generated password will be created and stored in the keyvault. The password requirements are listed below:
+- Between 8 characters and 128 characters
+- Must contain characters from three of the following categories – English uppercase letters, English lowercase letters, numbers (0-9), and non-alphanumeric characters (!, $, #, %, etc.). 
+- Your password cannot contain all or part of the login name. Part of a login name is defined as three or more consecutive alphanumeric characters.
+
 Default values for the parameters are provided in the script itself.
 
 Arguments | Required | Sample value
@@ -99,8 +104,6 @@ For eg.
 ```bash
 ./deploy/install.sh aoi westus demo
 ```
-
-Note: Currently, this deployment does not deploy Azure Database for PostgreSQL for post-analysis.
 
 Users can also use bicep template directly instead of using the script `install.sh`
 
@@ -162,6 +165,7 @@ Following is the list of resource-groups and resources that should be created if
 
     - Storage account named `rawdata<6-character-random-string>` to store raw input data for pipelines.
     - Keyvault named `aoi-data-kv` to store credentials as secrets.
+    - Postgres Single Server DB named `aoi-pg-server`
 
 - `aoi-monitor-rg`
 
@@ -308,6 +312,18 @@ To run the pipeline, open the Synapse Studio for the Synapse workspace that you 
 - Once the parameters are entered, click ok to submit and kick off the pipeline.
 
 - Wait for the pipeline to complete.
+# Reviewing data in Postgres (Custom Vision Model Pipeline)
+
+- To review the data in Postgres, you can use Azure Data Studio following this [guide](https://docs.microsoft.com/en-us/sql/azure-data-studio/quickstart-postgres?view=sql-server-ver15).
+- You will need the following information to connect:
+  - The server name: `<environmentCode>-pg-server.postgres.database.azure.com`
+  - user name: `<environmentCode>_admin_user@<environmentCode>-pg-server`
+  - password used at the start of the deployment
+
+- Example Queries
+  - If you would like to query distances from a given lat, long against data in the db you could use the following query and a third column "dist" will display the distances from the point provided in the query to the data in the location column
+    > SELECT *, ST_Distance(ST_SetSRID(ST_MakePoint(given_long, given_lat), 4326), location) AS dist FROM aioutputmodelschema.cvmodel
+  - More documentation on queries can be found [here](https://postgis.net/workshops/postgis-intro/geography.html)
 
 # Running the pipeline (Custom Vision Model V2)
 

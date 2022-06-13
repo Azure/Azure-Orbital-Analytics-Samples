@@ -32,7 +32,10 @@ jobs:
         echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
     - name: Install Azure Infrastructure
-      run: ./deploy/setup.sh pr${{ steps.vars.outputs.sha_short }} eastus custom-vision-model-v2 pr${{ steps.vars.outputs.sha_short }}-environment ${{ secrets.CI_BATCH_ACCOUNT_NAME }}
+      run: |
+        chars='@#$%&_+='
+        export POSTGRES_ADMIN_LOGIN_PASS=$({ </dev/urandom LC_ALL=C grep -ao '[A-Za-z0-9]' | head -n$((RANDOM % 8 + 9)); echo ${chars:$((RANDOM % ${#chars})):1}; } | shuf | tr -d '\n')
+        ./deploy/setup.sh pr${{ steps.vars.outputs.sha_short }} eastus custom-vision-model-v2 pr${{ steps.vars.outputs.sha_short }}-environment ${{ secrets.CI_BATCH_ACCOUNT_NAME }}
       shell: bash
 
     - name: Grant Admin role for synapse workspace to github service-principal and AAD group

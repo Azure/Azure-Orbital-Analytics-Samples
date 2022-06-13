@@ -32,6 +32,10 @@ param orchestrationModulePrefix string = 'orc'
 @description('Specify whether or not to deploy batch account')
 param deployBatchAccount bool = true
 
+@description('Postgres DB administrator login password')
+@secure()
+param postgresAdminLoginPass string
+
 var networkResourceGroupName = '${environmentCode}-${networkModulePrefix}-rg'
 var dataResourceGroupName = '${environmentCode}-${dataModulePrefix}-rg'
 var monitorResourceGroupName = '${environmentCode}-${monitorModulePrefix}-rg'
@@ -62,8 +66,6 @@ module networkModule 'groups/networking.bicep' = {
     networkResourceGroup
   ]
 }
-
-
 
 module monitorResourceGroup 'modules/resourcegroup.bicep' = {
   name : monitorResourceGroupName
@@ -136,6 +138,7 @@ module dataModule 'groups/data.bicep' = {
     synapseMIPrincipalId: pipelineModule.outputs.synapseMIPrincipalId
     pipelineResourceGroupName: pipelineResourceGroup.name
     pipelineLinkedSvcKeyVaultName: '${environmentCode}-${pipelineModulePrefix}-kv'
+    postgresAdminLoginPass: postgresAdminLoginPass
   }
   dependsOn: [
     networkModule

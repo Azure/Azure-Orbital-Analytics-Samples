@@ -30,7 +30,8 @@ DEPLOYMENT_SCRIPT="az deployment sub create -l $location -n $deploymentName \
     location=$location \
     environmentCode=$envCode \
     environment=$envTag \
-    deployBatchAccount=$deployBatchAccount"
+    deployBatchAccount=$deployBatchAccount \
+    postgresAdminLoginPass=$POSTGRES_ADMIN_LOGIN_PASS"
 $DEPLOYMENT_SCRIPT
 set +x
 
