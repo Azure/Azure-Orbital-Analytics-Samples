@@ -30,25 +30,32 @@ jobs:
       run: |
         echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+        MD5_OUTPUT="$($(date +%s) | md5sum | awk '{print $1}')"
+        echo "::set-output name=ENV_CODE::$(echo ${MD5_OUTPUT:0:7})"
 
     - name: Install Azure Infrastructure
       run: |
         chars='@#$%&_+='
         export POSTGRES_ADMIN_LOGIN_PASS=$({ </dev/urandom LC_ALL=C grep -ao '[A-Za-z0-9]' | head -n$((RANDOM % 8 + 9)); echo ${chars:$((RANDOM % ${#chars})):1}; } | shuf | tr -d '\n')
-        ./deploy/setup.sh pr${{ steps.vars.outputs.sha_short }} eastus custom-vision-model-v2 pr${{ steps.vars.outputs.sha_short }}-environment ${{ secrets.CI_BATCH_ACCOUNT_NAME }}
+        ./deploy/setup.sh ${{ steps.vars.outputs.ENV_CODE }} eastus custom-vision-model-v2 ${{ steps.vars.outputs.ENV_CODE }}-environment ${{ secrets.CI_BATCH_ACCOUNT_NAME }}
       shell: bash
 
     - name: Grant Admin role for synapse workspace to github service-principal and AAD group
       run: |
         # Granting role to principal-id for github workflow
-        az synapse role assignment create --workspace-name pr${{ steps.vars.outputs.sha_short }}-pipeline-syn-ws --role "Synapse Administrator" --assignee $(az account show --query 'user.name' -o tsv)
+        az synapse role assignment create --workspace-name ${{ steps.vars.outputs.ENV_CODE }}-pipeline-syn-ws --role "Synapse Administrator" --assignee $(az account show --query 'user.name' -o tsv)
         # Granting role to principal-id for AAD group
-        az synapse role assignment create --workspace-name pr${{ steps.vars.outputs.sha_short }}-pipeline-syn-ws --role "Synapse Administrator" --assignee ${{ secrets.AAD_GROUP_PRINCIPAL_ID }}
+        if [[ -z ${{ secrets.AAD_GROUP_PRINCIPAL_ID }} ]]; then
+          az synapse role assignment create --workspace-name ${{ steps.vars.outputs.ENV_CODE }}-pipeline-syn-ws --role "Synapse Administrator" --assignee ${{ secrets.AAD_GROUP_PRINCIPAL_ID }}
+        fi
       shell: bash
 
     - name: Execute pipeline
-      run: BATCH_ACCOUNT_NAME=${{ secrets.CI_BATCH_ACCOUNT_NAME }} SOURCE_STORAGE_ACCOUNT_NAME=${{ secrets.CI_STORAGE_ACCOUNT }} ./test/deploy-prepare-and-test-pipeline.sh pr${{ steps.vars.outputs.sha_short }}
+      run: BATCH_ACCOUNT_NAME=${{ secrets.CI_BATCH_ACCOUNT_NAME }} SOURCE_STORAGE_ACCOUNT_NAME=${{ secrets.CI_STORAGE_ACCOUNT }} ./test/deploy-prepare-and-test-pipeline.sh ${{ steps.vars.outputs.ENV_CODE }}
       shell: bash
+
+    outputs:
+      ENV_CODE: ${{ steps.vars.outputs.ENV_CODE }}
 
   cleanup:
     runs-on: ubuntu-latest
@@ -62,13 +69,6 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Get git info
-      id: vars
-      shell: bash
-      run: |
-        echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-
     - name: Cleanup the resources
-      run: ./deploy/cleanup.sh pr${{ steps.vars.outputs.sha_short }} ${{ secrets.CI_BATCH_ACCOUNT_NAME }}
+      run: ./deploy/cleanup.sh "${{ needs.build-and-deploy.outputs.ENV_CODE }}" ${{ secrets.CI_BATCH_ACCOUNT_NAME }}
       shell: bash
