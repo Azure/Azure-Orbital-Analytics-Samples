@@ -26,29 +26,41 @@ fi
 
 if [[ -z "$PRE_PROVISIONED_BATCH_ACCOUNT_NAME" ]]
   then
-    USE_PRE_PROVISIONED_BATCH_ACCOUNT="true"
+    DEPLOY_BATCH_ACCOUNT="true"
   else
-    USE_PRE_PROVISIONED_BATCH_ACCOUNT="false"
+    DEPLOY_BATCH_ACCOUNT="false"
 fi
 
 echo "Performing bicep template deployment"
 if [[ -z "$ENV_TAG" ]]
     then
-        deployBatchAccount=${USE_PRE_PROVISIONED_BATCH_ACCOUNT} ./deploy/install.sh "$ENV_CODE" "$LOCATION"
+        DEPLOY_BATCH_ACCOUNT=${DEPLOY_BATCH_ACCOUNT} \
+          ./deploy/install.sh "$ENV_CODE" "$LOCATION" 
     else
-        deployBatchAccount=${USE_PRE_PROVISIONED_BATCH_ACCOUNT} ./deploy/install.sh "$ENV_CODE" "$LOCATION" "$ENV_TAG"
+        DEPLOY_BATCH_ACCOUNT=${DEPLOY_BATCH_ACCOUNT} \
+          ./deploy/install.sh "$ENV_CODE" "$LOCATION" "$ENV_TAG"
 fi
 
-if [[ "${USE_PRE_PROVISIONED_BATCH_ACCOUNT}"=="false" ]]; then
-  ./test/use-pre-provisioned-batch-account.sh "$ENV_CODE" "$PRE_PROVISIONED_BATCH_ACCOUNT_NAME" "$PIPELINE_NAME"
+if [[ "$DEPLOY_BATCH_ACCOUNT" == "false" ]]; then
+  echo "Setting up the batch account!!!"
+  ./test/use-pre-provisioned-batch-account.sh \
+    "$ENV_CODE" \
+    "$PRE_PROVISIONED_BATCH_ACCOUNT_NAME" \
+    "$PIPELINE_NAME"
 fi
+
 echo "Performing configuration"
-./deploy/configure.sh "$ENV_CODE" "$PRE_PROVISIONED_BATCH_ACCOUNT_NAME"
+./deploy/configure.sh \
+  "$ENV_CODE" \
+  "$PRE_PROVISIONED_BATCH_ACCOUNT_NAME"
 
 if [[ -z "$PIPELINE_NAME" ]]
   then
     echo "Skipping pipeline packaging"
   else
     echo "Performing pipeline packaging"
-    ./deploy/package.sh "$ENV_CODE" "$PIPELINE_NAME" "$PRE_PROVISIONED_BATCH_ACCOUNT_NAME"
+    ./deploy/package.sh \
+      "$ENV_CODE" \
+      "$PIPELINE_NAME" \
+      "$PRE_PROVISIONED_BATCH_ACCOUNT_NAME"
 fi
