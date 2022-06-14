@@ -31,7 +31,7 @@ jobs:
         echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
         MD5_OUTPUT="$(echo $(date +%s) | md5sum | awk '{print $1}')"
-        echo "::set-output name=ENV_CODE::$(echo ${MD5_OUTPUT:0:7})"
+        echo "::set-output name=ENV_CODE::$(echo pr${MD5_OUTPUT:0:7})"
 
     - name: Install Azure Infrastructure
       run: |
