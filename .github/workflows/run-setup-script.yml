@@ -24,13 +24,13 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Get git info
+    - name: Setup environment
       id: vars
       shell: bash
       run: |
         echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-        MD5_OUTPUT="$($(date +%s) | md5sum | awk '{print $1}')"
+        MD5_OUTPUT="$(echo $(date +%s) | md5sum | awk '{print $1}')"
         echo "::set-output name=ENV_CODE::$(echo ${MD5_OUTPUT:0:7})"
 
     - name: Install Azure Infrastructure
