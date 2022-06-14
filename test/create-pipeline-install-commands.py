@@ -27,7 +27,6 @@ def check_dictionary(my_dict, find_key, found_list):
                 found_value['name']=value
                 found_value['type']=my_dict['type'][:-9]
                 add_element_to_dictionary_list(found_value, found_list)
-                # found_list.append(found_value)
         if type(value) is dict:
             check_dictionary(value, find_key, found_list)
         if type(value) is list and len(value)>0:
@@ -109,9 +108,13 @@ def install_dependent_component(workspace_name, component_name, component_type, 
         command = "az synapse linked-service create --name \""+ component_name +"\" --workspace-name "+ workspace_name + " --file @\"" + file_name + "\""
     elif component_type == "pipeline":
         command = "az synapse pipeline create --name \""+ component_name +"\" --workspace-name " +workspace_name + " --file @\"" + file_name + "\""
+    elif component_type == "notebook":
+        tmp_notebook_file_name = "/tmp/spark-notebook-"+component_name+".json"
+        create_notebook_file_command = "jq '.properties' \"" + file_name + "\" > \"" + tmp_notebook_file_name + "\""
+        command =  create_notebook_file_command + "; az synapse notebook create --name \""+ component_name + "\" --workspace-name " + workspace_name + " --file @\"" + tmp_notebook_file_name + "\""
     return command  
 
-def find_missing_components(component_dictionary_list, component_file_name):#, synapse_workspace_group, synapse_resource_group_name):
+def find_missing_components(component_dictionary_list, component_file_name):
     if len(component_dictionary_list) == 0:
         with open(component_file_name, 'r') as freader:
             my_dict = json.load(fp=freader)
