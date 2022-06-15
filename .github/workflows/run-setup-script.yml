@@ -45,7 +45,7 @@ jobs:
         # Granting role to principal-id for github workflow
         az synapse role assignment create --workspace-name ${{ steps.vars.outputs.ENV_CODE }}-pipeline-syn-ws --role "Synapse Administrator" --assignee $(az account show --query 'user.name' -o tsv)
         # Granting role to principal-id for AAD group
-        if [[ -z ${{ secrets.AAD_GROUP_PRINCIPAL_ID }} ]]; then
+        if [[ ! -z ${{ secrets.AAD_GROUP_PRINCIPAL_ID }} ]]; then
           az synapse role assignment create --workspace-name ${{ steps.vars.outputs.ENV_CODE }}-pipeline-syn-ws --role "Synapse Administrator" --assignee ${{ secrets.AAD_GROUP_PRINCIPAL_ID }}
         fi
       shell: bash
