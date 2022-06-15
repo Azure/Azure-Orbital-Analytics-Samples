@@ -29,15 +29,22 @@ param pipelineModulePrefix string = 'pipeline'
 @description('Used for naming of the orchestration resource group and its resources')
 param orchestrationModulePrefix string = 'orc'
 
-@description('Specify whether or not to deploy batch account')
-param deployBatchAccount bool = true
-
 @description('Specify whether or not to deploy PostgreSQL')
 param deployPgSQL bool = true
 
 @description('Postgres DB administrator login password')
 @secure()
 param postgresAdminLoginPass string
+
+@description('Specify whether or not to deploy AI model execution infrastructure')
+param deployAiModelInfra bool = true
+
+@description('Specify which AI model execution infrastructure is used, valid choices are aks, batch-account')
+@allowed([
+  'batch-account'
+  'aks'
+])
+param aiModelInfraType string = 'batch-account'
 
 var networkResourceGroupName = '${environmentCode}-${networkModulePrefix}-rg'
 var dataResourceGroupName = '${environmentCode}-${dataModulePrefix}-rg'
@@ -170,7 +177,8 @@ module orchestrationModule 'groups/orchestration.bicep' = {
     environmentTag: environment
     logAnalyticsWorkspaceId: monitorModule.outputs.workspaceId
     mountAccountKey: dataModule.outputs.rawStoragePrimaryKey
-    deployBatchAccount: deployBatchAccount
+    deployAiModelInfra: deployAiModelInfra
+    aiModelInfraType: aiModelInfraType
     mountAccountName: dataModule.outputs.rawStorageAccountName
     mountFileUrl: '${dataModule.outputs.rawStorageFileEndpointUri}volume-a'
     pipelineResourceGroupName: pipelineResourceGroup.name

@@ -5,80 +5,103 @@
 
 PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/..; pwd)"
 
-ENV_CODE=${1:-${ENV_CODE}}
-PIPELINE_NAME=${2:-${PIPELINE_NAME}}
+ENV_CODE=${1:-$ENV_CODE}
+PIPELINE_NAME=${2:-$PIPELINE_NAME}
 
+AI_MODEL_INFRA_TYPE=${3:-${AI_MODEL_INFRA_TYPE:-"batch-account"}} # Currently supported values are aks and batch-account
 
-BATCH_ACCOUNT_NAME=${3:-${BATCH_ACCOUNT_NAME}}
-BATCH_ACCOUNT_RG_NAME=${4:-$BATCH_ACCOUNT_RG_NAME}
-BATCH_STORAGE_ACCOUNT_NAME=${5:-${BATCH_STORAGE_ACCOUNT_NAME}}
-KEY_VAULT_NAME=${6:-${KEY_VAULT_NAME}}
+AI_MODEL_INFRA_RESOURCE_NAME=${4:-$AI_MODEL_INFRA_RESOURCE_NAME}
+AI_MODEL_INFRA_RG_NAME=${5:-$AI_MODEL_INFRA_RG_NAME}
+AI_MODEL_INFRA_STORAGE_ACCOUNT_NAME=${6:-$AI_MODEL_INFRA_STORAGE_ACCOUNT_NAME}
 
-RAW_STORAGE_ACCOUNT_RG=${7:-${RAW_STORAGE_ACCOUNT_RG:-"${ENV_CODE}-data-rg"}}
-RAW_STORAGE_ACCOUNT_NAME=${8:-${RAW_STORAGE_ACCOUNT_NAME}}
+KEY_VAULT_NAME=${7:-$KEY_VAULT_NAME}
 
-SYNAPSE_WORKSPACE_RG=${9:-${SYNAPSE_WORKSPACE_RG:-"${ENV_CODE}-pipeline-rg"}}
-SYNAPSE_WORKSPACE_NAME=${10:-${SYNAPSE_WORKSPACE_NAME}}
-SYNAPSE_STORAGE_ACCOUNT_NAME=${11:-${SYNAPSE_STORAGE_ACCOUNT_NAME}}
-SYNAPSE_POOL=${12:-${SYNAPSE_POOL}}
+RAW_STORAGE_ACCOUNT_RG=${8:-${RAW_STORAGE_ACCOUNT_RG:-"${ENV_CODE}-data-rg"}}
+RAW_STORAGE_ACCOUNT_NAME=${9:-$RAW_STORAGE_ACCOUNT_NAME}
 
-DEPLOY_PGSQL=${13:-${DEPLOY_PGSQL:-"true"}}
+SYNAPSE_WORKSPACE_RG=${10:-${SYNAPSE_WORKSPACE_RG:-"${ENV_CODE}-pipeline-rg"}}
+SYNAPSE_WORKSPACE_NAME=${11:-$SYNAPSE_WORKSPACE_NAME}
+SYNAPSE_STORAGE_ACCOUNT_NAME=${12:-$SYNAPSE_STORAGE_ACCOUNT_NAME}
+SYNAPSE_POOL=${13:-$SYNAPSE_POOL}
+
+DEPLOY_PGSQL=${14:-${DEPLOY_PGSQL:-"true"}}
 
 MODE="batch-account$([[ $DEPLOY_PGSQL = "false" ]] && echo ",no-postgres" || echo '')"
 
 set -ex
 
-if [[ -z "$BATCH_ACCOUNT_NAME" ]] && [[ -z "$BATCH_ACCOUNT_RG_NAME" ]]; then
-    BATCH_ACCOUNT_RG_NAME="${ENV_CODE}-orc-rg"
+if [[ "$AI_MODEL_INFRA_TYPE" != "batch-account" ]] && [[ "$AI_MODEL_INFRA_TYPE" != "aks" ]]; then
+  echo "Invalid value for AI_MODEL_INFRA_TYPE! Supported values are 'aks' and 'batch-account'."
+  exit 1
 fi
-if [[ -z "$BATCH_ACCOUNT_NAME" ]]; then
-    BATCH_ACCOUNT_NAME=$(az batch account list --query "[?tags.type && tags.type == 'batch'].name" -o tsv -g $BATCH_ACCOUNT_RG_NAME)
-fi
-if [[ -z "$BATCH_ACCOUNT_RG_NAME" ]]; then
-    BATCH_ACCOUNT_ID=$(az batch account list --query "[?name == '${BATCH_ACCOUNT_NAME}'].id" -o tsv)
-    BATCH_ACCOUNT_RG_NAME=$(az resource show --ids ${BATCH_ACCOUNT_ID} --query resourceGroup -o tsv)
-fi
+
 if [[ -z "$RAW_STORAGE_ACCOUNT_NAME" ]]; then
     RAW_STORAGE_ACCOUNT_NAME=$(az storage account list --query "[?tags.store && tags.store == 'raw'].name" -o tsv -g $RAW_STORAGE_ACCOUNT_RG)
 fi
+
 if [[ -z "$SYNAPSE_STORAGE_ACCOUNT_NAME" ]]; then
     SYNAPSE_STORAGE_ACCOUNT_NAME=$(az storage account list --query "[?tags.store && tags.store == 'synapse'].name" -o tsv -g $SYNAPSE_WORKSPACE_RG)
 fi
-if [[ -z "$BATCH_STORAGE_ACCOUNT_NAME" ]]; then
-    BATCH_STORAGE_ACCOUNT_NAME=$(az storage account list --query "[?tags.store && tags.store == 'batch'].name" -o tsv -g $BATCH_ACCOUNT_RG_NAME)
-    if [[ -z "$BATCH_STORAGE_ACCOUNT_NAME" ]]; then
-        BATCH_STORAGE_ACCOUNT_NAME=$(az storage account list --resource-group $BATCH_ACCOUNT_RG_NAME --query [0].name -o tsv)
-    fi
-fi
-if [[ -z "$BATCH_ACCOUNT_LOCATION" ]]; then
-    BATCH_ACCOUNT_LOCATION=$(az batch account list --query "[?name == '${BATCH_ACCOUNT_NAME}'].location" -o tsv)
-fi
+
 if [[ -z "$KEY_VAULT_NAME" ]]; then
     KEY_VAULT_NAME=$(az keyvault list --query "[?tags.usage && tags.usage == 'linkedService'].name" -o tsv -g $SYNAPSE_WORKSPACE_RG)
 fi
+
 if [[ -z "$SYNAPSE_WORKSPACE_NAME" ]]; then
     SYNAPSE_WORKSPACE_NAME=$(az synapse workspace list --query "[?tags.workspaceId && tags.workspaceId == 'default'].name" -o tsv -g $SYNAPSE_WORKSPACE_RG)
     SYNAPSE_WORKSPACE_ID=$(az synapse workspace list --query "[?tags.workspaceId && tags.workspaceId == 'default'].id" -o tsv -g $SYNAPSE_WORKSPACE_RG)
 else
     SYNAPSE_WORKSPACE_ID=$(az synapse workspace list --query "[?name == '${BATCH_ACCOUNT_NAME}'].id" -o tsv -g $SYNAPSE_WORKSPACE_RG)
 fi
+
 if [[ -z "$SYNAPSE_POOL" ]]; then
     SYNAPSE_POOL=$(az synapse spark pool list --workspace-name $SYNAPSE_WORKSPACE_NAME --resource-group $SYNAPSE_WORKSPACE_RG --query "[?tags.poolId && tags.poolId == 'default'].name" -o tsv)
 fi
 
-echo 'Retrieved resource from Azure and ready to package'
-PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/package.py \
-    --raw_storage_account_name $RAW_STORAGE_ACCOUNT_NAME \
-    --synapse_storage_account_name $SYNAPSE_STORAGE_ACCOUNT_NAME \
-    --modes $MODE \
-    --batch_storage_account_name $BATCH_STORAGE_ACCOUNT_NAME \
-    --batch_account $BATCH_ACCOUNT_NAME \
-    --linked_key_vault $KEY_VAULT_NAME \
-    --synapse_pool_name $SYNAPSE_POOL \
-    --location $BATCH_ACCOUNT_LOCATION \
-    --pipeline_name $PIPELINE_NAME \
-    --synapse_workspace $SYNAPSE_WORKSPACE_NAME \
-    --synapse_workspace_id $SYNAPSE_WORKSPACE_ID"
+if [[ "$AI_MODEL_INFRA_TYPE" == "batch-account" ]]; then
+    echo "Selected AI model processing infra-type: Batch-Account!!!"
+
+    BATCH_ACCOUNT_NAME=$AI_MODEL_INFRA_RESOURCE_NAME
+    BATCH_ACCOUNT_RG_NAME=$AI_MODEL_INFRA_RG_NAME
+    BATCH_STORAGE_ACCOUNT_NAME=$AI_MODEL_INFRA_STORAGE_ACCOUNT_NAME
+
+    if [[ -z "$BATCH_ACCOUNT_NAME" ]] && [[ -z "$BATCH_ACCOUNT_RG_NAME" ]]; then
+        BATCH_ACCOUNT_RG_NAME="${ENV_CODE}-orc-rg"
+    fi
+    if [[ -z "$BATCH_ACCOUNT_NAME" ]]; then
+        BATCH_ACCOUNT_NAME=$(az batch account list --query "[?tags.type && tags.type == 'batch'].name" -o tsv -g $BATCH_ACCOUNT_RG_NAME)
+    fi
+    if [[ -z "$BATCH_ACCOUNT_RG_NAME" ]]; then
+        BATCH_ACCOUNT_ID=$(az batch account list --query "[?name == '${BATCH_ACCOUNT_NAME}'].id" -o tsv)
+        BATCH_ACCOUNT_RG_NAME=$(az resource show --ids ${BATCH_ACCOUNT_ID} --query resourceGroup -o tsv)
+    fi
+    if [[ -z "$BATCH_STORAGE_ACCOUNT_NAME" ]]; then
+        BATCH_STORAGE_ACCOUNT_NAME=$(az storage account list --query "[?tags.store && tags.store == 'batch'].name" -o tsv -g $BATCH_ACCOUNT_RG_NAME)
+        if [[ -z "$BATCH_STORAGE_ACCOUNT_NAME" ]]; then
+            BATCH_STORAGE_ACCOUNT_NAME=$(az storage account list --resource-group $BATCH_ACCOUNT_RG_NAME --query [0].name -o tsv)
+        fi
+    fi
+    if [[ -z "$BATCH_ACCOUNT_LOCATION" ]]; then
+        BATCH_ACCOUNT_LOCATION=$(az batch account list --query "[?name == '${BATCH_ACCOUNT_NAME}'].location" -o tsv)
+    fi
+
+    echo 'Retrieved resource from Azure and ready to package'
+    PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/package.py \
+        --raw_storage_account_name $RAW_STORAGE_ACCOUNT_NAME \
+        --synapse_storage_account_name $SYNAPSE_STORAGE_ACCOUNT_NAME \
+        --modes $MODE \
+        --batch_storage_account_name $BATCH_STORAGE_ACCOUNT_NAME \
+        --batch_account $BATCH_ACCOUNT_NAME \
+        --linked_key_vault $KEY_VAULT_NAME \
+        --synapse_pool_name $SYNAPSE_POOL \
+        --location $BATCH_ACCOUNT_LOCATION \
+        --pipeline_name $PIPELINE_NAME \
+        --synapse_workspace $SYNAPSE_WORKSPACE_NAME \
+        --synapse_workspace_id $SYNAPSE_WORKSPACE_ID"
+
+elif [[ "$AI_MODEL_INFRA_TYPE" == "aks" ]]; then
+    echo "Selected AI model processing infra-type: AKS!!!"
+fi
 
 if [[ $DEPLOY_PGSQL == "true" ]]; then
     DB_SERVER_NAME=$(az postgres server list --resource-group $RAW_STORAGE_ACCOUNT_RG --query '[].fullyQualifiedDomainName' -o tsv)
@@ -94,7 +117,6 @@ if [[ $DEPLOY_PGSQL == "true" ]]; then
             --pg_db_server_name $DB_SERVER_NAME)
     fi
 fi
-
 echo $PACKAGING_SCRIPT
 echo 'Starting packaging script ...'
 $PACKAGING_SCRIPT

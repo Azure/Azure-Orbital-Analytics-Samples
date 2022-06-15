@@ -7,8 +7,9 @@ ENV_CODE=${1:-${ENV_CODE}}
 LOCATION=${2:-${LOCATION}}
 PIPELINE_NAME=${3:-${PIPELINE_NAME}}
 ENV_TAG=${4:-${ENV_TAG}}
-PRE_PROVISIONED_BATCH_ACCOUNT_NAME=${5:-$PRE_PROVISIONED_BATCH_ACCOUNT_NAME}
-DEPLOY_PGSQL=${6:-${DEPLOY_PGSQL:-"true"}}
+PRE_PROVISIONED_AI_MODEL_INFRA_NAME=${5:-$PRE_PROVISIONED_AI_MODEL_INFRA_NAME}
+AI_MODEL_INFRA_TYPE=${6:-${AI_MODEL_INFRA_TYPE:-"batch-account"}} # Currently supported values are aks and batch-account
+DEPLOY_PGSQL=${7:-${DEPLOY_PGSQL:-"true"}}
 
 set -ex
 
@@ -24,37 +25,45 @@ if [[ -z "$LOCATION" ]]
     exit 1
 fi
 
-if [[ -z "$PRE_PROVISIONED_BATCH_ACCOUNT_NAME" ]]
+if [[ "$AI_MODEL_INFRA_TYPE" != "batch-account" ]] && [[ "$AI_MODEL_INFRA_TYPE" != "aks" ]]; then
+  echo "Invalid value for AI_MODEL_INFRA_TYPE! Supported values are 'aks' and 'batch-account'."
+  exit 1
+fi
+
+if [[ -z "$PRE_PROVISIONED_AI_MODEL_INFRA_NAME" ]]
   then
-    DEPLOY_BATCH_ACCOUNT="true"
+    DEPLOY_AI_MODEL_INFRA="true"
   else
-    DEPLOY_BATCH_ACCOUNT="false"
+    DEPLOY_AI_MODEL_INFRA="false"
 fi
 
 echo "Performing bicep template deployment"
 if [[ -z "$ENV_TAG" ]]
-    then
-        DEPLOY_BATCH_ACCOUNT=${DEPLOY_BATCH_ACCOUNT} \
-        DEPLOY_PGSQL=${DEPLOY_PGSQL} \
-          ./deploy/install.sh "$ENV_CODE" "$LOCATION" 
-    else
-        DEPLOY_BATCH_ACCOUNT=${DEPLOY_BATCH_ACCOUNT} \
-        DEPLOY_PGSQL=${DEPLOY_PGSQL} \
-          ./deploy/install.sh "$ENV_CODE" "$LOCATION" "$ENV_TAG"
+  then
+    DEPLOY_PGSQL=${DEPLOY_PGSQL} \
+    DEPLOY_AI_MODEL_INFRA=${DEPLOY_AI_MODEL_INFRA} \
+    AI_MODEL_INFRA_TYPE=${AI_MODEL_INFRA_TYPE} \
+      ./deploy/install.sh "$ENV_CODE" "$LOCATION" 
+  else
+    DEPLOY_PGSQL=${DEPLOY_PGSQL} \
+    DEPLOY_AI_MODEL_INFRA=${DEPLOY_AI_MODEL_INFRA} \
+    AI_MODEL_INFRA_TYPE=${AI_MODEL_INFRA_TYPE} \
+      ./deploy/install.sh "$ENV_CODE" "$LOCATION" "$ENV_TAG"
 fi
 
-if [[ "$DEPLOY_BATCH_ACCOUNT" == "false" ]]; then
+if [[ "${DEPLOY_AI_MODEL_INFRA}" == "false" ]] && [[ "${AI_MODEL_INFRA_TYPE}" == "batch-account" ]]; then
   echo "Setting up the batch account!!!"
   ./test/use-pre-provisioned-batch-account.sh \
     "$ENV_CODE" \
-    "$PRE_PROVISIONED_BATCH_ACCOUNT_NAME" \
+    "$PRE_PROVISIONED_AI_MODEL_INFRA_NAME" \
     "$PIPELINE_NAME"
 fi
 
 echo "Performing configuration"
 ./deploy/configure.sh \
   "$ENV_CODE" \
-  "$PRE_PROVISIONED_BATCH_ACCOUNT_NAME"
+  "$AI_MODEL_INFRA_TYPE" \
+  "$PRE_PROVISIONED_AI_MODEL_INFRA_NAME" 
 
 if [[ -z "$PIPELINE_NAME" ]]
   then
@@ -65,5 +74,6 @@ if [[ -z "$PIPELINE_NAME" ]]
       ./deploy/package.sh \
       "$ENV_CODE" \
       "$PIPELINE_NAME" \
-      "$PRE_PROVISIONED_BATCH_ACCOUNT_NAME"
+      "$AI_MODEL_INFRA_TYPE" \
+      "$PRE_PROVISIONED_AI_MODEL_INFRA_NAME"
 fi
