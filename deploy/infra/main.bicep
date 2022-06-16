@@ -32,6 +32,9 @@ param orchestrationModulePrefix string = 'orc'
 @description('Specify whether or not to deploy batch account')
 param deployBatchAccount bool = true
 
+@description('Specify whether or not to deploy PostgreSQL')
+param deployPgSQL bool = true
+
 @description('Postgres DB administrator login password')
 @secure()
 param postgresAdminLoginPass string
@@ -138,6 +141,7 @@ module dataModule 'groups/data.bicep' = {
     synapseMIPrincipalId: pipelineModule.outputs.synapseMIPrincipalId
     pipelineResourceGroupName: pipelineResourceGroup.name
     pipelineLinkedSvcKeyVaultName: '${environmentCode}-${pipelineModulePrefix}-kv'
+    deployPgSQL: deployPgSQL
     postgresAdminLoginPass: postgresAdminLoginPass
   }
   dependsOn: [

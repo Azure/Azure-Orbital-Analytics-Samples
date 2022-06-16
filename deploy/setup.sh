@@ -8,7 +8,7 @@ LOCATION=${2:-${LOCATION}}
 PIPELINE_NAME=${3:-${PIPELINE_NAME}}
 ENV_TAG=${4:-${ENV_TAG}}
 PRE_PROVISIONED_BATCH_ACCOUNT_NAME=${5:-$PRE_PROVISIONED_BATCH_ACCOUNT_NAME}
-
+DEPLOY_PGSQL=${6:-${DEPLOY_PGSQL:-"true"}}
 
 set -ex
 
@@ -35,9 +35,11 @@ echo "Performing bicep template deployment"
 if [[ -z "$ENV_TAG" ]]
     then
         DEPLOY_BATCH_ACCOUNT=${DEPLOY_BATCH_ACCOUNT} \
+        DEPLOY_PGSQL=${DEPLOY_PGSQL} \
           ./deploy/install.sh "$ENV_CODE" "$LOCATION" 
     else
         DEPLOY_BATCH_ACCOUNT=${DEPLOY_BATCH_ACCOUNT} \
+        DEPLOY_PGSQL=${DEPLOY_PGSQL} \
           ./deploy/install.sh "$ENV_CODE" "$LOCATION" "$ENV_TAG"
 fi
 
@@ -59,7 +61,8 @@ if [[ -z "$PIPELINE_NAME" ]]
     echo "Skipping pipeline packaging"
   else
     echo "Performing pipeline packaging"
-    ./deploy/package.sh \
+    DEPLOY_PGSQL=${DEPLOY_PGSQL} \
+      ./deploy/package.sh \
       "$ENV_CODE" \
       "$PIPELINE_NAME" \
       "$PRE_PROVISIONED_BATCH_ACCOUNT_NAME"

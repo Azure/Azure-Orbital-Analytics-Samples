@@ -19,8 +19,8 @@ parser.add_argument('--batch_account', type=str, required=True, help="Batch Acco
 parser.add_argument('--linked_key_vault', type=str, required=True, help="Key Vault to be added as Linked Service")
 parser.add_argument('--location', type=str, required=True, help="Batch Account Location")
 parser.add_argument('--pipeline_name', type=str, required=True, help="Name of the pipeline to package")
-parser.add_argument('--pg_db_username', type=str, required=True, help="Username to login to postgres db")
-parser.add_argument('--pg_db_server_name', type=str, required=True, help="Server name to login to postgres db")
+parser.add_argument('--pg_db_username', type=str, required=False, help="Username to login to postgres db", default='')
+parser.add_argument('--pg_db_server_name', type=str, required=False, help="Server name to login to postgres db", default='')
 
 #Parse Args
 args = parser.parse_args()
