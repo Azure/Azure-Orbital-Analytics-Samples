@@ -46,7 +46,8 @@ param synapseMIStorageAccountRoles array = [
 ]
 param synapseMIPrincipalId string = ''
 
-// Name parameters for Postgres
+// Parameters for Postgres
+param deployPgSQL bool = true
 param serverName string = ''
 param administratorLogin string = ''
 param postgresAdminLoginPass string = '' 
@@ -147,7 +148,7 @@ module synapseIdentityForStorageAccess '../modules/storage-role-assignment.bicep
   ]
 }]
 
-module postgresqlServer '../modules/postgres.single.svc.bicep' = {
+module postgresqlServer '../modules/postgres.single.svc.bicep' = if(deployPgSQL) {
   name: '${namingPrefix}-postgres'
   params: {
     location: location
@@ -165,11 +166,11 @@ module postgresqlServer '../modules/postgres.single.svc.bicep' = {
   }
 }
 
-resource postgresql_server_resource 'Microsoft.DBforPostgreSQL/servers@2017-12-01' existing = {
+resource postgresql_server_resource 'Microsoft.DBforPostgreSQL/servers@2017-12-01' existing = if(deployPgSQL) {
   name: serverNameVar
 }
 
-resource azurerm_postgresql_firewall_rule 'Microsoft.DBforPostgreSQL/servers/firewallRules@2017-12-01' = {
+resource azurerm_postgresql_firewall_rule 'Microsoft.DBforPostgreSQL/servers/firewallRules@2017-12-01' = if(deployPgSQL) {
   name: 'AllowAccessToAzureServices'
   parent: postgresql_server_resource
   properties: {
@@ -188,7 +189,7 @@ module dataUami '../modules/managed.identity.user.bicep' = {
     uamiName: uamiNameVar
   }
 }
-module pgAdministratorLoginPassword '../modules/akv.secrets.bicep' = {
+module pgAdministratorLoginPassword '../modules/akv.secrets.bicep' = if(deployPgSQL) {
   name: 'pg-admin-login-pass-${utcValue}'
   scope: resourceGroup(pipelineResourceGroupName)
   params: {
@@ -202,16 +203,16 @@ module pgAdministratorLoginPassword '../modules/akv.secrets.bicep' = {
   ]
 }
 
-module createContainerForTableCreation '../modules/aci.bicep' = {
+module createContainerForTableCreation '../modules/aci.bicep' = if(deployPgSQL) {
   name: '${namingPrefix}-container-for-db-table-creation'
   params: {
     name: '${namingPrefix}-container'
     userManagedIdentityId: dataUami.outputs.uamiId
     userManagedIdentityPrincipalId: dataUami.outputs.uamiPrincipalId
     location: location
-    server: postgresqlServer.outputs.pgServerName
-    username: postgresqlServer.outputs.pgUserName
-    dbPassword: postgresAdminLoginPassVar
+    server: deployPgSQL?postgresqlServer.outputs.pgServerName:''
+    username: deployPgSQL?postgresqlServer.outputs.pgUserName:''
+    dbPassword: deployPgSQL?postgresAdminLoginPassVar:''
   }
   dependsOn: [
     postgresqlServer
@@ -220,7 +221,7 @@ module createContainerForTableCreation '../modules/aci.bicep' = {
   ]
 }
 
-module deleteContainerForTableCreation '../modules/aci.delete.bicep' = {
+module deleteContainerForTableCreation '../modules/aci.delete.bicep' = if(deployPgSQL) {
   name: 'deleteContainerForTableCreation'
   params: {
     location: location
