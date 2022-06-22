@@ -13,7 +13,7 @@ ENV_CODE=${1:-${ENV_CODE}}
 
 if [[ -z ${ENV_CODE} ]]
   then
-    echo "Missing Environent Code"
+    echo "Missing Environment Code"
     exit 1
 fi
 
