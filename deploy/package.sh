@@ -8,6 +8,8 @@ PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/..; pwd)"
 ENV_CODE=${1:-${ENV_CODE}}
 PIPELINE_NAME=${2:-${PIPELINE_NAME}}
 
+AI_MODEL_INFRA_TYPE=${3:-${AI_MODEL_INFRA_TYPE:-"batch-account"}} # Currently supported values are aks and batch-account
+
 BATCH_ACCOUNT_NAME=${3:-${BATCH_ACCOUNT_NAME}}
 BATCH_ACCOUNT_RG_NAME=${4:-$BATCH_ACCOUNT_RG_NAME}
 BATCH_STORAGE_ACCOUNT_NAME=${5:-${BATCH_STORAGE_ACCOUNT_NAME}}
@@ -25,6 +27,10 @@ DEPLOY_PGSQL=${13:-${DEPLOY_PGSQL:-"true"}}
 
 set -ex
 
+if [[ "$AI_MODEL_INFRA_TYPE" != "batch-account" ]] && [[ "$AI_MODEL_INFRA_TYPE" != "aks" ]]; then
+  echo "Invalid value for AI_MODEL_INFRA_TYPE! Supported values are 'aks' and 'batch-account'."
+  exit 1
+fi
 
 if [[ -z "$BATCH_ACCOUNT_NAME" ]] && [[ -z "$BATCH_ACCOUNT_RG_NAME" ]]; then
     BATCH_ACCOUNT_RG_NAME="${ENV_CODE}-orc-rg"
@@ -64,10 +70,14 @@ if [[ -z "$SYNAPSE_POOL" ]]; then
     SYNAPSE_POOL=$(az synapse spark pool list --workspace-name $SYNAPSE_WORKSPACE_NAME --resource-group $SYNAPSE_WORKSPACE_RG --query "[?tags.poolId && tags.poolId == 'default'].name" -o tsv)
 fi
 
+
+MODE="${AI_MODEL_INFRA_TYPE}$([[ $DEPLOY_PGSQL = "true" ]] && echo ",postgres")"
+
 echo 'Retrieved resource from Azure and ready to package'
 PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/package.py \
     --raw_storage_account_name $RAW_STORAGE_ACCOUNT_NAME \
     --synapse_storage_account_name $SYNAPSE_STORAGE_ACCOUNT_NAME \
+    --modes $MODE \
     --batch_storage_account_name $BATCH_STORAGE_ACCOUNT_NAME \
     --batch_account $BATCH_ACCOUNT_NAME \
     --linked_key_vault $KEY_VAULT_NAME \

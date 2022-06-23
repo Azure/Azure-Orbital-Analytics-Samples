@@ -5,10 +5,14 @@ import os
 import re
 import argparse
 import shutil
-
+import json
+from pathlib import Path
 
 # Collect args
 parser = argparse.ArgumentParser(description='Arguments required to run packaging function')
+parser.add_argument('--modes',
+    type=str, required=False, default='batch-account',
+    help='Type of model run host either batch-account or aks')
 parser.add_argument('--raw_storage_account_name', type=str, required=True, help='Name of the Raw data hosting Storage Account')
 parser.add_argument('--synapse_storage_account_name', type=str, required=True, help='Name of the Raw data hosting Storage Account')
 parser.add_argument('--synapse_pool_name', type=str, required=True, help='Name of the Synapse pool in the Synapse workspace to use as default')
@@ -25,6 +29,7 @@ parser.add_argument('--pg_db_server_name', type=str, required=False, help="Serve
 #Parse Args
 args = parser.parse_args()
 
+
 def replace(tokens_map: dict, body: str):
 
     # use regex to identify tokens in the files. Token are in the format __token_name__
@@ -39,11 +44,11 @@ def replace(tokens_map: dict, body: str):
     
     return result
 
-def package(pipeline_name: str, tokens_map: dict):
+def package(pipeline_name: str, tokens_map: dict, modes='batch-account'):
 
     script_dirname = os.path.dirname(__file__)
     src_folder_path = os.path.join(script_dirname, '..', 'src', 'workflow', pipeline_name)
-    package_folder_path= os.path.join(os.getcwd(), 'pipeline_name')
+    package_folder_path= os.path.join(os.getcwd(), pipeline_name)
 
     # mode
     mode = 0o766
@@ -56,6 +61,54 @@ def package(pipeline_name: str, tokens_map: dict):
     # tokens with values
     shutil.copytree(src_folder_path, package_folder_path)
 
+    # read wlorkflow package manefiest file and execute manifest
+    if os.path.exists(package_folder_path + "/.package"):
+        package_manifest_folder = os.path.join(package_folder_path, ".package")
+        with open(os.path.join(package_manifest_folder, "manifest.json"), 'r') as jf:
+            package_manifest = json.load(jf)
+            manifest = package_manifest['modes']
+            for mode in modes.split(","):
+                package_manifest = manifest.get(mode)
+                if package_manifest is not None:
+                    for instruction in package_manifest:
+                        if instruction == 'exclude':
+                            for drop in package_manifest['exclude']:
+                                drop_path = os.path.join(package_manifest_folder, drop)
+                                if os.path.exists(drop_path):
+                                    os.remove(drop_path)
+                        if instruction == 'rename':
+                            for src, dest in package_manifest['rename'].items():
+                                shutil.move(
+                                    os.path.join(package_manifest_folder, src),
+                                    os.path.join(package_manifest_folder, dest))
+                        if instruction == 'removePropertyAtPath':
+                            for fileToModify in package_manifest['removePropertyAtPath']:
+                                
+                                if os.path.exists(os.path.join(os.getcwd(), pipeline_name, fileToModify['file'])):
+                                    file = open(os.path.join(os.getcwd(), pipeline_name, fileToModify['file']), 'r')
+                                    data = json.load(file)
+                                    paths = fileToModify['property']
+                                    propertyPath = ''
+
+                                    for path in paths.split('.'):
+                                        try:
+                                            path = int(path)
+                                        except Exception as ex:
+                                            pass
+                                        if type(path) == int:
+                                            propertyPath = f'%s[%s]' % (propertyPath,path)    
+                                        else:
+                                            propertyPath = f'%s[\'%s\']' % (propertyPath,path)
+                                
+                                    exec('del data%s' % propertyPath)
+                                    file = open(os.path.join(os.getcwd(), pipeline_name, fileToModify['file']), 'w')
+                                    json.dump(data, file, indent=10)
+
+
+        
+        # finally clean up .package folder before zipping it
+        shutil.rmtree(package_folder_path + "/.package")
+    
     # set of folder names are fixed for synapse pipelines and hence hardcoding them
     for folder in ['linkedService', 'sparkJobDefinition', 'pipeline', 'bigDataPool', 'notebook']:
 
@@ -104,4 +157,4 @@ if __name__ == "__main__":
     }
 
     # invoke package method
-    package(args.pipeline_name, tokens_map)
+    package(args.pipeline_name, tokens_map, args.modes)
