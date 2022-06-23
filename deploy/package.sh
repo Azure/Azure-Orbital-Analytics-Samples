@@ -8,8 +8,6 @@ PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/..; pwd)"
 ENV_CODE=${1:-${ENV_CODE}}
 PIPELINE_NAME=${2:-${PIPELINE_NAME}}
 
-AI_MODEL_INFRA_TYPE=${3:-${AI_MODEL_INFRA_TYPE:-"batch-account"}} # Currently supported values are aks and batch-account
-
 BATCH_ACCOUNT_NAME=${3:-${BATCH_ACCOUNT_NAME}}
 BATCH_ACCOUNT_RG_NAME=${4:-$BATCH_ACCOUNT_RG_NAME}
 BATCH_STORAGE_ACCOUNT_NAME=${5:-${BATCH_STORAGE_ACCOUNT_NAME}}
@@ -27,10 +25,6 @@ DEPLOY_PGSQL=${13:-${DEPLOY_PGSQL:-"true"}}
 
 set -ex
 
-if [[ "$AI_MODEL_INFRA_TYPE" != "batch-account" ]] && [[ "$AI_MODEL_INFRA_TYPE" != "aks" ]]; then
-  echo "Invalid value for AI_MODEL_INFRA_TYPE! Supported values are 'aks' and 'batch-account'."
-  exit 1
-fi
 
 if [[ -z "$BATCH_ACCOUNT_NAME" ]] && [[ -z "$BATCH_ACCOUNT_RG_NAME" ]]; then
     BATCH_ACCOUNT_RG_NAME="${ENV_CODE}-orc-rg"
@@ -71,7 +65,7 @@ if [[ -z "$SYNAPSE_POOL" ]]; then
 fi
 
 
-MODE="${AI_MODEL_INFRA_TYPE}$([[ $DEPLOY_PGSQL = "false" ]] && echo ",no-postgres")"
+MODE="$([[ $DEPLOY_PGSQL = "false" ]] && echo "no-postgres")"
 
 echo 'Retrieved resource from Azure and ready to package'
 PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/package.py \
