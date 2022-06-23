@@ -11,7 +11,7 @@ from pathlib import Path
 # Collect args
 parser = argparse.ArgumentParser(description='Arguments required to run packaging function')
 parser.add_argument('--modes',
-    type=str, required=False, default='batch-account',
+    type=str, required=True, default='batch-account',
     help='Type of model run host either batch-account or aks')
 parser.add_argument('--raw_storage_account_name', type=str, required=True, help='Name of the Raw data hosting Storage Account')
 parser.add_argument('--synapse_storage_account_name', type=str, required=True, help='Name of the Raw data hosting Storage Account')
