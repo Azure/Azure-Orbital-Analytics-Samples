@@ -71,7 +71,7 @@ if [[ -z "$SYNAPSE_POOL" ]]; then
 fi
 
 
-MODE="${AI_MODEL_INFRA_TYPE}$([[ $DEPLOY_PGSQL = "true" ]] && echo ",no-postgres")"
+MODE="${AI_MODEL_INFRA_TYPE}$([[ $DEPLOY_PGSQL = "false" ]] && echo ",no-postgres")"
 
 echo 'Retrieved resource from Azure and ready to package'
 PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/package.py \
