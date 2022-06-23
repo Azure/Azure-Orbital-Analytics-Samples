@@ -23,7 +23,6 @@ pr:
     - '*.md'
     - docs
     - deploy/README.md
-    - azure-pipelines
 
 trigger:
   batch: true
@@ -35,7 +34,6 @@ trigger:
     - '*.md'
     - docs
     - deploy/README.md
-    - azure-pipelines
 
 pool:
   vmImage: ubuntu-latest
@@ -51,6 +49,7 @@ jobs:
       scriptLocation: inlineScript
       inlineScript: |
         set -ex
+        echo This is a sample test!!!
         az vm list --output table
         echo Test ran successfully!!!
       addSpnToEnvironment: true
