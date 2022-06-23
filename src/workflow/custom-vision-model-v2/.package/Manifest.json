@@ -17,7 +17,7 @@
                 "../pipeline/E2E Custom Vision Model Flow_aks.json": "../pipeline/E2E Custom Vision Model Flow.json"
             }
         },
-        "postgres": {
+        "no-postgres": {
             "removePropertyAtPath" : [ {
                 "file": "pipeline/E2E Custom Vision Model Flow.json",
                 "property": "properties.activities.2"
