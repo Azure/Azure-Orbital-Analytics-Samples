@@ -130,3 +130,6 @@ dmypy.json
 
 # Packaged zip
 *.zip
+
+# Mac 
+.DS_Store
