@@ -24,6 +24,8 @@ SYNAPSE_POOL=${12:-${SYNAPSE_POOL}}
 
 DEPLOY_PGSQL=${13:-${DEPLOY_PGSQL:-"true"}}
 
+MODE="batch-account$([[ $DEPLOY_PGSQL = "false" ]] && echo ",no-postgres")"
+
 set -ex
 
 if [[ -z "$BATCH_ACCOUNT_NAME" ]] && [[ -z "$BATCH_ACCOUNT_RG_NAME" ]]; then
@@ -63,9 +65,6 @@ fi
 if [[ -z "$SYNAPSE_POOL" ]]; then
     SYNAPSE_POOL=$(az synapse spark pool list --workspace-name $SYNAPSE_WORKSPACE_NAME --resource-group $SYNAPSE_WORKSPACE_RG --query "[?tags.poolId && tags.poolId == 'default'].name" -o tsv)
 fi
-
-
-MODE="batch-account$([[ $DEPLOY_PGSQL = "false" ]] && echo ",no-postgres")"
 
 echo 'Retrieved resource from Azure and ready to package'
 PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/package.py \
