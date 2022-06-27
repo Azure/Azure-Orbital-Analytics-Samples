@@ -91,4 +91,4 @@ jobs:
       inlineScript: |
         set -e
         # Cleanup the resources
-        echo $(System.DefaultWorkingDirectory)/deploy/cleanup.sh ${ENV_CODE} ${CI_BATCH_ACCOUNT_NAME}
+        $(System.DefaultWorkingDirectory)/deploy/cleanup.sh ${ENV_CODE} ${CI_BATCH_ACCOUNT_NAME}
