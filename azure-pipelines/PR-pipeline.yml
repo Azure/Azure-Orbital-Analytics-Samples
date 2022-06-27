@@ -44,13 +44,51 @@ jobs:
   timeoutInMinutes: 300
   steps:
   - task: AzureCLI@1
+    name: DeployAndTest
     inputs:
       azureSubscription: '$(serviceConnectionToAzure)'
       scriptLocation: inlineScript
       inlineScript: |
-        set -ex
-        echo This is a sample test!!!
-        az vm list --output table
-        echo Test ran successfully!!!
+        set -e
+        export KEYVAULT_NAME=${{ parameters.KEYVAULT_NAME }}
+        export AAD_GROUP_PRINCIPAL_ID="$(az keyvault secret show --vault ${KEYVAULT_NAME} --name AAD-GROUP-PRINCIPAL-ID --query value -o tsv)"
+        export CI_BATCH_ACCOUNT_NAME="$(az keyvault secret show --vault ${KEYVAULT_NAME} --name CI-BATCH-ACCOUNT-NAME --query value -o tsv)"
+        export CI_STORAGE_ACCOUNT_NAME="$(az keyvault secret show --vault ${KEYVAULT_NAME} --name CI-STORAGE-ACCOUNT --query value -o tsv)"
+        MD5_OUTPUT="$(echo $(date +%s) | md5sum | awk '{print $1}')"
+        ENV_CODE=$(echo pr${MD5_OUTPUT:0:7})
+        echo "##vso[task.setvariable variable=environment_code;isOutput=true]${ENV_CODE}"
+        echo "##vso[task.setvariable variable=batch_account_name;isOutput=true]${CI_BATCH_ACCOUNT_NAME}"
+        chars='@#$%&_+='
+        export POSTGRES_ADMIN_LOGIN_PASS=$({ </dev/urandom LC_ALL=C grep -ao '[A-Za-z0-9]' | head -n$((RANDOM % 8 + 9)); echo ${chars:$((RANDOM % ${#chars})):1}; } | shuf | tr -d '\n')
+
+        # Setup the infrastructure for testing the pipeline
+        $(System.DefaultWorkingDirectory)/deploy/setup.sh ${ENV_CODE} eastus custom-vision-model-v2 ${ENV_CODE}-environment ${CI_BATCH_ACCOUNT_NAME}
+
+        # Grant access on Synapse workspace to resource owner azure account
+        echo "Granting access to resource owner azure account on synapse workspace ${ENV_CODE}-pipeline-syn-ws"
+        az synapse role assignment create --workspace-name ${ENV_CODE}-pipeline-syn-ws --role "Synapse Administrator" --assignee $(az account show --query 'user.name' -o tsv)
+        # Granting access on Synapse workspace for AAD group
+        echo "Granting access to the AAD group on synapse workspace ${ENV_CODE}-pipeline-syn-ws"
+        az synapse role assignment create --workspace-name ${ENV_CODE}-pipeline-syn-ws --role "Synapse Administrator" --assignee ${AAD_GROUP_PRINCIPAL_ID}
+
+        # Setup and Run Tests
+        BATCH_ACCOUNT_NAME=${CI_BATCH_ACCOUNT_NAME} SOURCE_STORAGE_ACCOUNT_NAME=${CI_STORAGE_ACCOUNT_NAME} $(System.DefaultWorkingDirectory)/test/deploy-prepare-and-test-pipeline.sh ${ENV_CODE}
       addSpnToEnvironment: true
       useGlobalConfig: true 
+- job: CleanupInfrastructure
+  displayName: "Cleanup Azure Infrastructure"
+  dependsOn: RunE2ETest
+  condition: always()
+  variables:
+      ENV_CODE: $[ dependencies.RunE2ETest.outputs['DeployAndTest.environment_code'] ]
+      CI_BATCH_ACCOUNT_NAME: $[ dependencies.RunE2ETest.outputs['DeployAndTest.batch_account_name'] ]
+  timeoutInMinutes: 300
+  steps:
+  - task: AzureCLI@1
+    inputs:
+      azureSubscription: '$(serviceConnectionToAzure)'
+      scriptLocation: inlineScript
+      inlineScript: |
+        set -e
+        # Cleanup the resources
+        echo $(System.DefaultWorkingDirectory)/deploy/cleanup.sh ${ENV_CODE} ${CI_BATCH_ACCOUNT_NAME}
