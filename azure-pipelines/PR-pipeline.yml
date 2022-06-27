@@ -1,0 +1,56 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
+
+name: $(Date:yyyyMMdd)$(Rev:.r)
+parameters:
+  - name: KEYVAULT_NAME
+    displayName: Keyvault Name
+    type: string
+    default: cipipelineresources
+
+variables:
+  - name: serviceConnectionToAzure
+    value: 'github-az-creds'
+
+pr:
+  branches:
+    include:
+      - main
+      - releases/*
+  paths:
+    exclude:
+    - '*.md'
+    - docs
+    - deploy/README.md
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - '*'
+  paths:
+    exclude:
+    - '*.md'
+    - docs
+    - deploy/README.md
+
+pool:
+  vmImage: ubuntu-latest
+
+jobs:
+- job: RunE2ETest
+  displayName: "Deploy Infrastructure and run Synapse Pipeline"
+  timeoutInMinutes: 300
+  steps:
+  - task: AzureCLI@1
+    inputs:
+      azureSubscription: '$(serviceConnectionToAzure)'
+      scriptLocation: inlineScript
+      inlineScript: |
+        set -ex
+        echo This is a sample test!!!
+        az vm list --output table
+        echo Test ran successfully!!!
+      addSpnToEnvironment: true
+      useGlobalConfig: true 
