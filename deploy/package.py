@@ -61,7 +61,7 @@ def package(pipeline_name: str, tokens_map: dict, modes='batch-account'):
     # tokens with values
     shutil.copytree(src_folder_path, package_folder_path)
 
-    # read wlorkflow package manefiest file and execute manifest
+    # read workflow package manifest file and execute manifest
     if os.path.exists(package_folder_path + "/.package"):
         package_manifest_folder = os.path.join(package_folder_path, ".package")
         with open(os.path.join(package_manifest_folder, "manifest.json"), 'r') as jf:
