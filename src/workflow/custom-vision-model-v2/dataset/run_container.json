@@ -1,0 +1,32 @@
+{
+    "name": "run_container",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "AOI Geospatial v2",
+            "type": "LinkedServiceReference"
+        },
+        "parameters": {
+            "container_name": {
+                "type": "string"
+            },
+            "folder_path": {
+                "type": "string"
+            }
+        },
+        "annotations": [],
+        "type": "Binary",
+        "typeProperties": {
+            "location": {
+                "type": "AzureBlobFSLocation",
+                "folderPath": {
+                    "value": "@dataset().folder_path",
+                    "type": "Expression"
+                },
+                "fileSystem": {
+                    "value": "@dataset().container_name",
+                    "type": "Expression"
+                }
+            }
+        }
+    }
+}
