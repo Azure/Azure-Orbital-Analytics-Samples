@@ -12,6 +12,8 @@ parameters:
 variables:
   - name: serviceConnectionToAzure
     value: 'github-az-creds'
+  - name: DisableDockerDetector # To disable public docker image checking
+    value: true
 
 pr:
   branches:
