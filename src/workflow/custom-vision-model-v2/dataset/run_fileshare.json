@@ -1,0 +1,25 @@
+{
+    "name": "run_fileshare",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "AOI Geospatial v2 FS",
+            "type": "LinkedServiceReference"
+        },
+        "parameters": {
+            "folder_path": {
+                "type": "string"
+            }
+        },
+        "annotations": [],
+        "type": "Binary",
+        "typeProperties": {
+            "location": {
+                "type": "AzureFileStorageLocation",
+                "folderPath": {
+                    "value": "@dataset().folder_path",
+                    "type": "Expression"
+                }
+            }
+        }
+    }
+}
