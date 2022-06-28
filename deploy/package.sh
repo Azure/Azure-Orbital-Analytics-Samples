@@ -26,7 +26,7 @@ SYNAPSE_POOL=${13:-$SYNAPSE_POOL}
 
 DEPLOY_PGSQL=${14:-${DEPLOY_PGSQL:-"true"}}
 
-MODE="batch-account$([[ $DEPLOY_PGSQL = "false" ]] && echo ",no-postgres" || echo '')"
+MODE="$AI_MODEL_INFRA_TYPE$([[ $DEPLOY_PGSQL = "false" ]] && echo ",no-postgres" || echo '')"
 
 set -ex
 
