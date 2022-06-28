@@ -48,14 +48,23 @@ Steps 2 through 4 can instead be deployed using a single script below:
 ./deploy/setup.sh <environmentCode> <location> <pipelineName> <envTag>
 
 ```
+or
+
+```bash
+./deploy/setup.sh <environmentCode> <location> <pipelineName> <envTag> <preprovisionedBatchAccountName> <deployPgsql>
+
+```
+
 If you like to package other pipelines or re-package an updated/modified pipeline, follow the instructions under `Packaging the Synapse pipeline` section. The script mentioned in that section can be rerun multiple times.
 
-Arguments | Required | Sample value
-----------|-----------|-------
-environmentCode | yes | aoi
-location | yes | westus
-pipelineName | no | Allowed values: custom-vision-model, custom-vision-model-v2
-envTag | no | synapse\-\<environmentCode\>
+Arguments | Required | Type | Sample value
+----------|-----------|-------|-------
+environmentCode | yes | string | aoi
+location | yes | string | westus
+pipelineName | no | string | Allowed values: custom-vision-model, custom-vision-model-v2
+envTag | no | string | synapse\-\<environmentCode\>
+preprovisionedBatchAccountName | no | string | aoibatchaccount
+deployPgsql | no | boolean | false
 
 **Note**: If you do not pass the optional pipelineName paramter value, no zip file will be generated. You may however run the `package.sh` script to generate a zip file after running the `setup.sh` script to generate the zip file.
 
@@ -85,6 +94,13 @@ To install infrastructure execute install.sh script as follows
 
 ```
 
+or 
+
+```bash
+./deploy/install.sh <environmentCode> <location> <envTag> <deploymentName> <deployBatchAccount> <deployPgsql>
+
+```
+
 You will be prompted to enter in a password for postgres. If left empty, an auto generated password will be created and stored in the keyvault. The password requirements are listed below:
 - Between 8 characters and 128 characters
 - Must contain characters from three of the following categories – English uppercase letters, English lowercase letters, numbers (0-9), and non-alphanumeric characters (!, $, #, %, etc.). 
@@ -92,17 +108,26 @@ You will be prompted to enter in a password for postgres. If left empty, an auto
 
 Default values for the parameters are provided in the script itself.
 
-Arguments | Required | Sample value
-----------|-----------|-------
-environmentCode | yes | aoi
-location | yes | westus
-envTag | no | synapse\-\<environmentCode\>
+Arguments | Required | Type | Sample value
+----------|-----------|-------|------------
+environmentCode | yes | string | aoi
+location | yes | string |westus
+envTag | no | string | synapse\-\<environmentCode\>
+deploymentName | no | string | aoi-deploy
+deployBatchAccount | no | boolean | false
+deployPgsql | no | boolean | false
 
 
 For eg.
 
 ```bash
 ./deploy/install.sh aoi westus demo
+```
+
+or 
+
+```bash
+./deploy/install.sh aoi westus demo aoi-deploy false false
 ```
 
 Users can also use bicep template directly instead of using the script `install.sh`
@@ -128,6 +153,24 @@ Next step is to configure your resources and set them up with the required depen
 ```bash
 ./deploy/configure.sh <environmentCode>
 ```
+or
+
+```bash
+./deploy/configure.sh <environmentCode> <batchAccountName> <batchAccountRG> <batchAccountKey> <batchAccountPoolName> <synapseWorkspaceRG> <synapseWorkspace> <synapsePool> <synapseStorageAccount>
+```
+
+Arguments | Required | Type | Sample value
+----------|-----------|-------|-------------
+environmentCode | yes | string | aoi
+batchAccountName | no | string | aoibatchaccount
+batchAccountRG | no | string | aoibatchaccountrg
+batchAccountKey | no | string | 2kfdof824lre-03k...d8kj4899==
+batchAccountPoolName | no | string | aoibatchaccountpool
+synapseWorkspaceRG | no | string | aoisynapseworkspacerg
+synapseWorkspace | no | string | aoisynapseworksapce
+synapsePool | no | string | synapsepoolname
+synapseStorageAccount | no | string | synrawdatastorage
+
 
 ## Packaging the Synapse Pipeline
 
@@ -138,6 +181,27 @@ To package the Synapse pipeline, run the `package.sh` script by following the sy
 ```bash
 ./deploy/package.sh <environmentCode> <pipelineName>
 ```
+or
+
+```bash
+./deploy/package.sh <environmentCode> <pipelineName> <batchAccountName> <batchAccountRG> <batchAccountStorageAccountName> <keyVaultName> <rawStorageAccountRG> <rawStorageAccountName> <synapseWorkspaceRG> <synapseWorkspace> <synapseStorageAccount> <synapsePool> <deployPgsql>
+```
+
+Arguments | Required | Type | Sample value
+----------|-----------|-------|---------------
+environmentCode | yes | string | aoi
+pipelineName | yes | string | Allowed Values: custom-vision-model, custom-vision-model-v2
+batchAccountName | no | string | aoibatchaccount
+batchAccountRG | no | string | aoibatchaccountrg
+batchAccountStorageAccountName | no | string | aoibatchstorageaccount
+keyVaultName | no | string | aoiKeyVault
+rawStorageAccountRG | no | string | aoi-data-rg
+rawStorageAccountName | no | string | rawdata34keh240
+synapseWorkspaceRG | no | string | aoisynapseworkspacerg
+synapseWorkspace | no | string | aoisynapseworksapce
+synapseStorageAccount | no | string | synrawdatastorage
+synapsePool | no | string | synapsepoolname
+deployPgsql | no | boolean | false
 
 ## Importing from Git Repository
 
