@@ -66,7 +66,7 @@ envTag | no | string | synapse\-\<environmentCode\>
 preprovisionedBatchAccountName | no | string | aoibatchaccount
 deployPgsql | no | boolean | false
 
-**Note**: If you do not pass the optional pipelineName paramter value, no zip file will be generated. You may however run the `package.sh` script to generate a zip file after running the `setup.sh` script to generate the zip file.
+**Note**: If you do not pass the optional pipelineName parameter value, no zip file will be generated. You may however run the `package.sh` script to generate a zip file after running the `setup.sh` script to generate the zip file.
 
 ## Preparing to execute the script
 
