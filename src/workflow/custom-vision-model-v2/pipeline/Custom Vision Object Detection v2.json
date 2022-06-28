@@ -113,13 +113,31 @@
                 "type": "WebActivity",
                 "dependsOn": [
                     {
-                        "activity": "Copy Config file",
+                        "activity": "Copy Tiles",
                         "dependencyConditions": [
                             "Succeeded"
                         ]
                     },
                     {
-                        "activity": "Copy Xml From Convert Transform",
+                        "activity": "Copy Config",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    },
+                    {
+                        "activity": "Copy Georeference Xml",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    },
+                    {
+                        "activity": "Delete Results Directory placeholder",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    },
+                    {
+                        "activity": "Delete Logs Directory placeholder",
                         "dependencyConditions": [
                             "Succeeded"
                         ]
@@ -200,124 +218,6 @@
                         "GeospatialStorageAccountKey",
                         "--linked_service_name",
                         "AOI Pipeline Key Vault"
-                    ],
-                    "targetBigDataPool": {
-                        "referenceName": "__synapse_pool_name__",
-                        "type": "BigDataPoolReference"
-                    },
-                    "executorSize": "Medium",
-                    "conf": {
-                        "spark.dynamicAllocation.minExecutors": 2,
-                        "spark.dynamicAllocation.maxExecutors": 3
-                    },
-                    "driverSize": "Medium",
-                    "numExecutors": 2
-                }
-            },
-            {
-                "name": "Copy Tiles",
-                "type": "SparkJob",
-                "dependsOn": [
-                    {
-                        "activity": "Read Spec Document",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "7.00:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "sparkJob": {
-                        "referenceName": "Copy noop",
-                        "type": "SparkJobDefinitionReference"
-                    },
-                    "file": "abfss://spark-jobs@__synapse_storage_account__.dfs.core.windows.net/copy_noop/src/main.py",
-                    "args": [
-                        "--storage_account_name",
-                        "@pipeline().parameters.StorageAccountName",
-                        "--src_container",
-                        "@pipeline().parameters.Prefix",
-                        "--src_folder",
-                        "tiles",
-                        "--key_vault_name",
-                        "__linked_key_vault__",
-                        "--storage_account_key_secret_name",
-                        "GeospatialStorageAccountKey",
-                        "--linked_service_name",
-                        "AOI Pipeline Key Vault",
-                        "--dst_fileshare",
-                        "volume-a",
-                        "--dst_folder",
-                        "@concat(pipeline().parameters.Prefix,'/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['submissionDirectory'])",
-                        "--folders_to_create",
-                        "@concat(pipeline().parameters.Prefix, '/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['submissionDirectory'])",
-                        "--folders_to_create",
-                        "@concat(pipeline().parameters.Prefix, '/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['resultsDirectory'])",
-                        "--folders_to_create",
-                        "@concat(pipeline().parameters.Prefix,'/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['logsDirectory'])"
-                    ],
-                    "targetBigDataPool": {
-                        "referenceName": "__synapse_pool_name__",
-                        "type": "BigDataPoolReference"
-                    },
-                    "executorSize": "Medium",
-                    "conf": {
-                        "spark.dynamicAllocation.minExecutors": 2,
-                        "spark.dynamicAllocation.maxExecutors": 3
-                    },
-                    "driverSize": "Medium",
-                    "numExecutors": 2
-                }
-            },
-            {
-                "name": "Copy Config file",
-                "type": "SparkJob",
-                "dependsOn": [
-                    {
-                        "activity": "Copy Tiles",
-                        "dependencyConditions": [
-                            "Succeeded"
-                        ]
-                    }
-                ],
-                "policy": {
-                    "timeout": "7.00:00:00",
-                    "retry": 0,
-                    "retryIntervalInSeconds": 30,
-                    "secureOutput": false,
-                    "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                    "sparkJob": {
-                        "referenceName": "Copy noop",
-                        "type": "SparkJobDefinitionReference"
-                    },
-                    "file": "abfss://spark-jobs@__synapse_storage_account__.dfs.core.windows.net/copy_noop/src/main.py",
-                    "args": [
-                        "--storage_account_name",
-                        "@pipeline().parameters.StorageAccountName",
-                        "--src_container",
-                        "@pipeline().parameters.Prefix",
-                        "--src_folder",
-                        "@concat('config/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['contextFileName'])",
-                        "--key_vault_name",
-                        "__linked_key_vault__",
-                        "--storage_account_key_secret_name",
-                        "GeospatialStorageAccountKey",
-                        "--linked_service_name",
-                        "AOI Pipeline Key Vault",
-                        "--dst_fileshare",
-                        "volume-a",
-                        "--dst_folder",
-                        "@concat(pipeline().parameters.Prefix, '/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['contextFileName'])"
                     ],
                     "targetBigDataPool": {
                         "referenceName": "__synapse_pool_name__",
@@ -498,11 +398,11 @@
                 }
             },
             {
-                "name": "Copy Xml From Convert Transform",
-                "type": "SparkJob",
+                "name": "Copy Tiles",
+                "type": "Copy",
                 "dependsOn": [
                     {
-                        "activity": "Copy Tiles",
+                        "activity": "Read Spec Document",
                         "dependencyConditions": [
                             "Succeeded"
                         ]
@@ -517,40 +417,428 @@
                 },
                 "userProperties": [],
                 "typeProperties": {
-                    "sparkJob": {
-                        "referenceName": "Copy noop",
-                        "type": "SparkJobDefinitionReference"
+                    "source": {
+                        "type": "BinarySource",
+                        "storeSettings": {
+                            "type": "AzureBlobFSReadSettings",
+                            "maxConcurrentConnections": 15,
+                            "recursive": true,
+                            "wildcardFolderPath": "tiles",
+                            "wildcardFileName": "*.png",
+                            "deleteFilesAfterCompletion": false
+                        },
+                        "formatSettings": {
+                            "type": "BinaryReadSettings"
+                        }
                     },
-                    "file": "abfss://spark-jobs@__synapse_storage_account__.dfs.core.windows.net/copy_noop/src/main.py",
-                    "args": [
-                        "--storage_account_name",
-                        "@pipeline().parameters.StorageAccountName",
-                        "--src_container",
-                        "@pipeline().parameters.Prefix",
-                        "--src_folder",
-                        "convert/output.png.aux.xml",
-                        "--key_vault_name",
-                        "__linked_key_vault__",
-                        "--storage_account_key_secret_name",
-                        "GeospatialStorageAccountKey",
-                        "--linked_service_name",
-                        "AOI Pipeline Key Vault",
-                        "--dst_fileshare",
-                        "volume-a",
-                        "--dst_folder",
-                        "@concat(pipeline().parameters.Prefix, '/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['submissionDirectory'], '/output.png.aux.xml')"
-                    ],
-                    "targetBigDataPool": {
-                        "referenceName": "__synapse_pool_name__",
-                        "type": "BigDataPoolReference"
+                    "sink": {
+                        "type": "BinarySink",
+                        "storeSettings": {
+                            "type": "AzureFileStorageWriteSettings",
+                            "maxConcurrentConnections": 15
+                        }
                     },
-                    "executorSize": "Medium",
-                    "conf": {
-                        "spark.dynamicAllocation.minExecutors": 2,
-                        "spark.dynamicAllocation.maxExecutors": 3
+                    "enableStaging": false
+                },
+                "inputs": [
+                    {
+                        "referenceName": "run_container",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "container_name": {
+                                "value": "@pipeline().parameters.Prefix",
+                                "type": "Expression"
+                            },
+                            "folder_path": "tiles"
+                        }
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "run_fileshare",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "folder_path": {
+                                "value": "@concat(pipeline().parameters.Prefix, '/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['submissionDirectory'])",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "Copy Config",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "Read Spec Document",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "BinarySource",
+                        "storeSettings": {
+                            "type": "AzureBlobFSReadSettings",
+                            "maxConcurrentConnections": 15,
+                            "recursive": true,
+                            "wildcardFolderPath": "config",
+                            "wildcardFileName": {
+                                "value": "@activity('Read Spec Document').output['runStatus'].output.sink.value[0]['contextFileName']",
+                                "type": "Expression"
+                            },
+                            "deleteFilesAfterCompletion": false
+                        },
+                        "formatSettings": {
+                            "type": "BinaryReadSettings"
+                        }
                     },
-                    "driverSize": "Medium",
-                    "numExecutors": 2
+                    "sink": {
+                        "type": "BinarySink",
+                        "storeSettings": {
+                            "type": "AzureFileStorageWriteSettings",
+                            "maxConcurrentConnections": 15
+                        }
+                    },
+                    "enableStaging": false
+                },
+                "inputs": [
+                    {
+                        "referenceName": "run_container",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "container_name": {
+                                "value": "@pipeline().parameters.Prefix",
+                                "type": "Expression"
+                            },
+                            "folder_path": "config"
+                        }
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "run_fileshare",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "folder_path": {
+                                "value": "@concat(pipeline().parameters.Prefix)",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "Copy Georeference Xml",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "Read Spec Document",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "BinarySource",
+                        "storeSettings": {
+                            "type": "AzureBlobFSReadSettings",
+                            "maxConcurrentConnections": 15,
+                            "recursive": true,
+                            "wildcardFolderPath": "convert",
+                            "wildcardFileName": "*.aux.xml",
+                            "deleteFilesAfterCompletion": false
+                        },
+                        "formatSettings": {
+                            "type": "BinaryReadSettings"
+                        }
+                    },
+                    "sink": {
+                        "type": "BinarySink",
+                        "storeSettings": {
+                            "type": "AzureFileStorageWriteSettings",
+                            "maxConcurrentConnections": 15
+                        }
+                    },
+                    "enableStaging": false
+                },
+                "inputs": [
+                    {
+                        "referenceName": "run_container",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "container_name": {
+                                "value": "@pipeline().parameters.Prefix",
+                                "type": "Expression"
+                            },
+                            "folder_path": "convert"
+                        }
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "run_fileshare",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "folder_path": {
+                                "value": "@concat(pipeline().parameters.Prefix, '/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['submissionDirectory'])",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "Create Results Directory with placeholder",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "Read Spec Document",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "BinarySource",
+                        "storeSettings": {
+                            "type": "AzureBlobFSReadSettings",
+                            "maxConcurrentConnections": 15,
+                            "recursive": true,
+                            "wildcardFolderPath": "config",
+                            "wildcardFileName": {
+                                "value": "@activity('Read Spec Document').output['runStatus'].output.sink.value[0]['contextFileName']",
+                                "type": "Expression"
+                            },
+                            "deleteFilesAfterCompletion": false
+                        },
+                        "formatSettings": {
+                            "type": "BinaryReadSettings"
+                        }
+                    },
+                    "sink": {
+                        "type": "BinarySink",
+                        "storeSettings": {
+                            "type": "AzureFileStorageWriteSettings",
+                            "maxConcurrentConnections": 15
+                        }
+                    },
+                    "enableStaging": false
+                },
+                "inputs": [
+                    {
+                        "referenceName": "run_container",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "container_name": {
+                                "value": "@pipeline().parameters.Prefix",
+                                "type": "Expression"
+                            },
+                            "folder_path": "config"
+                        }
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "run_fileshare",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "folder_path": {
+                                "value": "@concat(pipeline().parameters.Prefix, '/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['resultsDirectory'])",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "Create Logs Directory with placeholder_copy1",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "Read Spec Document",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "BinarySource",
+                        "storeSettings": {
+                            "type": "AzureBlobFSReadSettings",
+                            "maxConcurrentConnections": 15,
+                            "recursive": true,
+                            "wildcardFolderPath": "config",
+                            "wildcardFileName": {
+                                "value": "@activity('Read Spec Document').output['runStatus'].output.sink.value[0]['contextFileName']",
+                                "type": "Expression"
+                            },
+                            "deleteFilesAfterCompletion": false
+                        },
+                        "formatSettings": {
+                            "type": "BinaryReadSettings"
+                        }
+                    },
+                    "sink": {
+                        "type": "BinarySink",
+                        "storeSettings": {
+                            "type": "AzureFileStorageWriteSettings",
+                            "maxConcurrentConnections": 15
+                        }
+                    },
+                    "enableStaging": false
+                },
+                "inputs": [
+                    {
+                        "referenceName": "run_container",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "container_name": {
+                                "value": "@pipeline().parameters.Prefix",
+                                "type": "Expression"
+                            },
+                            "folder_path": "config"
+                        }
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "run_fileshare",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "folder_path": {
+                                "value": "@concat(pipeline().parameters.Prefix, '/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['logsDirectory'])",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "Delete Results Directory placeholder",
+                "type": "Delete",
+                "dependsOn": [
+                    {
+                        "activity": "Create Results Directory with placeholder",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "dataset": {
+                        "referenceName": "run_fileshare",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "folder_path": {
+                                "value": "@concat(pipeline().parameters.Prefix, '/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['resultsDirectory'])",
+                                "type": "Expression"
+                            }
+                        }
+                    },
+                    "logStorageSettings": {
+                        "linkedServiceName": {
+                            "referenceName": "AOI Geospatial v2",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    "enableLogging": true,
+                    "storeSettings": {
+                        "type": "AzureFileStorageReadSettings",
+                        "recursive": true,
+                        "wildcardFileName": "*.*",
+                        "enablePartitionDiscovery": false
+                    }
+                }
+            },
+            {
+                "name": "Delete Logs Directory placeholder",
+                "type": "Delete",
+                "dependsOn": [
+                    {
+                        "activity": "Create Logs Directory with placeholder_copy1",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "dataset": {
+                        "referenceName": "run_fileshare",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "folder_path": {
+                                "value": "@concat(pipeline().parameters.Prefix, '/', activity('Read Spec Document').output['runStatus'].output.sink.value[0]['logsDirectory'])",
+                                "type": "Expression"
+                            }
+                        }
+                    },
+                    "logStorageSettings": {
+                        "linkedServiceName": {
+                            "referenceName": "AOI Geospatial v2",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    "enableLogging": true,
+                    "storeSettings": {
+                        "type": "AzureFileStorageReadSettings",
+                        "recursive": true,
+                        "wildcardFileName": "*.*",
+                        "enablePartitionDiscovery": false
+                    }
                 }
             }
         ],
