@@ -1,0 +1,20 @@
+{
+    "name": "GenBase64Encoding",
+    "properties": {
+        "annotations": [],
+        "type": "AzureFunction",
+        "typeProperties": {
+            "functionAppUrl": "__base64encodedzipcontent_functionapp_url__",
+            "functionKey": {
+                "type": "AzureKeyVaultSecret",
+                "store": {
+                    "referenceName": "AOI Pipeline Key Vault",
+                    "type": "LinkedServiceReference"
+                },
+                "secretName": "GenBase64EncondingFunctionKey"
+            },
+            "authentication": "Anonymous"
+        }
+    },
+    "type": "Microsoft.Synapse/workspaces/linkedservices"
+}

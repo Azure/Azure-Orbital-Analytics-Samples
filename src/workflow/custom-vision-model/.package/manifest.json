@@ -1,5 +1,5 @@
 {
-    "modes": {
+    "ai_model_infra_type": {
         "batch-account" : {
             "exclude" : [
                 "../pipeline/Custom Vision Object Detection v2_aks.json",
@@ -15,13 +15,6 @@
             "rename" : {
                 "../pipeline/E2E Custom Vision Model Flow_aks.json": "../pipeline/E2E Custom Vision Model Flow.json"
             }
-        },
-        "no-postgres": {
-            "removePropertyAtPath" : [ {
-                "file": "pipeline/E2E Custom Vision Model Flow.json",
-                "property": "properties.activities.2"
-            }
-            ] 
         }
     }
 }

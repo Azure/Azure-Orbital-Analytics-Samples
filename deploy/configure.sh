@@ -47,7 +47,7 @@ if [[ -n $SYNAPSE_STORAGE_ACCOUNT ]]; then
     # create a container to upload the spark job python files
     az storage container create --name "spark-jobs" --account-name ${SYNAPSE_STORAGE_ACCOUNT}
     # uploads the spark job python files
-    az storage blob upload-batch --destination "spark-jobs" --account-name ${SYNAPSE_STORAGE_ACCOUNT} --source "${PRJ_ROOT}/src/transforms/spark-jobs"
+    az storage blob upload-batch --destination "spark-jobs" --account-name ${SYNAPSE_STORAGE_ACCOUNT} --source "${PRJ_ROOT}/src/transforms/spark-jobs" --overwrite
 fi
 
 if [[ "$AI_MODEL_INFRA_TYPE" == "batch-account" ]]; then
@@ -72,10 +72,96 @@ if [[ "$AI_MODEL_INFRA_TYPE" == "batch-account" ]]; then
     then
         az batch account login --name ${BATCH_ACCOUNT_NAME} --resource-group ${BATCH_ACCOUNT_RG_NAME}
         # create batch job for custom vision model
-        az batch job create --id ${BATCH_ACCOUNT_POOL_NAME} --pool-id ${BATCH_ACCOUNT_POOL_NAME} --account-name ${BATCH_ACCOUNT_NAME} --account-key ${BATCH_ACCOUNT_KEY}
+        az batch job create --id ${BATCH_ACCOUNT_POOL_NAME} --pool-id ${BATCH_ACCOUNT_POOL_NAME} --account-name ${BATCH_ACCOUNT_NAME} --account-key ${BATCH_ACCOUNT_KEY} || true
     fi
 elif [[ "$AI_MODEL_INFRA_TYPE" == "aks" ]]; then
     echo "Selected AI model processing infra-type: AKS!!!"
-fi
+    DATA_RESOURCE_GROUP="${ENV_CODE}-data-rg"
+    AKS_NAMESPACE=vision
+    PV_SUFFIX=fileshare
+    PV_NAME="${ENV_CODE}-${AKS_NAMESPACE}-${PV_SUFFIX}"
+
+    RAW_STORAGE_ACCT=$(az storage account list --query "[?tags.store && tags.store == 'raw'].name" -o tsv -g $DATA_RESOURCE_GROUP)
+    RAW_STORAGE_KEY=$(az storage account keys list --resource-group $DATA_RESOURCE_GROUP --account-name $RAW_STORAGE_ACCT --query "[0].value" -o tsv)
+    VISION_FILE_SHARE_NAME=$(az storage share list --account-key $RAW_STORAGE_KEY --account-name $RAW_STORAGE_ACCT --query "[].name" -o tsv)
+
+    AKS_CLUSTER_NAME=$(az aks list -g ${ENV_CODE}-orc-rg --query "[?tags.type && tags.type == 'k8s'].name" -otsv)
+    while [[ ${AKS_CLUSTER_NAME} == '' ]];
+    do
+        sleep 60
+        AKS_CLUSTER_NAME=$(az aks list -g ${ENV_CODE}-orc-rg --query "[?tags.type && tags.type == 'k8s'].name" -otsv)
+    done
+    # force to provision aks-command namespace
+    az aks command invoke -g ${ENV_CODE}-orc-rg -n ${AKS_CLUSTER_NAME} -c "kubectl get ns"
+    az aks get-credentials --resource-group ${ENV_CODE}-orc-rg --name ${AKS_CLUSTER_NAME} --context ${AKS_CLUSTER_NAME} --overwrite-existing
+    kubectl config set-context ${AKS_CLUSTER_NAME}
+
+    cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: $AKS_NAMESPACE
+EOF
+
+    cat <<EOF | kubectl -n $AKS_NAMESPACE apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  name: azure-secret
+  namespace: $AKS_NAMESPACE
+type: Opaque
+stringData:
+  azurestorageaccountname: ${RAW_STORAGE_ACCT}
+  azurestorageaccountkey: ${RAW_STORAGE_KEY}
+EOF
+
+    cat <<EOF | kubectl -n $AKS_NAMESPACE apply -f -
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ${PV_NAME}
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: azurefile-csi
+  csi:
+    driver: file.csi.azure.com
+    readOnly: false
+    volumeHandle: ${PV_NAME}
+    volumeAttributes:
+      resourceGroup: ${DATA_RESOURCE_GROUP}
+      shareName: ${VISION_FILE_SHARE_NAME}
+    nodeStageSecretRef:
+      name: azure-secret
+      namespace: ${AKS_NAMESPACE}
+  mountOptions:
+    - dir_mode=0777
+    - file_mode=0777
+    - uid=0
+    - gid=0
+    - mfsymlinks
+    - cache=strict
+    - nosharesock
+    - nobrl
+EOF
+
+    cat << EOF | kubectl -n $AKS_NAMESPACE apply -f -
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ${PV_NAME}
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: azurefile-csi
+  volumeName: ${PV_NAME}
+  resources:
+    requests:
+      storage: 5Gi
+EOF
+fi # end of "$AI_MODEL_INFRA_TYPE" == "aks"
 
 echo "configuration completed!"

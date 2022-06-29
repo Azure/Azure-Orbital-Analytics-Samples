@@ -22,10 +22,22 @@ parser.add_argument('--batch_storage_account_name', type=str, required=True, hel
 parser.add_argument('--batch_account', type=str, required=True, help="Batch Account name")
 parser.add_argument('--batch_pool_name', type=str, required=True, help="Batch Pool name")
 parser.add_argument('--linked_key_vault', type=str, required=True, help="Key Vault to be added as Linked Service")
-parser.add_argument('--location', type=str, required=True, help="Batch Account Location")
+parser.add_argument('--location', type=str, required=False, help="Batch Account Location")
 parser.add_argument('--pipeline_name', type=str, required=True, help="Name of the pipeline to package")
-parser.add_argument('--pg_db_username', type=str, required=False, help="Username to login to postgres db", default='')
-parser.add_argument('--pg_db_server_name', type=str, required=False, help="Server name to login to postgres db", default='')
+parser.add_argument('--pg_db_username', type=str, required=False, help="Username to login to postgres db")
+parser.add_argument('--pg_db_server_name', type=str, required=False, help="Server name to login to postgres db")
+parser.add_argument('--persistent_volume_claim',
+    type=str, required=False,
+    default='__env_code__-vision-fileshare',
+    help="persistent volume claim object name set up in AKS")
+parser.add_argument('--aks_management_rest_url',
+    type=str, required=False,
+    default='https://management.azure.com/subscriptions/__subscription__/resourceGroups/__env_code__-orc-rg/providers/Microsoft.ContainerService/managedClusters/__env_code__-aks2/runCommand?api-version=2022-02-01',
+    help="AKS management rest URL")
+parser.add_argument('--base64encodedzipcontent_functionapp_url',
+    type=str, required=False,
+    help="functionapp url for base64encodedzipcontent"
+)
 
 #Parse Args
 args = parser.parse_args()
@@ -82,6 +94,15 @@ def package(pipeline_name: str, tokens_map: dict, modes='batch-account'):
                                 shutil.move(
                                     os.path.join(package_manifest_folder, src),
                                     os.path.join(package_manifest_folder, dest))
+                                modified_jdata = {}
+                                with open(os.path.join(package_manifest_folder, dest), 'r') as fp:
+                                    modified_jdata = json.load(fp)
+                                    if modified_jdata.get('name') is not None:
+                                        path_splitted = dest.split('/')
+                                        name_only_with_extension = path_splitted[-1].split('.')[0]
+                                        modified_jdata['name'] = name_only_with_extension
+                                with open(os.path.join(package_manifest_folder, dest), 'w') as fp:
+                                    json.dump(modified_jdata, fp, indent=4)
                         if instruction == 'removePropertyAtPath':
                             for fileToModify in package_manifest['removePropertyAtPath']:
                                 
@@ -105,8 +126,6 @@ def package(pipeline_name: str, tokens_map: dict, modes='batch-account'):
                                     file = open(os.path.join(os.getcwd(), pipeline_name, fileToModify['file']), 'w')
                                     json.dump(data, file, indent=10)
 
-
-        
         # finally clean up .package folder before zipping it
         shutil.rmtree(package_folder_path + "/.package")
     
@@ -142,21 +161,38 @@ def package(pipeline_name: str, tokens_map: dict, modes='batch-account'):
     
 if __name__ == "__main__":
 
-    # list of tokens and their values to be replaced
-    tokens_map = {
-        '__raw_data_storage_account__': args.raw_storage_account_name,
-        '__batch_storage_account__': args.batch_storage_account_name,
-        '__batch_account__': args.batch_account,
-        '__batch_pool_name__': args.batch_pool_name,
-        '__linked_key_vault__': args.linked_key_vault,
-        '__synapse_storage_account__': args.synapse_storage_account_name,
-        '__synapse_pool_name__': args.synapse_pool_name,
-        '__synapse_workspace_id__':args.synapse_workspace_id,
-        '__synapse_workspace__':args.synapse_workspace,
-        '__location__': args.location,
-        '__pg_db_username__': args.pg_db_username,
-        '__pg_db_server_name__': args.pg_db_server_name
-    }
-
+    if args.modes.find('batch-account') > -1:
+        # list of tokens and their values to be replaced
+        tokens_map = {
+            '__raw_data_storage_account__': args.raw_storage_account_name,
+            '__batch_storage_account__': args.batch_storage_account_name,
+            '__batch_account__': args.batch_account,
+            '__batch_pool_name__': args.batch_pool_name,
+            '__linked_key_vault__': args.linked_key_vault,
+            '__synapse_storage_account__': args.synapse_storage_account_name,
+            '__synapse_pool_name__': args.synapse_pool_name,
+            '__synapse_workspace_id__':args.synapse_workspace_id,
+            '__synapse_workspace__':args.synapse_workspace,
+            '__location__': args.location,
+            '__pg_db_username__': args.pg_db_username,
+            '__pg_db_server_name__': args.pg_db_server_name
+        }
+    elif args.modes.find('aks') > -1: 
+        # list of tokens and their values to be replaced for aks based pipeline
+        tokens_map = {
+            '__raw_data_storage_account__': args.raw_storage_account_name,
+            '__persistent_volume_claim__': args.persistent_volume_claim,
+            '__aks_management_rest_url__': args.aks_management_rest_url,
+            '__base64encodedzipcontent_functionapp_url__': args.base64encodedzipcontent_functionapp_url,
+            '__linked_key_vault__': args.linked_key_vault,
+            '__synapse_storage_account__': args.synapse_storage_account_name,
+            '__synapse_pool_name__': args.synapse_pool_name,
+            '__synapse_workspace_id__':args.synapse_workspace_id,
+            '__synapse_workspace__':args.synapse_workspace,
+            '__pg_db_username__': args.pg_db_username,
+            '__pg_db_server_name__': args.pg_db_server_name
+        }
+    else:
+        raise ValueError('args.modes should include at least either batch-account or aks.')
     # invoke package method
     package(args.pipeline_name, tokens_map, args.modes)
