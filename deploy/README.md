@@ -451,6 +451,24 @@ NO_DELETE_PIPELINE_RESOURCE_GROUP=true
 ./deploy/cleanup.sh <environmentCode>
 ```
 
+# Using different infrastructure to host AI-Model execution
+
+We have introduced the work to cater to the need of customers to use different infrastructure types to host the execution of AI-Models:
+
+Previously, we had the AI-Model executing on Azure Batch Account, now we are extending this to use AKS.
+
+To help users we have introduced a new variable `AI_MODEL_INFRA_TYPE` in [setup.sh](./setup.sh) to suggest which infrastructure type they would want to use.
+
+`AI_MODEL_INFRA_TYPE` currently supports 2 values, with default being `batch-account`: 
+- `batch-account` 
+- `aks`
+
+Those users requiring to execute AI-Model against `batch-account` will not need any changes to their commands, however, those who want to execute against `aks`, can simply execute by setting the environment variable `AI_MODEL_INFRA_TYPE`.
+
+```bash
+AI_MODEL_INFRA_TYPE=aks ./deploy/setup.sh <environmentCode> <location> <pipelineName> <envTag>
+```
+
 # Attributions And Disclaimers
 
 - [Geotiff file](https://aoigeospatial.blob.core.windows.net/public/samples/sample_4326.tif) provided as sample are attributed to NAIP Imagery available via [Planetary Computer](https://planetarycomputer.microsoft.com) They are covered under [USDA](https://ngda-imagery-geoplatform.hub.arcgis.com)

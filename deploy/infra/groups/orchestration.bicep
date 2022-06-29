@@ -27,7 +27,12 @@ param uamiName string = ''
 param pipelineResourceGroupName string
 param pipelineLinkedSvcKeyVaultName string
 
-param deployBatchAccount bool = true
+param deployAiModelInfra bool = true
+@allowed([
+  'batch-account'
+  'aks'
+])
+param aiModelInfraType string = 'batch-account'
 
 // Mount options
 param mountAccountName string
@@ -104,6 +109,9 @@ var keyvaultNameVar = empty(keyvaultName) ? '${namingPrefix}-kv' : keyvaultName
 var batchAccountNameVar = empty(batchAccountName) ? '${environmentCode}${projectName}batchact' : batchAccountName
 var batchAccountAutoStorageAccountNameVar = empty(batchAccountAutoStorageAccountName) ? 'batchacc${nameSuffix}' : batchAccountAutoStorageAccountName
 var acrNameVar = empty(acrName) ? '${environmentCode}${projectName}acr' : acrName
+
+var deployBatchAccount = deployAiModelInfra && (aiModelInfraType=='batch-account')
+var deployAksCluster = deployAiModelInfra && (aiModelInfraType=='aks')
 
 module keyVault '../modules/akv.bicep' = {
   name: '${namingPrefix}-akv'
