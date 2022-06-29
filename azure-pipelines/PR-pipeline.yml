@@ -8,10 +8,6 @@ parameters:
     displayName: Keyvault Name
     type: string
     default: cipipelineresources
-  - name: USE_POSTGRE_SQL
-    displayName: Use PostgreSQL DB
-    type: string
-    default: true
 
 variables:
   - name: serviceConnectionToAzure
@@ -58,7 +54,6 @@ jobs:
         set -e
 
         export KEYVAULT_NAME=${{ parameters.KEYVAULT_NAME }}
-        export USE_POSTGRE_SQL=${{ parameters.USE_POSTGRE_SQL }}
 
         export AAD_GROUP_PRINCIPAL_ID="$(az keyvault secret show --vault ${KEYVAULT_NAME} --name AAD-GROUP-PRINCIPAL-ID --query value -o tsv)"
         export CI_BATCH_ACCOUNT_NAME="$(az keyvault secret show --vault ${KEYVAULT_NAME} --name CI-BATCH-ACCOUNT-NAME --query value -o tsv)"
