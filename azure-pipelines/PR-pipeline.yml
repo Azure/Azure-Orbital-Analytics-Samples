@@ -8,6 +8,10 @@ parameters:
     displayName: Keyvault Name
     type: string
     default: cipipelineresources
+  - name: USE_POSTGRE_SQL
+    displayName: Use PostgreSQL DB
+    type: string
+    default: true
 
 variables:
   - name: serviceConnectionToAzure
@@ -52,19 +56,25 @@ jobs:
       scriptLocation: inlineScript
       inlineScript: |
         set -e
+
         export KEYVAULT_NAME=${{ parameters.KEYVAULT_NAME }}
+        export USE_POSTGRE_SQL=${{ parameters.USE_POSTGRE_SQL }}
+
         export AAD_GROUP_PRINCIPAL_ID="$(az keyvault secret show --vault ${KEYVAULT_NAME} --name AAD-GROUP-PRINCIPAL-ID --query value -o tsv)"
         export CI_BATCH_ACCOUNT_NAME="$(az keyvault secret show --vault ${KEYVAULT_NAME} --name CI-BATCH-ACCOUNT-NAME --query value -o tsv)"
         export CI_STORAGE_ACCOUNT_NAME="$(az keyvault secret show --vault ${KEYVAULT_NAME} --name CI-STORAGE-ACCOUNT --query value -o tsv)"
+
         MD5_OUTPUT="$(echo $(date +%s) | md5sum | awk '{print $1}')"
         ENV_CODE=$(echo pr${MD5_OUTPUT:0:7})
+
         echo "##vso[task.setvariable variable=environment_code;isOutput=true]${ENV_CODE}"
         echo "##vso[task.setvariable variable=batch_account_name;isOutput=true]${CI_BATCH_ACCOUNT_NAME}"
+
         chars='@#$%&_+='
         export POSTGRES_ADMIN_LOGIN_PASS=$({ </dev/urandom LC_ALL=C grep -ao '[A-Za-z0-9]' | head -n$((RANDOM % 8 + 9)); echo ${chars:$((RANDOM % ${#chars})):1}; } | shuf | tr -d '\n')
 
         # Setup the infrastructure for testing the pipeline
-        $(System.DefaultWorkingDirectory)/deploy/setup.sh ${ENV_CODE} eastus custom-vision-model-v2 ${ENV_CODE}-environment ${CI_BATCH_ACCOUNT_NAME}
+        DEPLOY_PGSQL=${USE_POSTGRE_SQL} $(System.DefaultWorkingDirectory)/deploy/setup.sh ${ENV_CODE} eastus custom-vision-model-v2 ${ENV_CODE}-environment ${CI_BATCH_ACCOUNT_NAME}
 
         # Grant access on Synapse workspace to resource owner azure account
         echo "Granting access to resource owner azure account on synapse workspace ${ENV_CODE}-pipeline-syn-ws"
