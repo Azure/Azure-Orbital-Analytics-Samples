@@ -1,7 +1,7 @@
-param aspName string
-param aspKind string
-param aspReserved bool
-param mewCount int
+param name string
+param kind string
+param reserved bool
+param maximumElasticWorkerCount int
 param skuTier string
 param skuSize string
 param skuName string
@@ -9,12 +9,12 @@ param location string = resourceGroup().location
 param environmentName string
 
 resource hostingPlan 'Microsoft.Web/serverfarms@2021-01-15' = {
-  name: aspName
+  name: name
   location: location 
-  kind: aspKind
+  kind: kind
   properties: {
-    maximumElasticWorkerCount: mewCount
-    reserved: aspReserved 
+    maximumElasticWorkerCount: maximumElasticWorkerCount
+    reserved: reserved 
   }
   sku: {
     name: skuName 
@@ -26,6 +26,4 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2021-01-15' = {
   }
 }
 
-output id string = hostingPlan.id
-
- 
+output id string = hostingPlan.id 

@@ -427,7 +427,7 @@ To run the pipeline, open the Synapse Studio for the Synapse workspace that you 
 | Prefix | This is the Storage container name created in [Running the pipeline section](#running-the-pipeline) that hosts the Raw data|
 | StorageAccountName | Name of the Storage Account in <environmentCode>-data-rg resource group that hosts the Raw data |
 | AOI | Area of Interest over which the AI Model is run |
-| AksManagementRestApiURL | AKS Management Rest API Endpoint URL where Azure Synapse makes request calls to send kubectl commands to |
+| AksManagementRestApiURL | AKS Management Rest API Endpoint URL where Azure Synapse makes request calls to send kubectl commands to. Refer to [doc](https://docs.microsoft.com/en-us/rest/api/aks/managed-clusters/run-command). |
 | PersistentVolumeClaim | Persistent Volume Claim Name used for the AI-Model execution Kubernetes pod. This is preconfigured during setup and configuration, and can be found from Azure portal (provisioned AKS-> 'Storage'-> 'Persistent volume claims'). |
 
 - Once the parameters are entered, click ok to submit and kick off the pipeline.

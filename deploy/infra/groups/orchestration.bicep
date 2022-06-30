@@ -339,6 +339,7 @@ module attachACRtoAKS '../modules/aks-attach-acr.bicep' = if(deployAksCluster) {
   }
   dependsOn: [
     acr
+    aksCluster
   ]
 }
 
@@ -360,7 +361,6 @@ module aksInvokerRoleDef '../modules/custom.roledef.bicep' = if(deployAksCluster
 module aksCustomRoleAssignment '../modules/aks-invoker-role-assignment.bicep' = if(deployAksCluster) {
   name: 'custom-role-assignment-for-${aksClusterNameVar}'
   params: {
-    principalId: synapseMIPrincipalId
     aksClusterName: aksClusterNameVar
     customRoleDefId: deployAksCluster?aksInvokerRoleDef.outputs.Id :''
   }
@@ -377,27 +377,21 @@ module functionAppStorageAccount '../modules/storage.bicep' = if(deployAksCluste
     location: location
     storeType: 'fapp-storage'
   }
-  dependsOn: [
-    aksCluster
-  ]
 }
 
 module functionAppHostPlan '../modules/asp.bicep' = if(deployAksCluster) {
   name: '${namingPrefix}-asp'
   params: {
-    aspName: '${namingPrefix}-asp'
-    aspKind: 'linux'
-    aspReserved: true
-    mewCount: 1
+    name: '${namingPrefix}-asp'
+    kind: 'linux'
+    reserved: true
+    maximumElasticWorkerCount: 1
     skuTier: 'Dynamic'
     skuSize: 'Y1'
     skuName: 'Y1'
     location: location
     environmentName: environmentTag
   }
-  dependsOn: [
-    aksCluster
-  ]
 }
 
 module functionApp '../modules/functionapp.bicep' = if(deployAksCluster) {
@@ -417,38 +411,30 @@ module functionApp '../modules/functionapp.bicep' = if(deployAksCluster) {
       linuxFxVersion: 'Python|3.9'     
     }
   }
-  dependsOn: [
-    aksCluster
-  ]
 }
 
 module base64EncodedZipContentFunction '../modules/function.bicep' = if(deployAksCluster) {
   name: '${namingPrefix}-base64fapp'
   params: {
-    functionAppName: functionAppNameVar
-    functionName: 'base64EncodedZipContent'
-    functionFiles : {
+    appName: functionAppNameVar
+    name: 'base64EncodedZipContent'
+    files : {
       '__init__.py': loadTextContent('gen_base64_encoded_content.py')
     }
-    functionLanguage: 'python'
+    language: 'python'
   }
   dependsOn:[
     functionApp
   ]
 }
 
-module base64EncodedZipContentFunctionKey '../modules/akv.secrets.bicep' = if(deployAksCluster) {
+module base64EncodedZipContentFunctionKey '../modules/function.key.to.keyvault.bicep' = if(deployAksCluster) {
   name: '${namingPrefix}-base64fapp-fkey'
-  scope: resourceGroup(pipelineResourceGroupName)
   params: {
     environmentName: environmentTag
-    keyVaultName: '${environmentCode}-pipeline-kv'
-    secretName: 'GenBase64EncondingFunctionKey' 
-    secretValue: deployAksCluster?base64EncodedZipContentFunction.outputs.functionkey:''
+    keyVaultName: pipelineLinkedSvcKeyVaultName
+    keyVaultResourceGroup: pipelineResourceGroupName
+    functionSecretName: 'GenBase64EncondingFunctionKey'
+    functionId: deployAksCluster?base64EncodedZipContentFunction.outputs.id:''
   }
 }
-
-
-
-
-

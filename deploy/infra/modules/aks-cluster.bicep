@@ -49,8 +49,6 @@ resource aks 'Microsoft.ContainerService/managedClusters@2022-01-01' = {
   }
 }
 
-
 output Id string = aks.id
 output principalId string = aks.identity.principalId
 output kubeletIdentityId string = aks.properties.identityProfile.kubeletidentity.objectId
-

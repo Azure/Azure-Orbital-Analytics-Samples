@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-param functionAppName string
-param functionName string
-param functionFiles object = {}
-param functionLanguage string
-param functionInputBinding object = {
+param appName string
+param name string
+param files object = {}
+param language string
+param inputBinding object = {
   name: 'req'
   type: 'httpTrigger'
   direction: 'in'
@@ -21,20 +21,19 @@ param functionOutputBinding object = {
 }
 
 resource function 'Microsoft.Web/sites/functions@2021-03-01' = {
-  name: '${functionAppName}/${functionName}'
+  name: '${appName}/${name}'
   properties: {
     config: {
       disabled: false
       bindings: [
-        functionInputBinding
+        inputBinding
         functionOutputBinding
       ]
     }
-    files: functionFiles
-    language: functionLanguage
+    files: files
+    language: language
   }
 }
 
 output id string = function.id
-#disable-next-line outputs-should-not-contain-secrets // we do not output to terminal. calling bicep will take this & store in keyvault
-output functionkey string = listKeys(function.id, '2021-03-01').default
+output fullName string = function.name
