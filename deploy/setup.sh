@@ -9,7 +9,7 @@ PIPELINE_NAME=${3:-${PIPELINE_NAME}}
 ENV_TAG=${4:-${ENV_TAG}}
 PRE_PROVISIONED_AI_MODEL_INFRA_NAME=${5:-$PRE_PROVISIONED_AI_MODEL_INFRA_NAME}
 AI_MODEL_INFRA_TYPE=${6:-${AI_MODEL_INFRA_TYPE:-"batch-account"}} # Currently supported values are aks and batch-account
-DEPLOY_PGSQL=${7:-${DEPLOY_PGSQL:-"true"}}
+DEPLOY_PGSQL=${7:-${DEPLOY_PGSQL:-"false"}}
 
 set -ex
 
