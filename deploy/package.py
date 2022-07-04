@@ -20,6 +20,7 @@ parser.add_argument('--synapse_workspace_id', type=str, required=True, help='Id 
 parser.add_argument('--synapse_workspace', type=str, required=True, help='Synapse pool name')
 parser.add_argument('--batch_storage_account_name', type=str, required=True, help='Name of the Batch Storage Account')
 parser.add_argument('--batch_account', type=str, required=True, help="Batch Account name")
+parser.add_argument('--batch_pool_name', type=str, required=True, help="Batch Pool name")
 parser.add_argument('--linked_key_vault', type=str, required=True, help="Key Vault to be added as Linked Service")
 parser.add_argument('--location', type=str, required=True, help="Batch Account Location")
 parser.add_argument('--pipeline_name', type=str, required=True, help="Name of the pipeline to package")
@@ -146,6 +147,7 @@ if __name__ == "__main__":
         '__raw_data_storage_account__': args.raw_storage_account_name,
         '__batch_storage_account__': args.batch_storage_account_name,
         '__batch_account__': args.batch_account,
+        '__batch_pool_name__': args.batch_pool_name,
         '__linked_key_vault__': args.linked_key_vault,
         '__synapse_storage_account__': args.synapse_storage_account_name,
         '__synapse_pool_name__': args.synapse_pool_name,

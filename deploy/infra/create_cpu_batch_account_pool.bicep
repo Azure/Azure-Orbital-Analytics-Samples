@@ -19,7 +19,7 @@ param batchAccountPoolMountFileUrl string
 param acrName string = ''
 
 // Parameters with default values  for Data Fetch Batch Account Pool
-param batchAccountCpuOnlyPoolName string = 'data-cpu-pool'
+param batchAccountCpuOnlyPoolName string = '${environmentCode}-data-cpu-pool'
 param batchAccountCpuOnlyPoolVmSize string = 'standard_d2s_v3'
 param batchAccountCpuOnlyPoolDedicatedNodes int = 1
 param batchAccountCpuOnlyPoolImageReferencePublisher string = 'microsoft-azure-batch'

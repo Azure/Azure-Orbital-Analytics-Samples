@@ -92,6 +92,7 @@ if [[ "$AI_MODEL_INFRA_TYPE" == "batch-account" ]]; then
         --modes $MODE \
         --batch_storage_account_name $BATCH_STORAGE_ACCOUNT_NAME \
         --batch_account $BATCH_ACCOUNT_NAME \
+        --batch_pool_name ${ENV_CODE}-data-cpu-pool \
         --linked_key_vault $KEY_VAULT_NAME \
         --synapse_pool_name $SYNAPSE_POOL \
         --location $BATCH_ACCOUNT_LOCATION \
