@@ -72,7 +72,7 @@ if [[ "$AI_MODEL_INFRA_TYPE" == "batch-account" ]]; then
     then
         az batch account login --name ${BATCH_ACCOUNT_NAME} --resource-group ${BATCH_ACCOUNT_RG_NAME}
         # create batch job for custom vision model
-        az batch job create --id ${BATCH_ACCOUNT_POOL_NAME} --pool-id ${BATCH_ACCOUNT_POOL_NAME} --account-name ${BATCH_ACCOUNT_NAME} --account-key ${BATCH_ACCOUNT_KEY} || true
+        az batch job create --id ${BATCH_ACCOUNT_POOL_NAME} --pool-id ${BATCH_ACCOUNT_POOL_NAME} --account-name ${BATCH_ACCOUNT_NAME} --account-key ${BATCH_ACCOUNT_KEY}
     fi
 elif [[ "$AI_MODEL_INFRA_TYPE" == "aks" ]]; then
     echo "Selected AI model processing infra-type: AKS!!!"

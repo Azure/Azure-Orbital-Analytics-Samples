@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
+
 @description('Array of actions for the roleDefinition')
 param actions array = []
 
