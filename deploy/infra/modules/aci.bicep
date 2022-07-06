@@ -14,7 +14,7 @@ param port int = 80
 param cpuCores int = 1
 
 @description('The amount of memory to allocate to the container in gigabytes.')
-param memoryInGb int = 4
+param memoryInGb int = 2
 
 param userManagedIdentityId string
 

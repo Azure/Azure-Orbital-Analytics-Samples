@@ -409,7 +409,7 @@ To run the pipeline, open the Synapse Studio for the Synapse workspace that you 
 
 - Open the `E2E Custom Vision Model Flow` and click on debug button
 
-- When presented with the parameters, fill out the values. Below table provide the details on that each parameter represents.
+- When presented with the parameters, fill out the values. Below table provide the details on that each parameter represents if batch-account (by default) is provisioned in infrastructure setup.
 
 | parameter | description |
 |--|--|
@@ -419,6 +419,16 @@ To run the pipeline, open the Synapse Studio for the Synapse workspace that you 
 | BatchAccountName | Name of the Batch Account in <environmentCode>-orc-rg resource group to run the AI Model |
 | BatchJobName | Job name within the Batch Account in <environmentCode>-orc-rg resource group that runs the AI Model |
 | BatchLocation | Location of the Batch Account in <environmentCode>-orc-rg resource group that runs the AI Model |
+
+- In case AKS (Azure Kubernetes Service) is provisioned, parameters and their descriptions are:
+
+| parameter | description |
+|--|--|
+| Prefix | This is the Storage container name created in [Running the pipeline section](#running-the-pipeline) that hosts the Raw data|
+| StorageAccountName | Name of the Storage Account in <environmentCode>-data-rg resource group that hosts the Raw data |
+| AOI | Area of Interest over which the AI Model is run |
+| AksManagementRestApiURL | AKS Management Rest API Endpoint URL where Azure Synapse makes request calls to send kubectl commands to. Refer to [doc](https://docs.microsoft.com/en-us/rest/api/aks/managed-clusters/run-command). |
+| PersistentVolumeClaim | Persistent Volume Claim Name used for the AI-Model execution Kubernetes pod. This is preconfigured during setup and configuration, and can be found from Azure portal (provisioned AKS-> 'Storage'-> 'Persistent volume claims'). |
 
 - Once the parameters are entered, click ok to submit and kick off the pipeline.
 

@@ -176,6 +176,7 @@ module orchestrationModule 'groups/orchestration.bicep' = {
     environmentCode: environmentCode
     environmentTag: environment
     logAnalyticsWorkspaceId: monitorModule.outputs.workspaceId
+    appInsightsInstrumentationKey: monitorModule.outputs.appInsightsInstrumentationKey
     mountAccountKey: dataModule.outputs.rawStoragePrimaryKey
     deployAiModelInfra: deployAiModelInfra
     aiModelInfraType: aiModelInfraType

@@ -1,0 +1,189 @@
+{
+    "name": "E2E Custom Vision Model Flow_aks",
+    "properties": {
+        "activities": [
+            {
+                "name": "Transforms",
+                "type": "ExecutePipeline",
+                "dependsOn": [],
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "Custom Vision Model Transforms v2",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "Prefix": {
+                            "value": "@pipeline().parameters.Prefix",
+                            "type": "Expression"
+                        },
+                        "StorageAccountName": {
+                            "value": "@pipeline().parameters.StorageAccountName",
+                            "type": "Expression"
+                        },
+                        "AOI": {
+                            "value": "@pipeline().parameters.AOI",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "Custom Vision Object Detection with AKS",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "Transforms",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "Custom Vision Object Detection v2_aks",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {
+                        "Prefix": {
+                            "value": "@pipeline().parameters.Prefix",
+                            "type": "Expression"
+                        },
+                        "StorageAccountName": {
+                            "value": "@pipeline().parameters.StorageAccountName",
+                            "type": "Expression"
+                        },
+                        "AksManagementRestApiURL": {
+                            "value": "@pipeline().parameters.AksManagementRestApiURL",
+                            "type": "Expression"
+                        },
+                        "PersistentVolumeClaim": {
+                            "value": "@pipeline().parameters.PersistentVolumeClaim",
+                            "type": "Expression"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "Insert CV Object Detection Data Into DB",
+                "type": "SynapseNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "Custom Vision Object Detection with AKS",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 3,
+                    "retryIntervalInSeconds": 60,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebook": {
+                        "referenceName": "Insert CV Object Detection Data Into DB Notebook Job",
+                        "type": "NotebookReference"
+                    },
+                    "parameters": {
+                        "storage_account_name": {
+                            "value": {
+                                "value": "@pipeline().parameters.StorageAccountName",
+                                "type": "Expression"
+                            },
+                            "type": "string"
+                        },
+                        "container_name": {
+                            "value": {
+                                "value": "@pipeline().parameters.Prefix",
+                                "type": "Expression"
+                            },
+                            "type": "string"
+                        },
+                        "folder_path": {
+                            "value": "pool-geolocation",
+                            "type": "string"
+                        },
+                        "key_vault_name": {
+                            "value": "__linked_key_vault__",
+                            "type": "string"
+                        },
+                        "storage_account_key_secret_name": {
+                            "value": "GeospatialStorageAccountKey",
+                            "type": "string"
+                        },
+                        "linked_service_name": {
+                            "value": "AOI Pipeline Key Vault",
+                            "type": "string"
+                        },
+                        "db_password_secret_name": {
+                            "value": "PostgresAdminPassword",
+                            "type": "string"
+                        },
+                        "db_username": {
+                            "value": "__pg_db_username__",
+                            "type": "string"
+                        },
+                        "db_host": {
+                            "value": "__pg_db_server_name__",
+                            "type": "string"
+                        },
+                        "db_name": {
+                            "value": "postgres",
+                            "type": "string"
+                        },
+                        "db_port": {
+                            "value": "5432",
+                            "type": "int"
+                        },
+                        "ssl_root_path": {
+                            "value": "/opt/src/BaltimoreCyberTrustRoot.crt.pem",
+                            "type": "string"
+                        }
+                    },
+                    "snapshot": true,
+                    "sparkPool": {
+                        "referenceName": "__synapse_pool_name__",
+                        "type": "BigDataPoolReference"
+                    }
+                }
+            }
+        ],
+        "parameters": {
+            "Prefix": {
+                "type": "string",
+                "defaultValue": ""
+            },
+            "StorageAccountName": {
+                "type": "string",
+                "defaultValue": ""
+            },
+            "AOI": {
+                "type": "string",
+                "defaultValue": ""
+            },
+            "AksManagementRestApiURL": {
+                "type": "string",
+                "defaultValue": "__aks_management_rest_url__"
+            },
+            "PersistentVolumeClaim": {
+                "type": "string",
+                "defaultValue": "__persistent_volume_claim__"
+            }
+        },
+        "variables": {
+            "Storage_Account_Conn_String": {
+                "type": "String"
+            }
+        },
+        "annotations": [],
+        "lastPublishTime": "2022-03-06T05:42:39Z"
+    },
+    "type": "Microsoft.Synapse/workspaces/pipelines"
+}

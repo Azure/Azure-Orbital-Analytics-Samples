@@ -102,6 +102,48 @@ if [[ "$AI_MODEL_INFRA_TYPE" == "batch-account" ]]; then
 
 elif [[ "$AI_MODEL_INFRA_TYPE" == "aks" ]]; then
     echo "Selected AI model processing infra-type: AKS!!!"
+    AKS_ID=$(az aks list -g ${ENV_CODE}-orc-rg --query "[?tags.type && tags.type == 'k8s'].id" -otsv)
+    counter=0
+    while [[ ${AKS_ID} == '' ]];
+    do
+        if [[ $counter -gt 4 ]]; then
+            echo "Failed to get AKS ID"
+            break
+        fi
+        sleep 60
+        AKS_ID=$(az aks list -g ${ENV_CODE}-orc-rg --query "[?tags.type && tags.type == 'k8s'].id" -otsv)
+        counter=$((counter+1))
+    done
+
+    PERSISTENT_VOLUME_CLAIM="${ENV_CODE}-vision-fileshare"
+    AKS_MANAGEMENT_REST_URL="https://management.azure.com${AKS_ID}/runCommand?api-version=2022-02-01"
+    BASE64ENCODEDZIPCONTENT_FUNCTIONAPP_HOST=$(az functionapp list -g ${ENV_CODE}-orc-rg \
+        --query "[?tags.type && tags.type == 'functionapp'].hostNames[0]" | jq -r '.[0]')
+    counter=0
+    while [[ ${BASE64ENCODEDZIPCONTENT_FUNCTIONAPP_HOST} == '' ]];
+    do
+        if [[ $counter -gt 4 ]]; then
+            echo "Failed to get functionapp host"
+            break
+        fi
+        sleep 60
+        BASE64ENCODEDZIPCONTENT_FUNCTIONAPP_HOST=$(az functionapp list -g ${ENV_CODE}-orc-rg \
+        --query "[?tags.type && tags.type == 'functionapp'].hostNames[0]" | jq -r '.[0]')
+        counter=$((counter+1))
+    done
+    BASE64ENCODEDZIPCONTENT_FUNCTIONAPP_URL="https://${BASE64ENCODEDZIPCONTENT_FUNCTIONAPP_HOST}"
+    PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/package.py \
+        --raw_storage_account_name $RAW_STORAGE_ACCOUNT_NAME \
+        --synapse_storage_account_name $SYNAPSE_STORAGE_ACCOUNT_NAME \
+        --modes $MODE \
+        --persistent_volume_claim $PERSISTENT_VOLUME_CLAIM \
+        --aks_management_rest_url $AKS_MANAGEMENT_REST_URL \
+        --base64encodedzipcontent_functionapp_url $BASE64ENCODEDZIPCONTENT_FUNCTIONAPP_URL \
+        --linked_key_vault $KEY_VAULT_NAME \
+        --synapse_pool_name $SYNAPSE_POOL \
+        --pipeline_name $PIPELINE_NAME \
+        --synapse_workspace $SYNAPSE_WORKSPACE_NAME \
+        --synapse_workspace_id $SYNAPSE_WORKSPACE_ID"
 fi
 
 if [[ $DEPLOY_PGSQL == "true" ]]; then

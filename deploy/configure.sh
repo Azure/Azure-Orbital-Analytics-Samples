@@ -17,7 +17,7 @@ SYNAPSE_WORKSPACE_RG=${6:-${SYNAPSE_WORKSPACE_RG:-"${ENV_CODE}-pipeline-rg"}}
 SYNAPSE_WORKSPACE=${7:-${SYNAPSE_WORKSPACE:-"${ENV_CODE}-pipeline-syn-ws"}}
 SYNAPSE_POOL=${8:-${SYNAPSE_POOL}}
 SYNAPSE_STORAGE_ACCOUNT=${9:-${SYNAPSE_STORAGE_ACCOUNT}}
-
+DATA_RESOURCE_GROUP=${10:-${DATA_RESOURCE_GROUP:-"${ENV_CODE}-data-rg"}}
 
 if [[ "$AI_MODEL_INFRA_TYPE" != "batch-account" ]] && [[ "$AI_MODEL_INFRA_TYPE" != "aks" ]]; then
   echo "Invalid value for AI_MODEL_INFRA_TYPE! Supported values are 'aks' and 'batch-account'."
@@ -47,7 +47,7 @@ if [[ -n $SYNAPSE_STORAGE_ACCOUNT ]]; then
     # create a container to upload the spark job python files
     az storage container create --name "spark-jobs" --account-name ${SYNAPSE_STORAGE_ACCOUNT}
     # uploads the spark job python files
-    az storage blob upload-batch --destination "spark-jobs" --account-name ${SYNAPSE_STORAGE_ACCOUNT} --source "${PRJ_ROOT}/src/transforms/spark-jobs"
+    az storage blob upload-batch --destination "spark-jobs" --account-name ${SYNAPSE_STORAGE_ACCOUNT} --source "${PRJ_ROOT}/src/transforms/spark-jobs" --overwrite
 fi
 
 if [[ "$AI_MODEL_INFRA_TYPE" == "batch-account" ]]; then
@@ -76,6 +76,52 @@ if [[ "$AI_MODEL_INFRA_TYPE" == "batch-account" ]]; then
     fi
 elif [[ "$AI_MODEL_INFRA_TYPE" == "aks" ]]; then
     echo "Selected AI model processing infra-type: AKS!!!"
-fi
+    AKS_NAMESPACE=vision
+    PV_SUFFIX=fileshare
+    PV_NAME="${ENV_CODE}-${AKS_NAMESPACE}-${PV_SUFFIX}"
+
+    RAW_STORAGE_ACCT=$(az storage account list --query "[?tags.store && tags.store == 'raw'].name" -o tsv -g $DATA_RESOURCE_GROUP)
+    RAW_STORAGE_KEY=$(az storage account keys list --resource-group $DATA_RESOURCE_GROUP --account-name $RAW_STORAGE_ACCT --query "[0].value" -o tsv)
+    FILE_SHARE_NAME=$(az storage share list --account-key $RAW_STORAGE_KEY --account-name $RAW_STORAGE_ACCT --query "[].name" -o tsv)
+
+    AKS_CLUSTER_NAME=$(az aks list -g ${ENV_CODE}-orc-rg --query "[?tags.type && tags.type == 'k8s'].name" -otsv)
+    counter=0
+    while [[ ${AKS_CLUSTER_NAME} == '' ]];
+    do
+        if [[ $counter -gt 4 ]]; then
+            echo "Failed to get AKS cluster name"
+            break
+        fi
+        sleep 60
+        AKS_CLUSTER_NAME=$(az aks list -g ${ENV_CODE}-orc-rg --query "[?tags.type && tags.type == 'k8s'].name" -otsv)
+        counter=$((counter+1))
+    done
+    # force to provision aks-command namespace
+    az aks command invoke -g ${ENV_CODE}-orc-rg -n ${AKS_CLUSTER_NAME} -c "kubectl get ns"
+    az aks get-credentials --resource-group ${ENV_CODE}-orc-rg --name ${AKS_CLUSTER_NAME} --context ${AKS_CLUSTER_NAME} --overwrite-existing
+    kubectl config set-context ${AKS_CLUSTER_NAME}
+
+    # create vison namespace
+    AKS_NAMESPACE=$AKS_NAMESPACE \
+      envsubst < "$PRJ_ROOT/deploy/kube_yaml/namespace.yaml" | kubectl apply -f -
+    
+    # create storage secret
+    AKS_NAMESPACE=$AKS_NAMESPACE \
+    RAW_STORAGE_ACCT=$RAW_STORAGE_ACCT \
+    RAW_STORAGE_KEY=$RAW_STORAGE_KEY \
+      envsubst < "$PRJ_ROOT/deploy/kube_yaml/storage_secret.yaml" | kubectl -n $AKS_NAMESPACE apply -f -
+    
+    # create pv
+    AKS_NAMESPACE=$AKS_NAMESPACE \
+    PV_NAME=$PV_NAME \
+    DATA_RESOURCE_GROUP=$DATA_RESOURCE_GROUP \
+    FILE_SHARE_NAME=$FILE_SHARE_NAME \
+      envsubst < "$PRJ_ROOT/deploy/kube_yaml/pv.yaml" | kubectl -n $AKS_NAMESPACE apply -f -
+    
+    # create pvc
+    AKS_NAMESPACE=$AKS_NAMESPACE \
+    PV_NAME=$PV_NAME \
+      envsubst < "$PRJ_ROOT/deploy/kube_yaml/pvc.yaml" | kubectl -n $AKS_NAMESPACE apply -f -
+fi # end of "$AI_MODEL_INFRA_TYPE" == "aks"
 
 echo "configuration completed!"
