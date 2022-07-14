@@ -54,11 +54,11 @@ The instructions on this page will guide you through configuring the pipeline te
  
     ![](./images/7.png)
 
-1. When all the required fields are provided as shown on the right side of the image below, go ahead and publish.
+4. When all the required fields are provided as shown on the right side of the image below, go ahead and publish.
 
     ![](./images/8.png)
 
-2. When published successfully, you are just one step away from running the pipeline. Enable the Integration Runtime by moving the **Data flow debug** toggle button. While this is warming up, enter the value for the parameters.
+5. When published successfully, you are just one step away from running the pipeline. Enable the Integration Runtime by moving the **Data flow debug** toggle button. While this is warming up, enter the value for the parameters.
 
    ![](./images/9.png) 
    
@@ -74,5 +74,5 @@ The instructions on this page will guide you through configuring the pipeline te
     | 7|SparkPoolName | pool<6-character-random-string>| Get the spark pool name from \<environmentCode>-pipeline-rg | 
     | 8|EnvCode | \<environmentCode> | Same as used in the deployment steps| 
 
-3. All set to start the pipeline now. Press **Debug**.
+6. All set to start the pipeline now. Press **Debug**.
 
