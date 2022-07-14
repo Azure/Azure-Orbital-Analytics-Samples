@@ -32,6 +32,8 @@ The instructions on this page will guide you through configuring the pipeline te
     ![](./images/2.png)
 
 3. On the right side, there is a list of mandatory fields. Click each of them and select the respective names from the dropdown as shown below. This additional step is only interim; we are working with the Synapse product group for a long term fix.
+   
+   NOTE: It may not be the exact list as shown below, configure the names on the one's that show up.
 
 - Transforms
 
