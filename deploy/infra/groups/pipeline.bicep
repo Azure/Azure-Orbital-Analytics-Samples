@@ -8,7 +8,6 @@ param projectName string
 param location string
 
 // Name parameters for infrastructure resources
-param synapseResourceGroupName string = ''
 param keyvaultName string = ''
 param synapseHnsStorageAccountName string = ''
 param synapseWorkspaceName string = ''
@@ -48,7 +47,7 @@ param synapseFirewallAllowStartIP string = '0.0.0.0'
 param synapseAutoPauseEnabled bool = true
 param synapseAutoPauseDelayInMinutes int = 15
 param synapseAutoScaleEnabled bool = true
-param synapseAutoScaleMinNodeCount int = 1
+param synapseAutoScaleMinNodeCount int = 3
 param synapseAutoScaleMaxNodeCount int = 5
 param synapseCacheSize int = 0
 param synapseDynamicExecutorAllocationEnabled bool = false
@@ -86,11 +85,10 @@ param synapseMIStorageAccountRoles array = [
 param logAnalyticsWorkspaceId string
 
 var namingPrefix = '${environmentCode}-${projectName}'
-var synapseResourceGroupNameVar = empty(synapseResourceGroupName) ? '${namingPrefix}-rg' : synapseResourceGroupName
-var nameSuffix = substring(uniqueString(synapseResourceGroupNameVar), 0, 6)
-var keyvaultNameVar = empty(keyvaultName) ? '${namingPrefix}-kv' : keyvaultName
+var nameSuffix = substring(uniqueString(guid('${subscription().subscriptionId}${namingPrefix}${environmentTag}${location}')), 0, 10)
+var keyvaultNameVar = empty(keyvaultName) ? 'kvp${nameSuffix}' : keyvaultName
 var synapseHnsStorageAccountNameVar = empty(synapseHnsStorageAccountName) ? 'synhns${nameSuffix}' : synapseHnsStorageAccountName
-var synapseWorkspaceNameVar = empty(synapseWorkspaceName) ? '${namingPrefix}-syn-ws' : synapseWorkspaceName
+var synapseWorkspaceNameVar = empty(synapseWorkspaceName) ? 'synws${nameSuffix}' : synapseWorkspaceName
 var synapseSparkPoolNameVar = empty(synapseSparkPoolName) ? 'pool${nameSuffix}' : synapseSparkPoolName
 var synapseSqlAdminLoginPasswordVar = empty(synapseSqlAdminLoginPassword) ? 'SynapsePassword!${nameSuffix}' : synapseSqlAdminLoginPassword
 
@@ -248,3 +246,4 @@ module pkgDataStorageAccountCredentials '../modules/storage.credentials.to.keyva
 }
 
 output synapseMIPrincipalId string = synapseWorkspace.outputs.synapseMIPrincipalId
+output pipelineLinkedSvcKeyVaultName string = keyvaultNameVar

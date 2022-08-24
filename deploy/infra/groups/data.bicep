@@ -8,7 +8,6 @@ param projectName string
 param location string
 
 // Name parameters for infrastructure resources
-param dataResourceGroupName string = ''
 param pipelineResourceGroupName string = ''
 param pipelineLinkedSvcKeyVaultName string = ''
 param keyvaultName string = ''
@@ -64,18 +63,14 @@ param geoRedundantBackup string = 'Disabled'
 
 param postgresAdminPasswordSecretName string = 'PostgresAdminPassword'
 param utcValue string = utcNow()
-
+var namingPrefix = '${environmentCode}-${projectName}'
+var nameSuffix = substring(uniqueString(guid('${subscription().subscriptionId}${namingPrefix}${environmentTag}${location}')), 0, 10)
 var postgresAdminLoginPassVar = empty(postgresAdminLoginPass) ? '${uniqueString(resourceGroup().id)}!' : postgresAdminLoginPass
 var administratorLoginVar = empty(administratorLogin) ? '${environmentCode}_admin_user' : administratorLogin
-var serverNameVar = empty(serverName) ? '${environmentCode}-pg-server' : serverName
-
+var serverNameVar = empty(serverName) ? 'pg${nameSuffix}' : serverName
 param uamiName string = ''
-var uamiNameVar = empty(uamiName) ? '${namingPrefix}-umi' : uamiName
-
-var namingPrefix = '${environmentCode}-${projectName}'
-var dataResourceGroupNameVar = empty(dataResourceGroupName) ? '${namingPrefix}-rg' : dataResourceGroupName
-var nameSuffix = substring(uniqueString(dataResourceGroupNameVar), 0, 6)
-var keyvaultNameVar = empty(keyvaultName) ? '${namingPrefix}-kv' : keyvaultName
+var uamiNameVar = empty(uamiName) ? '${namingPrefix}${nameSuffix}-umi' : uamiName
+var keyvaultNameVar = empty(keyvaultName) ? 'kvd${nameSuffix}' : keyvaultName
 var rawDataStorageAccountNameVar = empty(rawDataStorageAccountName) ? 'rawdata${nameSuffix}' : rawDataStorageAccountName
 module keyVault '../modules/akv.bicep' = {
   name: '${namingPrefix}-akv'
@@ -226,7 +221,7 @@ module deleteContainerForTableCreation '../modules/aci.delete.bicep' = if(deploy
   params: {
     location: location
     aciName: '${namingPrefix}-container'
-    uamiName: '${namingPrefix}-umi'
+    uamiName: uamiNameVar
   }
   dependsOn: [
     createContainerForTableCreation

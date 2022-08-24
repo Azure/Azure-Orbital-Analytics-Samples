@@ -227,9 +227,9 @@ Following is the list of resource-groups and resources that should be created if
 
     This resource group houses data resources.
 
-    - Storage account named `rawdata<6-character-random-string>` to store raw input data for pipelines.
-    - Keyvault named `aoi-data-kv` to store credentials as secrets.
-    - Postgres Single Server DB named `aoi-pg-server`
+    - Storage account named `rawdata<10-character-random-string>` to store raw input data for pipelines.
+    - Keyvault named `kvd<10-character-random-string>` to store credentials as secrets.
+    - Postgres Single Server DB named `pg<<10-character-random-string>>`
 
 - `aoi-monitor-rg`
 
@@ -253,8 +253,8 @@ Following is the list of resource-groups and resources that should be created if
 
     This resource group houses pipeline orchestration resources.
 
-    - Storage account named `batchacc<6-character-random-string>` for batch account.
-    - Batch Account named `aoiorcbatchact`.
+    - Storage account named `batchacc<10-character-random-string>` for batch account.
+    - Batch Account named `batchact<10-character-random-string>`.
 
         Also, go to the Batch Account and switch to the pools blade. Look for one or more pools created by the bicep template. Make sure the resizing of the pool is completed without any errors. 
         
@@ -265,18 +265,18 @@ Following is the list of resource-groups and resources that should be created if
 
         Note: The Bicep template adds the Synapse workspace's Managed Identity to the Batch Account as `Contributor`. Alternatively, Custom Role Definitions can be used to assign the Synapse workspace's Managed Identity to the Batch Account with required Azure RBAC operations.
 
-    - Keyvault named `aoi-orc-kv`.
+    - Keyvault named `kvo<10-character-random-string>`.
     - User managed identity `aoi-orc-umi` for access and authentication.
-    - Azure Container registry instance named `aoiorcacr` to store container images.
+    - Azure Container registry instance named `acr<10-character-random-string>` to store container images.
 
 - `aoi-pipeline-rg`
 
     This resource group houses Synapse pipeline resources.
 
-    - Keyvault instance named `aoi-pipeline-kv` to hold secrets for pipeline.
-    - Storage account named `synhns<6-character-random-string>` for Synapse workspace.
-    - Synapse workspace named `aoi-pipeline-syn-ws` to hold pipeline resources.
-    - Synapse spark pool `pool<6-character-random-string>` to run analytics.
+    - Keyvault instance named `kvp<10-character-random-string>` to hold secrets for pipeline.
+    - Storage account named `synhns<10-character-random-string>` for Synapse workspace.
+    - Synapse workspace named `synws<10-character-random-string>` to hold pipeline resources.
+    - Synapse spark pool `pool<10-character-random-string>` to run analytics.
 
 
 ## Load the Custom Vision Model to your Container Registry
