@@ -17,7 +17,7 @@ SOURCE_CONTAINER_NAME=${7:-${SOURCE_CONTAINER_NAME:-${PIPELINE_NAME}}}
 SOURCE_STORAGE_ACCOUNT_NAME=${8:-${SOURCE_STORAGE_ACCOUNT_NAME:-"pipelineciresources"}}
 SOURCE_STORAGE_ACCOUNT_RG_NAME=${9:-${SOURCE_STORAGE_ACCOUNT_RG_NAME:-"ci-resources"}}
 SYNAPSE_RESOURCE_GROUP_NAME=${10:-${SYNAPSE_RESOURCE_GROUP_NAME:-"${ENV_CODE}-pipeline-rg"}}
-SYNAPSE_WORKSPACE_NAME=${11:-${SYNAPSE_WORKSPACE_NAME:-"${ENV_CODE}-pipeline-syn-ws"}}
+SYNAPSE_WORKSPACE_NAME=${11:-${SYNAPSE_WORKSPACE_NAME}}
 BATCH_JOB_NAME=${12:-${BATCH_JOB_NAME:-"${ENV_CODE}-data-cpu-pool"}}
 AOI_PARAMETER_VALUE=${13:-${AOI_PARAMETER_VALUE:-"-117.063550 32.749467 -116.999386 32.812946"}}
 PIPELINE_FILE_NAME=${14:-${PIPELINE_FILE_NAME:-"E2E Custom Vision Model Flow.json"}}
@@ -42,6 +42,9 @@ if [[ -z "$SOURCE_STORAGE_ACCOUNT_KEY" ]]; then
     SOURCE_STORAGE_ACCOUNT_KEY=$(az storage account keys list --resource-group ${SOURCE_STORAGE_ACCOUNT_RG_NAME} --account-name ${SOURCE_STORAGE_ACCOUNT_NAME} --query "[0].value" --output tsv)
 fi
 
+if [[ -z "$SYNAPSE_WORKSPACE_NAME" ]]; then
+    SYNAPSE_WORKSPACE_NAME=$(az synapse workspace list --query "[?tags.workspaceId && tags.workspaceId == 'default'].name" -o tsv -g ${SYNAPSE_RESOURCE_GROUP_NAME})
+fi
 # Create container in destination storage account
 echo "Creating container ${DESTINATION_CONTAINER_NAME} on storage account ${DESTINATION_STORAGE_ACCOUNT_NAME}"
 az storage container create --name ${DESTINATION_CONTAINER_NAME} --account-name ${DESTINATION_STORAGE_ACCOUNT_NAME} --account-key ${STORAGE_ACCOUNT_KEY}

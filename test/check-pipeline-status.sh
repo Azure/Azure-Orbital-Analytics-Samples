@@ -9,6 +9,7 @@ ENV_CODE=${1:-${ENV_CODE}}
 PIPELINE_RUN_ID=${2:-${PIPELINE_RUN_ID}}
 SYNAPSE_WORKSPACE_NAME=${3:-${SYNAPSE_WORKSPACE_NAME}}
 SLEEP_TIME_BETWEEN_CHECK_STATUS=${4:-${SLEEP_TIME_BETWEEN_CHECK_STATUS:-300}}
+SYNAPSE_WORKSPACE_RG=${5:-${SYNAPSE_WORKSPACE_RG:-"${ENV_CODE}-pipeline-rg"}}
 
 if [[ -z "$ENV_CODE" ]]
   then
@@ -17,7 +18,7 @@ if [[ -z "$ENV_CODE" ]]
 fi
 
 if [[ -z "$SYNAPSE_WORKSPACE_NAME" ]]; then
-    SYNAPSE_WORKSPACE_NAME="${ENV_CODE}-pipeline-syn-ws"
+    SYNAPSE_WORKSPACE_NAME=$(az synapse workspace list --query "[?tags.workspaceId && tags.workspaceId == 'default'].name" -o tsv -g ${SYNAPSE_WORKSPACE_RG})
 fi
 if [[ -z "$SLEEP_TIME_BETWEEN_CHECK_STATUS" ]]; then
     SLEEP_TIME_BETWEEN_CHECK_STATUS=60

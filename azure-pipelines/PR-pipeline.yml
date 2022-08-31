@@ -72,11 +72,12 @@ jobs:
         DEPLOY_PGSQL=${USE_POSTGRE_SQL} $(System.DefaultWorkingDirectory)/deploy/setup.sh ${ENV_CODE} eastus custom-vision-model-v2 ${ENV_CODE}-environment ${CI_BATCH_ACCOUNT_NAME}
 
         # Grant access on Synapse workspace to resource owner azure account
-        echo "Granting access to resource owner azure account on synapse workspace ${ENV_CODE}-pipeline-syn-ws"
-        az synapse role assignment create --workspace-name ${ENV_CODE}-pipeline-syn-ws --role "Synapse Administrator" --assignee $(az account show --query 'user.name' -o tsv)
+        SYNAPSE_WORKSPACE_NAME=$(az synapse workspace list --query "[?tags.workspaceId && tags.workspaceId == 'default'].name" -o tsv -g "${ENV_CODE}-pipeline-rg")
+        echo "Granting access to resource owner azure account on synapse workspace ${SYNAPSE_WORKSPACE_NAME}"
+        az synapse role assignment create --workspace-name ${SYNAPSE_WORKSPACE_NAME} --role "Synapse Administrator" --assignee $(az account show --query 'user.name' -o tsv)
         # Granting access on Synapse workspace for AAD group
-        echo "Granting access to the AAD group on synapse workspace ${ENV_CODE}-pipeline-syn-ws"
-        az synapse role assignment create --workspace-name ${ENV_CODE}-pipeline-syn-ws --role "Synapse Administrator" --assignee ${AAD_GROUP_PRINCIPAL_ID}
+        echo "Granting access to the AAD group on synapse workspace ${SYNAPSE_WORKSPACE_NAME}"
+        az synapse role assignment create --workspace-name ${SYNAPSE_WORKSPACE_NAME} --role "Synapse Administrator" --assignee ${AAD_GROUP_PRINCIPAL_ID}
 
         # Setup and Run Tests
         BATCH_ACCOUNT_NAME=${CI_BATCH_ACCOUNT_NAME} SOURCE_STORAGE_ACCOUNT_NAME=${CI_STORAGE_ACCOUNT_NAME} $(System.DefaultWorkingDirectory)/test/deploy-prepare-and-test-pipeline.sh ${ENV_CODE}

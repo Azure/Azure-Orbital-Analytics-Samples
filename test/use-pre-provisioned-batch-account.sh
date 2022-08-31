@@ -35,8 +35,8 @@ DESTINATION_BATCH_ACCOUNT_RG_NAME=$(az resource show --ids ${DESTINATION_BATCH_A
 DESTINATION_BATCH_ACCOUNT_STORAGE_ACCOUNT_NAME=$(az storage account list --resource-group $DESTINATION_BATCH_ACCOUNT_RG_NAME --query [0].name -o tsv)
 BATCH_POOL_MOUNT_STORAGE_ACCOUNT_RG_NAME="${ENV_CODE}-data-rg"
 BATCH_POOL_MOUNT_STORAGE_ACCOUNT_NAME=$(az storage account list --resource-group $BATCH_POOL_MOUNT_STORAGE_ACCOUNT_RG_NAME --query [0].name -o tsv)
-SOURCE_SYNAPSE_WORKSPACE_NAME="${ENV_CODE}-pipeline-syn-ws"
 SOURCE_SYNAPSE_WORKSPACE_RG_NAME="${ENV_CODE}-pipeline-rg"
+SOURCE_SYNAPSE_WORKSPACE_NAME=$(az synapse workspace list --query "[?tags.workspaceId && tags.workspaceId == 'default'].name" -o tsv -g ${SOURCE_SYNAPSE_WORKSPACE_RG_NAME})
 
 # Verify that infrastructure and batch account are in same location
 BATCH_ACCOUNT_LOCATION=$(az batch account show  --name ${DESTINATION_BATCH_ACCOUNT_NAME} --resource-group ${DESTINATION_BATCH_ACCOUNT_RG_NAME} --query "location" --output tsv)
@@ -51,7 +51,8 @@ python3 ${PRJ_ROOT}/test/batch_account.py \
     --env_code ${ENV_CODE} \
     --target_batch_account_name ${DESTINATION_BATCH_ACCOUNT_NAME} \
     --target_batch_account_resource_group_name ${DESTINATION_BATCH_ACCOUNT_RG_NAME} \
-    --batch_account_role ${DESTINATION_BATCH_ACCOUNT_ROLE}
+    --batch_account_role ${DESTINATION_BATCH_ACCOUNT_ROLE} \
+    --source_synapse_workspace_name ${SOURCE_SYNAPSE_WORKSPACE_NAME}
 
 # Deploy Batch Pool
 BATCH_POOL_MOUNT_STORAGE_ACCOUNT_KEY=$(az storage account keys list --resource-group ${BATCH_POOL_MOUNT_STORAGE_ACCOUNT_RG_NAME} --account-name ${BATCH_POOL_MOUNT_STORAGE_ACCOUNT_NAME} --query "[0].value" --output tsv)
@@ -59,12 +60,13 @@ BATCH_POOL_MOUNT_STORAGE_ACCOUNT_FILE_URL=$(az storage account show --resource-g
 
 echo
 echo "Deploying batch pool \"${DESTINATION_BATCH_ACCOUNT_POOL_NAME}\" on batch account \"${DESTINATION_BATCH_ACCOUNT_NAME}\""
+ACR_NAME=$(az acr list --resource-group "${ENV_CODE}-orc-rg" --query "[0].name" --output tsv)
 az deployment group create --resource-group "${ENV_CODE}-orc-rg" \
     --template-file ${PRJ_ROOT}/deploy/infra/create_cpu_batch_account_pool.bicep \
     --parameters \
         environmentCode=${ENV_CODE} \
         projectName="orc" \
-        acrName="${ENV_CODE}orcacr"\
+        acrName="${ACR_NAME}"\
         batchAccountName=${DESTINATION_BATCH_ACCOUNT_NAME} \
         batchAccountResourceGroup=${DESTINATION_BATCH_ACCOUNT_RG_NAME} \
         batchAccountCpuOnlyPoolName="${DESTINATION_BATCH_ACCOUNT_POOL_NAME}" \
