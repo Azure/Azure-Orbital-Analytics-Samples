@@ -229,7 +229,7 @@ Following is the list of resource-groups and resources that should be created if
 
     - Storage account named `rawdata<10-character-random-string>` to store raw input data for pipelines.
     - Keyvault named `kvd<10-character-random-string>` to store credentials as secrets.
-    - Postgres Single Server DB named `pg<<10-character-random-string>>`
+    - Postgres Single Server DB named `pg<10-character-random-string>`
 
 - `aoi-monitor-rg`
 
