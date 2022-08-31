@@ -9,8 +9,8 @@ The deployment script uses following tools, please follow the links provided to 
 
 - The scripts are executed on bash shell, so if using a computer with windows based operating system, install a [WSL](https://docs.microsoft.com/windows/wsl/about) environment to execute the script.
 
-- The user performing the deployment of the bicep template and the associated scripts should have `Contributor` role assigned at the subscription to which the resources are being deployed.
-
+- The user performing the deployment of the bicep template and the associated scripts should have `Owner` role assigned at the subscription to which the resources are being deployed.
+- The bicep templates have been written to adhere to the syntax and rules for bicep version >= 0.8.9. Please check your bicep version using `az bicep version` or `bicep --version` if you run into bicep related errors.
 - This solution assumes no interference from Policies deployed to your tenant preventing resources from being deployed. 
 
 - Get the repository to find the scripts. Clone the repository using following command.
