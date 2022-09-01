@@ -147,7 +147,7 @@ module dataModule 'groups/data.bicep' = {
     environmentTag: environment
     synapseMIPrincipalId: pipelineModule.outputs.synapseMIPrincipalId
     pipelineResourceGroupName: pipelineResourceGroup.name
-    pipelineLinkedSvcKeyVaultName: '${environmentCode}-${pipelineModulePrefix}-kv'
+    pipelineLinkedSvcKeyVaultName: pipelineModule.outputs.pipelineLinkedSvcKeyVaultName
     deployPgSQL: deployPgSQL
     postgresAdminLoginPass: postgresAdminLoginPass
   }
@@ -183,7 +183,7 @@ module orchestrationModule 'groups/orchestration.bicep' = {
     mountAccountName: dataModule.outputs.rawStorageAccountName
     mountFileUrl: '${dataModule.outputs.rawStorageFileEndpointUri}volume-a'
     pipelineResourceGroupName: pipelineResourceGroup.name
-    pipelineLinkedSvcKeyVaultName: '${environmentCode}-${pipelineModulePrefix}-kv'
+    pipelineLinkedSvcKeyVaultName: pipelineModule.outputs.pipelineLinkedSvcKeyVaultName
     synapseMIPrincipalId: pipelineModule.outputs.synapseMIPrincipalId
   }
   dependsOn: [

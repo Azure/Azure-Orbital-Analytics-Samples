@@ -55,7 +55,8 @@ do
         fi
         # Create the linked services and spark job definition on Synapse workspace
         echo "Creating ${item} please wait.."
-        az synapse "${item}" create --workspace-name "${ENV_CODE}-pipeline-syn-ws" \
+        SYNAPSE_WORKSPACE_NAME=$(az synapse workspace list --query "[?tags.workspaceId && tags.workspaceId == 'default'].name" -o tsv -g "${ENV_CODE}-pipeline-rg")
+        az synapse "${item}" create --workspace-name "${SYNAPSE_WORKSPACE_NAME}" \
             --name "${file_name}" --file @"${full_name}"
     done
 done

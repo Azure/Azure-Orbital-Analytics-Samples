@@ -16,7 +16,6 @@ param synapseMIBatchAccountRoles array = [
 ]
 
 // Name parameters for infrastructure resources
-param orchestrationResourceGroupName string = ''
 param keyvaultName string = ''
 param batchAccountName string = ''
 param batchAccountAutoStorageAccountName string = ''
@@ -104,16 +103,15 @@ param appInsightsInstrumentationKey string
 param acrSku string = 'Standard'
 
 var namingPrefix = '${environmentCode}-${projectName}'
-var orchestrationResourceGroupNameVar = empty(orchestrationResourceGroupName) ? '${namingPrefix}-rg' : orchestrationResourceGroupName
-var nameSuffix = substring(uniqueString(orchestrationResourceGroupNameVar), 0, 6)
+var nameSuffix = substring(uniqueString(guid('${subscription().subscriptionId}${namingPrefix}${environmentTag}${location}')), 0, 10)
 var uamiNameVar = empty(uamiName) ? '${namingPrefix}-umi' : uamiName
-var keyvaultNameVar = empty(keyvaultName) ? '${namingPrefix}-kv' : keyvaultName
-var batchAccountNameVar = empty(batchAccountName) ? '${environmentCode}${projectName}batchact' : batchAccountName
+var keyvaultNameVar = empty(keyvaultName) ? 'kvo${nameSuffix}' : keyvaultName
+var batchAccountNameVar = empty(batchAccountName) ? 'batchact${nameSuffix}' : batchAccountName
 var batchAccountAutoStorageAccountNameVar = empty(batchAccountAutoStorageAccountName) ? 'batchacc${nameSuffix}' : batchAccountAutoStorageAccountName
-var acrNameVar = empty(acrName) ? '${environmentCode}${projectName}acr' : acrName
-var aksClusterNameVar = empty(aksClusterName) ? '${environmentCode}${projectName}aks' : aksClusterName
+var acrNameVar = empty(acrName) ? 'acr${nameSuffix}' : acrName
+var aksClusterNameVar = empty(aksClusterName) ? 'aks${nameSuffix}' : aksClusterName
 var functionStorageAccountNameVar = empty(functionStorageAccountName) ? 'funxacc${nameSuffix}' : functionStorageAccountName
-var functionAppNameVar = empty(functionAppName) ? '${namingPrefix}-fapp' : functionAppName
+var functionAppNameVar = empty(functionAppName) ? 'fapp${nameSuffix}' : functionAppName
 
 var deployBatchAccount = deployAiModelInfra && (aiModelInfraType=='batch-account')
 var deployAksCluster = deployAiModelInfra && (aiModelInfraType=='aks')

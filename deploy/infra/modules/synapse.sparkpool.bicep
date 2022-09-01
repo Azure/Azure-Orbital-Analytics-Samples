@@ -8,7 +8,7 @@ param sparkPoolName string
 param autoPauseEnabled bool = true
 param autoPauseDelayInMinutes int = 15
 param autoScaleEnabled bool = true
-param autoScaleMinNodeCount int = 1
+param autoScaleMinNodeCount int = 3
 param autoScaleMaxNodeCount int = 5
 param cacheSize int = 0 
 param dynamicExecutorAllocationEnabled bool = false

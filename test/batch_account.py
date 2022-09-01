@@ -12,6 +12,7 @@ parser.add_argument('--env_code', type=str, required=True, help='Environment cod
 parser.add_argument('--target_batch_account_name', type=str, required=True, help='Name of pre-provisioned Batch Account')
 parser.add_argument('--target_batch_account_resource_group_name', type=str, required=True, help='Resource group name of pre-provisioned Batch Account')
 parser.add_argument('--batch_account_role', type=str, required=False, default='Contributor', help='Role to be granted on batch account')
+parser.add_argument('--source_synapse_workspace_name', type=str, required=True, help='Source Synapse workspace Name')
 args = parser.parse_args()
 
 def execute_azure_cli_command(az_cli_command):
@@ -33,7 +34,7 @@ def assign_access_for_batch_account_to_principal_id(principal_id, batch_account_
         return role_assignment_error
 
 if __name__ == "__main__":
-    source_synapse_workspace_name = args.env_code + "-pipeline-syn-ws"
+    source_synapse_workspace_name = args.source_synapse_workspace_name
     source_synapse_workspace_resource_group_name = args.env_code + "-pipeline-rg"
 
     synapse_managed_identity_query_command = "az synapse workspace show --name " + source_synapse_workspace_name +" --resource-group " + source_synapse_workspace_resource_group_name
