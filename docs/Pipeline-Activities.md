@@ -1,0 +1,110 @@
+# Pipeline Activities
+
+The purpose of this document is to provide a detailed walkthrough of the Synapse pipeline including the child pipelines, activities and their parameters. As we discuss each pipeline, their corresponding pipeline and supporting files checked in this repository will be linked under each topic. 
+
+## Main Pipeline
+
+Two versions of the pipeline are available. 
+
+a. First version of the [pipeline](../src/workflow/custom-vision-model-v2/pipeline/E2E%20Custom%20Vision%20Model%20Flow.json) uses [Azure Batch Account]() to run AI Model as a container to process the raster data and provide the output. 
+b. Second version of the [pipeline](../src/workflow/custom-vision-model-v2/pipeline/E2E%20Custom%20Vision%20Model%20Flow_aks.json) uses [Azure Kubernetes Service (AKS)]() to run AI Model as a container to process the raster data and provide the output.
+
+You have the option to pick which Azure service will be used to run the AI Model at the time of deployment. Refer to the [README.md](../deploy/README.md) document to understand the deployment steps and options available during deployment.
+
+The main pipeline contains two steps. 
+
+- It starts by invoking the [Custom Vision Object Transform v2](../src/workflow/custom-vision-model-v2/pipeline/Custom%20Vision%20Model%20Transforms%20v2.json) pipeline to transform your data before it can be consumed by the AI Model.
+
+- Next, the [Custom Vision Model Transform v2](../src/workflow/custom-vision-model-v2/pipeline/Custom%20Vision%20Object%20Detection%20v2.json) or [Custom Vision Model Transform v2_aks](../src/workflow/custom-vision-model-v2/pipeline/Custom%20Vision%20Object%20Detection%20v2_aks.json) pipeline is triggered to process the data through the AI Model running as container in either Azure Batch Account or Azure Kubernetes Services respectively. 
+
+For Custom Vision model, the output is a set of JSON files that contains the location of the swimming pools detected in the image passed to the AI Model as 512 by 512 images. 
+
+The final steps is to process the location of the detected swimming pools into geolocation (latitude, longitude). This will be explained in detailed later in this document as we dive deeper into each child pipeline.
+
+
+## Custom Vision Model Transform
+
+This is a simple, one-activity pipeline that serves one purpose. It transforms the raw raster geotiff (Aerial Imagery) and outputs a set of 512 by 512 tiles of PNG file format. 
+
+To convert the raw raster geotiff, it first stitches the geotiff (in case there are more than one geotiff to be processed), crops the geotiff to the Area of Interest, converts geotiff to PNG and finally tiles them to 512 by 512 sizes.
+
+Below are the parameters for this pipeline:
+
+No | Parameter | Purpose 
+---|------|----------
+1 | Prefix | This refers to the Storage Account Container created for the specific pipeline run. Refer to the [README.md](../deploy/README.md) document to understand the steps to run the pipeline.
+2 | StorageAccountName | Name of the Storage Account where the data is stored
+3 | AOI | Area of Interest refers to specific geographic extent to focus the analysis
+
+Inside the pipeline, there is one activity that submits a Spark Job to the Azure Synapse Spark Pool provisioned by the Bicep template. The Spark Job takes the below parameters as input:
+
+No | Parameter | Purpose 
+---|------|----------
+1 | storage_account_name | Name of the Storage Account where the data is stored
+2 | storage_container | Name of the Container in the Storage Account where the data is stored
+3 | key_vault_name | Name of the Key Vault where the secrets related to the pipeline are stored. There is only one Key Vault provisioned through the Bicep template. This is the Key Vault that will be used for all pipeline related secrets
+4 | storage_account_key_secret_name | Account Key for the Storage Account is stored as a secret in Key Vault. This parameter is used to pass the name of the secret in the Key Vault that holds the account key
+5 | linked_service_name | Synapse allows adding certain services like Key Vault, Storage Account, etc as Linked Service. This parameters is used to pass the name of the Key Vault added to the Synapse instance as linked service. 
+6 | aoi | Area of Interest refers to specific geographic extent to focus the analysis
+
+
+
+
+## Custom Vision Model Transforms (Using Azure Batch Account)
+
+This is the core of the pipeline where the actual AI Model is run against the data submitted to the pipeline. The steps prior to this pipeline, prepares the data to be in a format that is consumable by the AI Model.
+
+The AI Model is packaged as a Container Image that is publicly available to be pulled and run locally on your Azure Batch Account or Azure Kubernetes Service.
+
+Below are the parameters for this pipeline:
+
+No | Parameter | Purpose 
+---|------|----------
+1 | Prefix | This refers to the Storage Account Container created for the specific pipeline run. Refer to the [README.md](../deploy/README.md) document to understand the steps to run the pipeline.
+2 | BatchName | Name of the Batch Account where the AI Model container will be run
+3 | JobName | Name of the Job inside the Batch Account where the AI Model container will be run
+4 | BatchLocation | Location/Region where the Batch Account is provisioned. For Example - for East US region, use eastus
+5 | StorageAccountName | Name of the Storage Account where the data is stored
+
+![Detection Pipeline](./images/detection-pipeline.png)
+
+1. Read Spec Document
+
+As the name suggests, this activity read the spec (specification) document. 
+
+A specification document is a JSON file that defines the environment specifications for running the AI Model container. It includes location of the image, credentials to pull the image, path to look for input file, output file path, log file path, CPU, GPU and memory among other parameters that define the minimal runtime environment.
+
+Data read from the spec document will be used as paramter to one or more of the activities in the later part of the pipeline.
+
+No | Parameter | Purpose 
+---|------|----------
+1 | 
+
+2. Copy and Delete File(s)
+
+Data for the AI Model is in a Container in Azure Storage Account. For the AI Model, the data needs to be copied to a File Share in Azure Storage Account. This set of steps serves to copy the input files from the Containers to File Shares in the Storage Account.
+
+There is also a need to create empty Folders like output folder and log folder what will be used by the AI Model to store the outputs and logs after running the AI Model. However, since ADF Activities do not allow create of empty folder, we create placeholder files under the folder and then delete the placeholder file to create the empty folder.
+
+3. Custom Vision kick off
+
+During this step, the container is scheduled in Azure Batch Account to run as a task. This is done by calling the Azure Batch Account API and sending the parameters required. 
+
+4. Wait for Custom Vision
+
+The previous step kicks off the task in Azure Batch Account and exits. AI Model takes several minutes to hours to complete depending on the input file sizes. This steps monitors the AI Model running in the Azure Batch Account to check if they are complete. This set of activities are set to run in a loop and exit only if the AI Model completes.
+
+5. Copy File(s)
+
+At this stage of the pipeline, the AI Model is run and the output is available in File Share in Azure Storage Account. It needs to be copied from File Share to Container in Azure Storage Account. This step copies the output in JSON and XML format to the container in Azure Storage Account.
+
+6. Pool Geolocation
+
+The output from running the AI Model (Custom Vision Model) gives the location of the Swimming pool in the tiles in terms of pixel location. This step converts the pixel location of the detected objects to the geolocation (latitude, longitude).
+
+
+
+
+
+
+
