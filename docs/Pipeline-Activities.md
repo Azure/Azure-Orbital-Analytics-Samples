@@ -50,7 +50,7 @@ No | Parameter | Purpose
 
 
 
-## Custom Vision Model Transforms (Using Azure Batch Account)
+## Custom Vision Model Detection (Using Azure Batch Account)
 
 This is the core of the pipeline where the actual AI Model is run against the data submitted to the pipeline. The steps prior to this pipeline, prepares the data to be in a format that is consumable by the AI Model.
 
@@ -125,7 +125,20 @@ No | Parameter | Purpose
 6 | linked_service_name | Name of the Linked Service in Synapse which links the Key Vaults to Synapse
 
 
+## Custom Vision Model Detection (Using Azure Kubernetes Service)
 
+This pipeline is performs the same functionality as the **Custom Vision Model Detection (Using Azure Batch Account)**. However, it uses Azure Kubernetes Service in place of Azure Batch Account to run the AI Model.
 
+The pipeline remains the same as the **Custom Vision Model Detection (Using Azure Batch Account)**. There are two activities that are changes to accomodate the switch from Azure Batch Account to Azure Kubernetes Service. We'll discuss only the components that are different in this pipeline.
 
+**3. Invoke Workload in AKS**
 
+During this step, the container is scheduled in Azure Kubernetes Service to run as a job. This is done by calling the Azure Kubernetes Service API and sending the parameters required.
+
+**Note:** There is no specific custom parameters defined for this activity.
+
+**4. Wait for Custom Vision**
+
+The previous step kicks off the task in Azure Kubernetes Service and exits. AI Model takes several minutes to hours to complete depending on the input file sizes. This steps monitors the AI Model running in the Azure Kubernetes Service to check if they are complete. This set of activities are set to run in a loop and exit only if the AI Model completes.
+
+**Note:** There is no specific custom parameters defined for this activity.
