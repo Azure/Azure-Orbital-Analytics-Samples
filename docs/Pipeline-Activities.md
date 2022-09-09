@@ -4,6 +4,8 @@ The purpose of this document is to provide a detailed walkthrough of the Synapse
 
 ## Main Pipeline
 
+![Main Pipeline](./images/main-pipeline.png)
+
 Two versions of the pipeline are available. 
 
 a. First version of the [pipeline](../src/workflow/custom-vision-model-v2/pipeline/E2E%20Custom%20Vision%20Model%20Flow.json) uses [Azure Batch Account]() to run AI Model as a container to process the raster data and provide the output. 
@@ -23,6 +25,8 @@ The final steps is to process the location of the detected swimming pools into g
 
 
 ## Custom Vision Model Transform
+
+![Transform Pipeline](./images/transform-pipeline.png)
 
 This is a simple, one-activity pipeline that serves one purpose. It transforms the raw raster geotiff (Aerial Imagery) and outputs a set of 512 by 512 tiles of PNG file format. 
 
