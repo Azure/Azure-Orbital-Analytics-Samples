@@ -68,7 +68,7 @@ No | Parameter | Purpose
 
 ![Detection Pipeline](./images/detection-pipeline.png)
 
-1. Read Spec Document
+**1. Read Spec Document**
 
 As the name suggests, this activity read the spec (specification) document. 
 
@@ -78,30 +78,51 @@ Data read from the spec document will be used as paramter to one or more of the 
 
 No | Parameter | Purpose 
 ---|------|----------
-1 | 
+1 | filename | Name of JSON specification document
+2 | folderpath | Name of the folder that contains the JSON specification document. This is relative folder path (relative to the container in Azure Storage Account)
+3 | containername | Name of the container that contains the JSON specification document
 
-2. Copy and Delete File(s)
+**2. Copy and Delete File(s)**
 
 Data for the AI Model is in a Container in Azure Storage Account. For the AI Model, the data needs to be copied to a File Share in Azure Storage Account. This set of steps serves to copy the input files from the Containers to File Shares in the Storage Account.
 
 There is also a need to create empty Folders like output folder and log folder what will be used by the AI Model to store the outputs and logs after running the AI Model. However, since ADF Activities do not allow create of empty folder, we create placeholder files under the folder and then delete the placeholder file to create the empty folder.
 
-3. Custom Vision kick off
+No | Parameter | Purpose 
+---|------|----------
+1 | container_name | Name of the destination container in Azure Storage Account where the files are to be copied
+2 | folder_path | Name of the destination folder in Azure Storage Account where the files are to be copied
 
-During this step, the container is scheduled in Azure Batch Account to run as a task. This is done by calling the Azure Batch Account API and sending the parameters required. 
+**3. Custom Vision kick off**
 
-4. Wait for Custom Vision
+During this step, the container is scheduled in Azure Batch Account to run as a task. This is done by calling the Azure Batch Account API and sending the parameters required.
+
+**Note:** There is no specific custom parameters defined for this activity.
+
+**4. Wait for Custom Vision**
 
 The previous step kicks off the task in Azure Batch Account and exits. AI Model takes several minutes to hours to complete depending on the input file sizes. This steps monitors the AI Model running in the Azure Batch Account to check if they are complete. This set of activities are set to run in a loop and exit only if the AI Model completes.
 
-5. Copy File(s)
+**Note:** There is no specific custom parameters defined for this activity.
+
+**5. Copy File(s)**
 
 At this stage of the pipeline, the AI Model is run and the output is available in File Share in Azure Storage Account. It needs to be copied from File Share to Container in Azure Storage Account. This step copies the output in JSON and XML format to the container in Azure Storage Account.
 
-6. Pool Geolocation
+**Note:** There is no specific custom parameters defined for this activity.
+
+**6. Pool Geolocation**
 
 The output from running the AI Model (Custom Vision Model) gives the location of the Swimming pool in the tiles in terms of pixel location. This step converts the pixel location of the detected objects to the geolocation (latitude, longitude).
 
+No | Parameter | Purpose 
+---|------|----------
+1 | storage_account_name | Name of the Storage Account where the input data is stored
+2 | storage_container | Name of the container in Storage Account where the input data is stored
+3 | src_folder_name | Name of the folder under the container in Storage Account where the input data is stored
+4 | key_vault_name | Name of the Key Vault to use for pulling the secrets
+5 | storage_account_key_secret_name | Name of the secret in Key Vault that stores the Access Key of Storage Account
+6 | linked_service_name | Name of the Linked Service in Synapse which links the Key Vaults to Synapse
 
 
 
