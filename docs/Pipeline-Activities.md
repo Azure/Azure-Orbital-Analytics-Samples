@@ -6,10 +6,10 @@ The purpose of this document is to provide a detailed walkthrough of the Synapse
 
 ![Main Pipeline](./images/main-pipeline.png)
 
-Two versions of the pipeline are available. 
+Two variants of the pipeline are available. 
 
-a. First version of the [pipeline](../src/workflow/custom-vision-model-v2/pipeline/E2E%20Custom%20Vision%20Model%20Flow.json) uses [Azure Batch Account]() to run AI Model as a container to process the raster data and provide the output. 
-b. Second version of the [pipeline](../src/workflow/custom-vision-model-v2/pipeline/E2E%20Custom%20Vision%20Model%20Flow_aks.json) uses [Azure Kubernetes Service (AKS)]() to run AI Model as a container to process the raster data and provide the output.
+a. First variant of the [pipeline](../src/workflow/custom-vision-model-v2/pipeline/E2E%20Custom%20Vision%20Model%20Flow.json) uses [Azure Batch Account]() to run AI Model as a container to process the raster data and provide the output.  
+b. Second variant of the [pipeline](../src/workflow/custom-vision-model-v2/pipeline/E2E%20Custom%20Vision%20Model%20Flow_aks.json) uses [Azure Kubernetes Service (AKS)]() to run AI Model as a container to process the raster data and provide the output.
 
 You have the option to pick which Azure service will be used to run the AI Model at the time of deployment. Refer to the [README.md](../deploy/README.md) document to understand the deployment steps and options available during deployment.
 
