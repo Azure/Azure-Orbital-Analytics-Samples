@@ -2,6 +2,29 @@
 
 The purpose of this document is to provide a detailed walkthrough of the Synapse pipeline including the child pipelines, activities and their parameters. As we discuss each pipeline, their corresponding pipeline and supporting files checked in this repository will be linked under each topic. 
 
+
+## Pipeline Folder Structure
+
+All supporting files for the pipeline are checked in to the [Workflow](../src/workflow) folder. Below is the folder structure.
+
+![Main Pipeline](./images/workflow-folder.png)
+
+The folder structure is defined by Azure Synapse Analytics service when exporting your Synapse pipeline to a ZIP file or checking them to a Github/Azure DevOps repository. A quick overview of each folder is in the table below:
+
+No | Folder | Purpose 
+---|------|----------
+1 | .package | An internal folder for Synapse pipeline to hold package manifest files
+2 | bigDataPool | Contains JSON definition files to create Spark pool
+3 | dataflow | Contains JSON definition files to create dataflows in Synapse Workspace
+4 | dataset | Contains JSON definition files to create datasets in Synapse Workspace
+5 | linkedService | Contains JSON definition files to create Linked Services in Synapse Workspace
+6 | notebook | Contains JSON definition files to create Notebooks in Synapse Workspace
+7 | pipeline | Contains JSON definition files to create pipelines in Synapse Workspace
+8 | sparkJobDefinition | Contains JSON definition files to create Spark Job definitions in Synapse Workspace
+9 | publish_config.json | Contains configuration details such as the branch in your repository to use as pubish branch
+
+**Note:** Individual files and folders in the [Workflow](../src/workflow) parent folder are not intended to be imported into your workspace individually. You will need to run the `package.sh` in the deploy folder to create the zip file and then use the contents of the zip files to check-in your code to a repository.
+
 ## Main Pipeline
 
 ![Main Pipeline](./images/main-pipeline.png)
