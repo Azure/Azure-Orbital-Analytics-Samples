@@ -109,13 +109,13 @@ The previous step kicks off the task in Azure Batch Account and exits. AI Model 
 
 **Note:** There is no specific custom parameters defined for this activity.
 
-**5. Copy File(s)**
+**5. & 6. Copy File(s)**
 
 At this stage of the pipeline, the AI Model is run and the output is available in File Share in Azure Storage Account. It needs to be copied from File Share to Container in Azure Storage Account. This step copies the output in JSON and XML format to the container in Azure Storage Account.
 
 **Note:** There is no specific custom parameters defined for this activity.
 
-**6. Pool Geolocation**
+**7. Pool Geolocation**
 
 The output from running the AI Model (Custom Vision Model) gives the location of the Swimming pool in the tiles in terms of pixel location. This step converts the pixel location of the detected objects to the geolocation (latitude, longitude).
 
@@ -134,6 +134,8 @@ No | Parameter | Purpose
 This pipeline is performs the same functionality as the **Custom Vision Model Detection (Using Azure Batch Account)**. However, it uses Azure Kubernetes Service in place of Azure Batch Account to run the AI Model.
 
 The pipeline remains the same as the **Custom Vision Model Detection (Using Azure Batch Account)**. There are two activities that are changes to accomodate the switch from Azure Batch Account to Azure Kubernetes Service. We'll discuss only the components that are different in this pipeline.
+
+![Detection Pipeline](./images/detection-pipeline-aks.png)
 
 **3. Invoke Workload in AKS**
 
