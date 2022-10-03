@@ -7,11 +7,9 @@ Disclaimer: The solution and samples provided in this repository is for learning
 
 # Getting Started
 
-Start by following the steps in the [deploy](/deploy/README.md) folder to setup the Azure resources required to build your pipeline.
+[deploy](/deploy/README.md) discusses how to proceed with setting-up the Azure resources required to build/execute the pipeline.
 
-Import the pipeline under the `workflow` folder to your Azure Synapse Analytics instance's workspace. Alternatively, you can copy the files to your repository (git or Azure DevOps) and link the repository to your Azure Synapse Analytics workspace. 
-
-Sample pipelines are provided that include the following AI Model:
+Sample pipeline provided makes use of the following AI Model:
 
 ### a. AI model
 

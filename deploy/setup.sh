@@ -5,10 +5,10 @@
 
 ENV_CODE=${1:-${ENV_CODE}}
 LOCATION=${2:-${LOCATION}}
-PIPELINE_NAME=${3:-${PIPELINE_NAME:-"custom-vision-model"}}
-ENV_TAG=${4:-${ENV_TAG}}
-PRE_PROVISIONED_AI_MODEL_INFRA_NAME=${5:-$PRE_PROVISIONED_AI_MODEL_INFRA_NAME}
-AI_MODEL_INFRA_TYPE=${6:-${AI_MODEL_INFRA_TYPE:-"batch-account"}} # Currently supported values are aks and batch-account
+ENV_TAG=${3:-${ENV_TAG:-"synapse-$ENV_CODE"}}
+PIPELINE_NAME=${4:-${PIPELINE_NAME:-"custom-vision-model"}}
+AI_MODEL_INFRA_TYPE=${5:-${AI_MODEL_INFRA_TYPE:-"batch-account"}} # Currently supported values are aks and batch-account
+PRE_PROVISIONED_AI_MODEL_INFRA_NAME=${6:-$PRE_PROVISIONED_AI_MODEL_INFRA_NAME}
 DEPLOY_PGSQL=${7:-${DEPLOY_PGSQL:-"true"}}
 
 set -ex

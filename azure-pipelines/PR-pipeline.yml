@@ -69,7 +69,9 @@ jobs:
         export POSTGRES_ADMIN_LOGIN_PASS=$({ </dev/urandom LC_ALL=C grep -ao '[A-Za-z0-9]' | head -n$((RANDOM % 8 + 9)); echo ${chars:$((RANDOM % ${#chars})):1}; } | shuf | tr -d '\n')
 
         # Setup the infrastructure for testing the pipeline
-        DEPLOY_PGSQL=${USE_POSTGRE_SQL} $(System.DefaultWorkingDirectory)/deploy/setup.sh ${ENV_CODE} eastus custom-vision-model ${ENV_CODE}-environment ${CI_BATCH_ACCOUNT_NAME}
+        DEPLOY_PGSQL=${USE_POSTGRE_SQL} \
+          PRE_PROVISIONED_AI_MODEL_INFRA_NAME=${CI_BATCH_ACCOUNT_NAME} \
+          $(System.DefaultWorkingDirectory)/deploy/setup.sh ${ENV_CODE} eastus ${ENV_CODE}-ci-environment
 
         # Grant access on Synapse workspace to resource owner azure account
         SYNAPSE_WORKSPACE_NAME=$(az synapse workspace list --query "[?tags.workspaceId && tags.workspaceId == 'default'].name" -o tsv -g "${ENV_CODE}-pipeline-rg")
