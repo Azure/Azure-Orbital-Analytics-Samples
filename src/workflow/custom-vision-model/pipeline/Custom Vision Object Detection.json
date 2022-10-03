@@ -1,5 +1,5 @@
 {
-    "name": "Custom Vision Object Detection v2",
+    "name": "Custom Vision Object Detection",
     "properties": {
         "activities": [
             {
@@ -783,7 +783,7 @@
                     },
                     "logStorageSettings": {
                         "linkedServiceName": {
-                            "referenceName": "AOI Geospatial v2",
+                            "referenceName": "AOI Geospatial",
                             "type": "LinkedServiceReference"
                         }
                     },
@@ -828,7 +828,7 @@
                     },
                     "logStorageSettings": {
                         "linkedServiceName": {
-                            "referenceName": "AOI Geospatial v2",
+                            "referenceName": "AOI Geospatial",
                             "type": "LinkedServiceReference"
                         }
                     },

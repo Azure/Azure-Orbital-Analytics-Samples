@@ -1,10 +1,10 @@
 If you've landed on this page from Synapse gallery then Congrats! -- you are in the right place.
 
-The instructions on this page will guide you through configuring the pipeline template to successfully run a custom vision model for object detection (for example, detecting swimming pool objects). You can also use the pipeline template to explore other object detection use cases as well. Currently, the template only supports custom vision model v2. 
+The instructions on this page will guide you through configuring the pipeline template to successfully run a custom vision model for object detection (for example, detecting swimming pool objects). You can also use the pipeline template to explore other object detection use cases as well. Currently, the template only supports custom vision model. 
 
 **Prerequisites**
 
-* Follow the steps in the [readme](https://github.com/Azure/Azure-Orbital-Analytics-Samples/blob/main/deploy/README.md) to deploy the infrastructure. This includes creation of the custom vision model v2 package as well. 
+* Follow the steps in the [readme](https://github.com/Azure/Azure-Orbital-Analytics-Samples/blob/main/deploy/README.md) to deploy the infrastructure. This includes creation of the custom vision model package as well. 
 
 * Run the following command to create the linked services and spark job definition on the Synapse workspace: 
 

@@ -1,15 +1,15 @@
 {
-    "name": "run_container",
+    "name": "rawtifs",
     "properties": {
         "linkedServiceName": {
-            "referenceName": "AOI Geospatial v2",
+            "referenceName": "AOI Data Storage Account",
             "type": "LinkedServiceReference"
         },
         "parameters": {
-            "container_name": {
+            "containername": {
                 "type": "string"
             },
-            "folder_path": {
+            "folderpath": {
                 "type": "string"
             }
         },
@@ -17,16 +17,17 @@
         "type": "Binary",
         "typeProperties": {
             "location": {
-                "type": "AzureBlobFSLocation",
+                "type": "AzureBlobStorageLocation",
                 "folderPath": {
-                    "value": "@dataset().folder_path",
+                    "value": "@dataset().folderpath",
                     "type": "Expression"
                 },
-                "fileSystem": {
-                    "value": "@dataset().container_name",
+                "container": {
+                    "value": "@dataset().containername",
                     "type": "Expression"
                 }
             }
         }
-    }
+    },
+    "type": "Microsoft.Synapse/workspaces/datasets"
 }

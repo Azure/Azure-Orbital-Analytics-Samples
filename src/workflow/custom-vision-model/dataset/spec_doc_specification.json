@@ -2,7 +2,7 @@
     "name": "spec_doc_specification",
     "properties": {
         "linkedServiceName": {
-            "referenceName": "AOI Data Storage Account v2",
+            "referenceName": "AOI Data Storage Account",
             "type": "LinkedServiceReference"
         },
         "parameters": {

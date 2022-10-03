@@ -2,7 +2,7 @@
     "name": "gls",
     "properties": {
         "linkedServiceName": {
-            "referenceName": "AOI Geospatial v2 FS",
+            "referenceName": "AOI Geospatial FS",
             "type": "LinkedServiceReference"
         },
         "annotations": [],

@@ -1,15 +1,15 @@
 {
-    "name": "gld",
+    "name": "run_container",
     "properties": {
         "linkedServiceName": {
-            "referenceName": "AOI Geospatial v2",
+            "referenceName": "AOI Geospatial",
             "type": "LinkedServiceReference"
         },
         "parameters": {
-            "DestinationFolderPath": {
+            "container_name": {
                 "type": "string"
             },
-            "DestinationContainerName": {
+            "folder_path": {
                 "type": "string"
             }
         },
@@ -19,15 +19,14 @@
             "location": {
                 "type": "AzureBlobFSLocation",
                 "folderPath": {
-                    "value": "@dataset().DestinationFolderPath",
+                    "value": "@dataset().folder_path",
                     "type": "Expression"
                 },
                 "fileSystem": {
-                    "value": "@dataset().DestinationContainerName",
+                    "value": "@dataset().container_name",
                     "type": "Expression"
                 }
             }
         }
-    },
-    "type": "Microsoft.Synapse/workspaces/datasets"
+    }
 }

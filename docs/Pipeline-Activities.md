@@ -31,16 +31,16 @@ No | Folder | Purpose
 
 Two variants of the pipeline are available. 
 
-a. First variant of the [pipeline](../src/workflow/custom-vision-model-v2/pipeline/E2E%20Custom%20Vision%20Model%20Flow.json) uses [Azure Batch Account]() to run AI Model as a container to process the raster data and provide the output.  
-b. Second variant of the [pipeline](../src/workflow/custom-vision-model-v2/pipeline/E2E%20Custom%20Vision%20Model%20Flow_aks.json) uses [Azure Kubernetes Service (AKS)]() to run AI Model as a container to process the raster data and provide the output.
+a. First variant of the [pipeline](../src/workflow/custom-vision-model/pipeline/E2E%20Custom%20Vision%20Model%20Flow.json) uses [Azure Batch Account]() to run AI Model as a container to process the raster data and provide the output.  
+b. Second variant of the [pipeline](../src/workflow/custom-vision-model/pipeline/E2E%20Custom%20Vision%20Model%20Flow_aks.json) uses [Azure Kubernetes Service (AKS)]() to run AI Model as a container to process the raster data and provide the output.
 
 You have the option to pick which Azure service will be used to run the AI Model at the time of deployment. Refer to the [README.md](../deploy/README.md) document to understand the deployment steps and options available during deployment.
 
 The main pipeline contains two steps. 
 
-- It starts by invoking the [Custom Vision Object Transform v2](../src/workflow/custom-vision-model-v2/pipeline/Custom%20Vision%20Model%20Transforms%20v2.json) pipeline to transform your data before it can be consumed by the AI Model.
+- It starts by invoking the [Custom Vision Object Transform](../src/workflow/custom-vision-model/pipeline/Custom%20Vision%20Model%20Transforms.json) pipeline to transform your data before it can be consumed by the AI Model.
 
-- Next, the [Custom Vision Model Transform v2](../src/workflow/custom-vision-model-v2/pipeline/Custom%20Vision%20Object%20Detection%20v2.json) or [Custom Vision Model Transform v2_aks](../src/workflow/custom-vision-model-v2/pipeline/Custom%20Vision%20Object%20Detection%20v2_aks.json) pipeline is triggered to process the data through the AI Model running as container in either Azure Batch Account or Azure Kubernetes Services respectively. 
+- Next, the [Custom Vision Model Transform](../src/workflow/custom-vision-model/pipeline/Custom%20Vision%20Object%20Detection.json) or [Custom Vision Model Transform aks](../src/workflow/custom-vision-model/pipeline/Custom%20Vision%20Object%20Detection%20aks.json) pipeline is triggered to process the data through the AI Model running as container in either Azure Batch Account or Azure Kubernetes Services respectively. 
 
 For Custom Vision model, the output is a set of JSON files that contains the location of the swimming pools detected in the image passed to the AI Model as 512 by 512 images. 
 

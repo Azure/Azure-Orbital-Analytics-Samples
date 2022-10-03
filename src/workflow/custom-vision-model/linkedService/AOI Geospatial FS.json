@@ -1,8 +1,8 @@
 {
-    "name": "AOI Data Storage Account v2",
+    "name": "AOI Geospatial FS",
     "properties": {
         "annotations": [],
-        "type": "AzureBlobStorage",
+        "type": "AzureFileStorage",
         "typeProperties": {
             "connectionString": "DefaultEndpointsProtocol=https;AccountName=__raw_data_storage_account__;EndpointSuffix=core.windows.net;",
             "accountKey": {
@@ -12,7 +12,8 @@
                     "type": "LinkedServiceReference"
                 },
                 "secretName": "GeospatialStorageAccountKey"
-            }
+            },
+            "fileShare": "volume-a"
         },
         "connectVia": {
             "referenceName": "AutoResolveIntegrationRuntime",
