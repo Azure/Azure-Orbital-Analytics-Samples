@@ -6,7 +6,7 @@
 PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/..; pwd)"
 
 ENV_CODE=${1:-$ENV_CODE}
-PIPELINE_NAME=${2:-$PIPELINE_NAME}
+PIPELINE_NAME=${2:-${PIPELINE_NAME:-"custom-vision-model"}}
 
 AI_MODEL_INFRA_TYPE=${3:-${AI_MODEL_INFRA_TYPE:-"batch-account"}} # Currently supported values are aks and batch-account
 

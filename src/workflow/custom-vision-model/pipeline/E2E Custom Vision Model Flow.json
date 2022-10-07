@@ -9,7 +9,7 @@
                 "userProperties": [],
                 "typeProperties": {
                     "pipeline": {
-                        "referenceName": "Custom Vision Model Transforms v2",
+                        "referenceName": "Custom Vision Model Transforms",
                         "type": "PipelineReference"
                     },
                     "waitOnCompletion": true,
@@ -43,7 +43,7 @@
                 "userProperties": [],
                 "typeProperties": {
                     "pipeline": {
-                        "referenceName": "Custom Vision Object Detection v2",
+                        "referenceName": "Custom Vision Object Detection",
                         "type": "PipelineReference"
                     },
                     "waitOnCompletion": true,

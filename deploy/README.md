@@ -61,7 +61,7 @@ Arguments | Required | Type | Sample value
 ----------|-----------|-------|-------
 environmentCode | yes | string | aoi
 location | yes | string | westus
-pipelineName | no | string | Allowed values: custom-vision-model, custom-vision-model-v2
+pipelineName | no | string | Allowed value: custom-vision-model
 envTag | no | string | synapse\-\<environmentCode\>
 preprovisionedBatchAccountName | no | string | aoibatchaccount
 deployPgsql | no | boolean | false
@@ -81,7 +81,7 @@ Script has been written to be executed with minimalistic input, it requires foll
 - `environmentCode` which serves as the prefix for infrastructure services names. Allows only alpha numeric(no special characters) and must be between 3 and 8 characters.
 - `location` which suggests which azure region infrastructure is deployed in.
 - `environmentTag` / `envTag` serves as a simple label / tag to all resources being deployed as part of the bicep template to your subscription.
-- `pipelineName` refers to the name of the pipeline that is to be package for deployment to your Synapse Workspace. Allowed values are custom-vision-model, custom-vision-model-v2.
+- `pipelineName` refers to the name of the pipeline that is to be package for deployment to your Synapse Workspace. Allowed value is custom-vision-model.
 
 ## Deployment of Infrastructure using bicep template
 
@@ -190,7 +190,7 @@ or
 Arguments | Required | Type | Sample value
 ----------|-----------|-------|---------------
 environmentCode | yes | string | aoi
-pipelineName | yes | string | Allowed Values: custom-vision-model, custom-vision-model-v2
+pipelineName | no | string | Allowed Value: custom-vision-model
 batchAccountName | no | string | aoibatchaccount
 batchAccountRG | no | string | aoibatchaccountrg
 batchAccountStorageAccountName | no | string | aoibatchstorageaccount
@@ -210,7 +210,7 @@ Unzip the contents of the ZIP file generate by running the `package.sh` or `setu
 A few things to consider prior to integration of Git / GitHub Repository with Synapse Studio:
 
 * Do not bring the files from [workflow folder](../src/workflow) directly into your repository that you will use to integrate with Synapse Studio. You will need to run `package.sh` or `setup.sh` to replace placeholders in one or more files before checking-in the files to your repository to be used with the Synapse Studio. 
-* You can either create a new repository or use a forked version of the [Azure Orbital Analytics Sample](https://github.com/Azure/Azure-Orbital-Analytics-Samples) repository. If you use a new repository, use the Unzipped contents of the ZIP file to load into your new repository. If you use forked version of the [Azure Orbital Analytics Sample](https://github.com/Azure/Azure-Orbital-Analytics-Samples) repository, overwrite the contents of [Custom vision model v2 workflow folder](../src/workflow/custom-vision-model-v2) or [custom vision model workflow folder](../src/workflow/custom-vision-model) (depending on the pipeline being imported) with the Unzipped contents.
+* You can either create a new repository or use a forked version of the [Azure Orbital Analytics Sample](https://github.com/Azure/Azure-Orbital-Analytics-Samples) repository. If you use a new repository, use the Unzipped contents of the ZIP file to load into your new repository. If you use forked version of the [Azure Orbital Analytics Sample](https://github.com/Azure/Azure-Orbital-Analytics-Samples) repository, overwrite the contents of [Custom vision model workflow folder](../src/workflow/custom-vision-model) with the Unzipped contents.
 
 
 To import pipeline into the Synape Studio is through Source Control repository like GitHub or Azure DevOps repository, refer to the document on [Source Control](https://docs.microsoft.com/azure/synapse-analytics/cicd/source-control) to learn about Git Integration for Azure Synapse Analytics and how to setup.
@@ -323,7 +323,7 @@ docker push <container-registry-name>.azurecr.io/custom_vision_offline:latest
 ```
 Update the `algImageName` value in [Specification document](../src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) to point to the new image location.
 
-Note: When using a private Container Registry, update `containerSettings` property in your [Custom Vision Object Detection v2](/src/workflow/pipeline/Custom%20Vision%20Object%20Detection%20v2.json) pipeline and add the following sub-property in order to authenticate to Container Registry :
+Note: When using a private Container Registry, update `containerSettings` property in your [Custom Vision Object Detection](/src/workflow/pipeline/Custom%20Vision%20Object%20Detection.json) pipeline and add the following sub-property in order to authenticate to Container Registry :
 ```json
 "registry": {
         "registryServer": "",
@@ -332,7 +332,7 @@ Note: When using a private Container Registry, update `containerSettings` proper
     }
 ```
 
-The above change will need to be made to the `Custom Vision Model Transform v2` pipeline. Look for activity named `Custom Vision` of type Web activity and update the body property (under Settings tab) for that activity.
+The above change will need to be made to the `Custom Vision Model Transform` pipeline. Look for activity named `Custom Vision` of type Web activity and update the body property (under Settings tab) for that activity.
 
 [Specification document](../src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) and [Configuration file](../src/aimodels/custom_vision_object_detection_offline/config/config.json) required to run the Custom Vision Model.
 
@@ -341,55 +341,6 @@ The above change will need to be made to the `Custom Vision Model Transform v2` 
 - Configuration file - Each AI Model may require one or more parameters to run the model. This parameters driven by the end users are passed to the AI Model in the form of a configuration file. The schema of these configuration file is specific to the AI Model and hence we provide a template for the end user to plug-in their values.
 
 # Running the pipeline (Custom Vision Model)
-
-Before starting the pipeline, prepare the storage account in <environmentCode>-data-rg resource group by creating a container for the pipeline run.
-
-- Create a new container for every pipeline run. Make sure the container name does not exceed 8 characters.
-
-- Under the newly created container, add two folders. One folder named `config` with the following configuration files:
-
-    - [Specification document](../src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) configuration file that is provided by the AI Model partner.
-    - [Config file](../src/aimodels/custom_vision_object_detection_offline/config/config.json) specific to the AI Model that contains parameters to be passed to the AI Model.
-    - [Config file](../src/transforms/spark-jobs/raster_crop/config/config-aoi.json) for Crop transformation that container the Area of Interest to crop to.
-    - [Config file](../src/transforms/spark-jobs/raster_convert/config/config-img-convert-png.json) for GeoTiff to Png transform.
-    - [Config file](../src/transforms/spark-jobs/pool_geolocation/config/config-pool-geolocation.json) for pool gelocation transform which converts Image coordinates to Geolocation coordinates.
-
-    Another folder named `raw` with sample Geotiff to be processed by the pipeline. You can use this [Geotiff file](https://aoigeospatial.blob.core.windows.net/public/samples/sample_4326.tif) hosted as a sample or any Geotiff with CRS of EPSG 4326.
-
-    When using this sample file, update your [Crop Transform's Config file](../src/transforms/spark-jobs/raster_crop/config/config-aoi.json) with bbox of `[-117.063550, 32.749467, -116.999386, 32.812946]`.
-
-To run the pipeline, open the Synapse Studio for the Synapse workspace that you have created and follow the below listed steps.
-
-- Open the `E2E Custom Vision Model Flow` and click on debug button
-
-- When presented with the parameters, fill out the values. Below table provide the details on that each parameter represents.
-
-| parameter | description |
-|--|--|
-| Prefix | This is the Storage container name created in [Running the pipeline section](#running-the-pipeline) that hosts the Raw data|
-| StorageAccountName | Name of the Storage Account in <environmentCode>-data-rg resource group that hosts the Raw data |
-| StorageAccountKey | Access Key of the Storage Account in <environmentCode>-data-rg resource group that hosts the Raw data |
-| BatchAccountName | Name of the Batch Account in <environmentCode>-orc-rg resource group to run the AI Model |
-| BatchJobName | Job name within the Batch Account in <environmentCode>-orc-rg resource group that runs the AI Model |
-| BatchLocation | Location of the Batch Account in <environmentCode>-orc-rg resource group that runs the AI Model |
-
-- Once the parameters are entered, click ok to submit and kick off the pipeline.
-
-- Wait for the pipeline to complete.
-# Reviewing data in Postgres (Custom Vision Model Pipeline)
-
-- To review the data in Postgres, you can use Azure Data Studio following this [guide](https://docs.microsoft.com/en-us/sql/azure-data-studio/quickstart-postgres?view=sql-server-ver15).
-- You will need the following information to connect:
-  - The server name: `<environmentCode>-pg-server.postgres.database.azure.com`
-  - user name: `<environmentCode>_admin_user@<environmentCode>-pg-server`
-  - password used at the start of the deployment
-
-- Example Queries
-  - If you would like to query distances from a given lat, long against data in the db you could use the following query and a third column "dist" will display the distances from the point provided in the query to the data in the location column
-    > SELECT *, ST_Distance(ST_SetSRID(ST_MakePoint(given_long, given_lat), 4326), location) AS dist FROM aioutputmodelschema.cvmodel
-  - More documentation on queries can be found [here](https://postgis.net/workshops/postgis-intro/geography.html)
-
-# Running the pipeline (Custom Vision Model V2)
 
 Before starting the pipeline, prepare the storage account in <environmentCode>-data-rg resource group by creating a container for the pipeline run.
 

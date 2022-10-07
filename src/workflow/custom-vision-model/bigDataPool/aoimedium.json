@@ -24,7 +24,7 @@
         "sparkConfigProperties": {
             "configurationType": "File",
             "filename": "config.txt",
-            "content": "spark.storage.synapse.linkedServiceName \"AOI Geospatial v2\"\rfs.azure.account.oauth.provider.type com.microsoft.azure.synapse.tokenlibrary.LinkedServiceBasedTokenProvider",
+            "content": "spark.storage.synapse.linkedServiceName \"AOI Geospatial\"\rfs.azure.account.oauth.provider.type com.microsoft.azure.synapse.tokenlibrary.LinkedServiceBasedTokenProvider",
             "time": "2022-02-22T00:52:46.8995063Z"
         },
         "sessionLevelPackagesEnabled": true,

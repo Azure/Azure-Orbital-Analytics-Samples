@@ -1,5 +1,5 @@
 {
-    "name": "AOI Geospatial v2",
+    "name": "AOI Geospatial",
     "type": "Microsoft.Synapse/workspaces/linkedservices",
     "properties": {
         "annotations": [],

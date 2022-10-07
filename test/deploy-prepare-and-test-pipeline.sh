@@ -8,7 +8,7 @@ PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/..; pwd)"
 ENV_CODE=${1:-${ENV_CODE}}
 
 BATCH_ACCOUNT_NAME=${2:-${BATCH_ACCOUNT_NAME:-"pipelinecibatch"}}
-PIPELINE_NAME=${3:-${PIPELINE_NAME:-"custom-vision-model-v2"}}
+PIPELINE_NAME=${3:-${PIPELINE_NAME:-"custom-vision-model"}}
 
 DESTINATION_CONTAINER_NAME=${4:-${DESTINATION_CONTAINER_NAME:-"${PIPELINE_NAME}-${ENV_CODE}"}}
 DESTINATION_STORAGE_ACCOUNT_NAME=${5:-${DESTINATION_STORAGE_ACCOUNT_NAME}}
@@ -49,7 +49,6 @@ fi
 echo "Creating container ${DESTINATION_CONTAINER_NAME} on storage account ${DESTINATION_STORAGE_ACCOUNT_NAME}"
 az storage container create --name ${DESTINATION_CONTAINER_NAME} --account-name ${DESTINATION_STORAGE_ACCOUNT_NAME} --account-key ${STORAGE_ACCOUNT_KEY}
 
-
 # Upload test data to destination storage account container
 echo "Copying resources to storage container ${DESTINATION_CONTAINER_NAME} on storage account ${DESTINATION_STORAGE_ACCOUNT_NAME}"
 az storage blob copy start \
@@ -81,38 +80,6 @@ az storage blob copy start \
   --source-account-name ${SOURCE_STORAGE_ACCOUNT_NAME} \
   --source-account-key ${SOURCE_STORAGE_ACCOUNT_KEY} \
   --source-blob config/custom_vision_object_detection.json
-  
-if [[ "${PIPELINE_NAME}" == "custom-vision-model" ]]; then
-  az storage blob copy start \
-    --destination-blob config/config-aoi.json \
-    --destination-container ${DESTINATION_CONTAINER_NAME} \
-    --account-name ${DESTINATION_STORAGE_ACCOUNT_NAME} \
-    --account-key ${STORAGE_ACCOUNT_KEY} \
-    --source-container ${SOURCE_CONTAINER_NAME} \
-    --source-account-name ${SOURCE_STORAGE_ACCOUNT_NAME} \
-    --source-account-key ${SOURCE_STORAGE_ACCOUNT_KEY} \
-    --source-blob config/config-aoi.json
-
-  az storage blob copy start \
-    --destination-blob config/config-img-convert-png.json \
-    --destination-container ${DESTINATION_CONTAINER_NAME} \
-    --account-name ${DESTINATION_STORAGE_ACCOUNT_NAME} \
-    --account-key ${STORAGE_ACCOUNT_KEY} \
-    --source-container ${SOURCE_CONTAINER_NAME} \
-    --source-account-name ${SOURCE_STORAGE_ACCOUNT_NAME} \
-    --source-account-key ${SOURCE_STORAGE_ACCOUNT_KEY} \
-    --source-blob config/config-img-convert-png.json
-
-  az storage blob copy start \
-    --destination-blob config/config-pool-geolocation.json \
-    --destination-container ${DESTINATION_CONTAINER_NAME} \
-    --account-name ${DESTINATION_STORAGE_ACCOUNT_NAME} \
-    --account-key ${STORAGE_ACCOUNT_KEY} \
-    --source-container ${SOURCE_CONTAINER_NAME} \
-    --source-account-name ${SOURCE_STORAGE_ACCOUNT_NAME} \
-    --source-account-key ${SOURCE_STORAGE_ACCOUNT_KEY} \
-    --source-blob config/config-pool-geolocation.json
-fi
 
 # Install Pipeline
 echo "Preparing commands to install pipeline components"

@@ -19,8 +19,8 @@ fi
 
 base_dir="$(cd "$(dirname "$0")/../../" && pwd)"
 
-# Uncompress the custom vision model v2 package
-if ! unzip "${base_dir}"/custom-vision-model-v2.zip -d "${base_dir}"/custom-vision-model-v2-"${ENV_CODE}";
+# Uncompress the custom vision model package
+if ! unzip "${base_dir}"/custom-vision-model.zip -d "${base_dir}"/custom-vision-model-"${ENV_CODE}";
 then
     echo "Unzip failed please check .."
     exit 1
@@ -28,7 +28,7 @@ else
     echo "Unzip completed successfully"
 fi
 
-pkg_dir=${base_dir}/custom-vision-model-v2-${ENV_CODE}
+pkg_dir=${base_dir}/custom-vision-model-${ENV_CODE}
 
 # The following one's are created on the Synapse workspace to run 
 # the pipeline template in Synapse gallery.
