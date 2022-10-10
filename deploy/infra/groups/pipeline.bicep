@@ -85,7 +85,7 @@ param synapseMIStorageAccountRoles array = [
 param logAnalyticsWorkspaceId string
 
 var namingPrefix = '${environmentCode}-${projectName}'
-var nameSuffix = substring(uniqueString(guid('${subscription().subscriptionId}${namingPrefix}${environmentTag}${location}')), 0, 10)
+var nameSuffix = substring(uniqueString(guid('${subscription().subscriptionId}${namingPrefix}${location}')), 0, 10)
 var keyvaultNameVar = empty(keyvaultName) ? 'kvp${nameSuffix}' : keyvaultName
 var synapseHnsStorageAccountNameVar = empty(synapseHnsStorageAccountName) ? 'synhns${nameSuffix}' : synapseHnsStorageAccountName
 var synapseWorkspaceNameVar = empty(synapseWorkspaceName) ? 'synws${nameSuffix}' : synapseWorkspaceName

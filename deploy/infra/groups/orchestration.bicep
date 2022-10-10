@@ -103,7 +103,7 @@ param appInsightsInstrumentationKey string
 param acrSku string = 'Standard'
 
 var namingPrefix = '${environmentCode}-${projectName}'
-var nameSuffix = substring(uniqueString(guid('${subscription().subscriptionId}${namingPrefix}${environmentTag}${location}')), 0, 10)
+var nameSuffix = substring(uniqueString(guid('${subscription().subscriptionId}${namingPrefix}${location}')), 0, 10)
 var uamiNameVar = empty(uamiName) ? '${namingPrefix}-umi' : uamiName
 var keyvaultNameVar = empty(keyvaultName) ? 'kvo${nameSuffix}' : keyvaultName
 var batchAccountNameVar = empty(batchAccountName) ? 'batchact${nameSuffix}' : batchAccountName
