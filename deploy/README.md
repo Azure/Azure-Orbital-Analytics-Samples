@@ -18,9 +18,14 @@ The deployment script uses following tools, please follow the links provided to 
 - [jq](https://stedolan.github.io/jq/download/)
 - The scripts are executed on bash shell, so if using a computer with windows based operating system, install a [WSL](https://docs.microsoft.com/windows/wsl/about) environment to execute the script.
 - Install bicep on az cli using command  `az bicep install` and ensure the bicep version is >=0.8.9.
-- The user performing the deployment of the bicep template and the associated scripts should have `Owner` role assigned at the subscription to which the resources are being deployed.
-
 Alternatively, one can use Azure Cloud Bash to deploy this sample solution in their Azure subscription.
+
+## RBAC requirement
+
+The user performing the deployment of the bicep template and the associated scripts should have `Owner` role assigned at the subscription to which the resources are being deployed. This is needed in order to grant IAM roles to managed identities in bicep templates.
+
+> [!NOTE]
+If you have started the deployment with a different role Ex: `Contributor`, and the deployment failed due to insufficient access. Please change the role to `Owner` and refresh the credentials by re-logging before attempting to deploy again.
 
 ## Infrastructure Deployment
 
