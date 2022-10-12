@@ -9,7 +9,9 @@ Disclaimer: The solution and samples provided in this repository is for learning
 
 Start by following the [README.md](./deploy/README.md) to setup the Azure resources required to execute the pipeline.
 
-This solution uses the [Custom Vision Model](/src/aimodels) as a sample AI model to demonstrate end-to-end Azure Synapse workflow for geospatial analysis. In this sample solution, the AI model detects swimming pools for a given geospatial data. You can use this solution to integrate other AI models.
+This solution uses the [Custom Vision Model](/src/aimodels) as a sample AI model to demonstrate end-to-end Azure Synapse workflow for geospatial analysis. In this sample solution, the AI model detects swimming pools for a given geospatial data.
+
+You can use this solution to integrate other AI models. Each AI Model requires their input geospatial data to be in a specific format. When adapting this solution for a different AI Model, make sure the geospatial data transform steps are modified to adapt to the individual AI Model's needs.
 
 ## Contributing
 
