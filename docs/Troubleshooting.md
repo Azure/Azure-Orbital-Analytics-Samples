@@ -47,5 +47,3 @@ After importing your pipeline from your repository or pipeline template approach
 ## Policies interference
 
 This solution assumes no interference from Policies deployed to your tenant preventing resources from being deployed.
-
-TODO: Add more information for this section

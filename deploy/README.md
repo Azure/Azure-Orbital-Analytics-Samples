@@ -112,10 +112,4 @@ NO_DELETE_PIPELINE_RESOURCE_GROUP=true
 
 ## AI Model
 
-This solution uses the [Custom Vision Model](/src/aimodels) as a sample AI model for demonstrating end to end Azure Synapse workflow geospatial analysis.
-
-This sample solution uses Custom Vision model to detect pools in a given geospatial data. 
-
-You can use other AI model for object detection or otherwise to run against this solution with a similar [specification](/src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json) or different specification as defined by AI model to integrate in your solution.
-
-Follow the [document](./bring-your-own-ai-model.md) to understand and use a different ai-model for processing with the pipeline.
+Follow the [document](./using-ai-model-in-pipeline.md) to understand and use [Custom Vision Model](/src/aimodels) or bring different ai-model for processing with the pipeline.
