@@ -1,7 +1,7 @@
 # Overview of Infrastructure deployment and configuration
 
 We are using bicep templates to deploy the infrastructure resources.
-We will be using following azure services:
+In a default setup we will be using following azure services:
 - Azure Batch Account
 - Azure Synapse Analytics
 - Azure Keyvault
