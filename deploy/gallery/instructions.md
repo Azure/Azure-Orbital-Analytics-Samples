@@ -1,10 +1,10 @@
-If you've landed on this page from Synapse gallery, we assume you have the infrastructure ready and have generated the custom vision model v2 package. If this is true proceed else follow the [readme](https://github.com/Azure/Azure-Orbital-Analytics-Samples/blob/main/deploy/README.md) file to deploy the infrastructure.
+If you've landed on this page from Synapse gallery, we assume you have the required infrastructure and the Custom Vision model package ready. If this is true proceed further else visit the [infrastructure deployment](https://github.com/Azure/Azure-Orbital-Analytics-Samples/tree/main/deploy#infrastructure-deployment) section and provision the required infrastructure and the package. 
 
-The instructions on this page will guide you through configuring the pipeline template to successfully run a custom vision model for object detection (for example, detecting swimming pool objects). You can also use the pipeline template to explore other object detection use cases as well.
+The instructions on this page will guide you through configuring the pipeline template in the gallery to successfully run a custom vision model for object detection (in this case, swimming pool).
 
 **Prerequisites**
 
-* Run the following command to create the linked services and spark job definition on the Synapse workspace. Occasionally, you may notice failure whilst creating the linked services. This is due to an on going issue with az cli, please re-run the command, if you encounter it.
+* Run the following command to create the linked services and spark job definition on the Synapse workspace. Occasionally, you may notice some failure whilst creating the linked services. This is due to an on going issue with az cli, please re-run the command, if you encounter it.
 
 	```bash
 	./deploy/gallery/create_service.sh <environmentCode> 
@@ -21,11 +21,11 @@ The instructions on this page will guide you through configuring the pipeline te
  
 **Switch back to Synapse gallery**
 
-1. The input page appears:
+1. The input page appears as shown below. 
    
    ![](./images/1.png)
 
-2. Select the values from the dropdown as shown below and click **Open pipeline**:
+2. Select the values from the dropdown as shown below and click **Open pipeline**.
 
     ![](./images/2.png)
 
@@ -39,7 +39,7 @@ The instructions on this page will guide you through configuring the pipeline te
         
         ![](./images/4.png)
  
- 4. When the mandatory fields are populated, turn on `Data flow debug`. While this is warming up, enter the value of the parameters as shown below and **Publish** to save the changes.
+4. When the mandatory fields are populated, turn on `Data flow debug`. While this is warming up, enter the value of the parameters as shown below and **Publish** to save the changes.
 
     ![](./images/5.png)
 
@@ -55,5 +55,5 @@ The instructions on this page will guide you through configuring the pipeline te
     | 8|EnvCode | \<environmentCode> | Same as used in the deployment steps|
     | 9|KeyVaultName | kvp<10-character-random-string>| Get the name from \<environmentCode>-pipeline-rg |
 
-4. All set to start the pipeline now. Press **Debug**.
+5. All set to start the pipeline now. Press **Debug**.
 
