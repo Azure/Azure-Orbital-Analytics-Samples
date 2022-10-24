@@ -43,12 +43,12 @@ if [[ -z "$ENV_TAG" ]]
     DEPLOY_PGSQL=${DEPLOY_PGSQL} \
     DEPLOY_AI_MODEL_INFRA=${DEPLOY_AI_MODEL_INFRA} \
     AI_MODEL_INFRA_TYPE=${AI_MODEL_INFRA_TYPE} \
-      ./deploy/install.sh "$ENV_CODE" "$LOCATION" 
+      ./deploy/scripts/install.sh "$ENV_CODE" "$LOCATION" 
   else
     DEPLOY_PGSQL=${DEPLOY_PGSQL} \
     DEPLOY_AI_MODEL_INFRA=${DEPLOY_AI_MODEL_INFRA} \
     AI_MODEL_INFRA_TYPE=${AI_MODEL_INFRA_TYPE} \
-      ./deploy/install.sh "$ENV_CODE" "$LOCATION" "$ENV_TAG"
+      ./deploy/scripts/install.sh "$ENV_CODE" "$LOCATION" "$ENV_TAG"
 fi
 
 if [[ "${DEPLOY_AI_MODEL_INFRA}" == "false" ]] && [[ "${AI_MODEL_INFRA_TYPE}" == "batch-account" ]]; then
@@ -60,7 +60,7 @@ if [[ "${DEPLOY_AI_MODEL_INFRA}" == "false" ]] && [[ "${AI_MODEL_INFRA_TYPE}" ==
 fi
 
 echo "Performing configuration"
-./deploy/configure.sh \
+./deploy/scripts/configure.sh \
   "$ENV_CODE" \
   "$AI_MODEL_INFRA_TYPE" \
   "$PRE_PROVISIONED_AI_MODEL_INFRA_NAME" 
@@ -71,7 +71,7 @@ if [[ -z "$PIPELINE_NAME" ]]
   else
     echo "Performing pipeline packaging"
     DEPLOY_PGSQL=${DEPLOY_PGSQL} \
-      ./deploy/package.sh \
+      ./deploy/scripts/package.sh \
       "$ENV_CODE" \
       "$PIPELINE_NAME" \
       "$AI_MODEL_INFRA_TYPE" \

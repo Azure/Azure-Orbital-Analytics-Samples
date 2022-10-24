@@ -23,7 +23,7 @@ No | Folder | Purpose
 8 | sparkJobDefinition | Contains JSON definition files to create Spark Job definitions in Synapse Workspace
 9 | publish_config.json | Contains configuration details such as the branch in your repository to use as pubish branch
 
-**Note:** Individual files and folders in the [Workflow](../src/workflow) parent folder are not intended to be imported into your workspace individually. You will need to run the `package.sh` in the deploy folder to create the zip file and then use the contents of the zip files to check-in your code to a repository.
+**Note:** Individual files and folders in the [Workflow](../src/workflow) parent folder are not intended to be imported into your workspace individually. You will need to run the [package.sh](../deploy/scripts/package.sh)  to create the zip file and then use the contents of the zip files to check-in your code to a repository.
 
 ## Main Pipeline
 

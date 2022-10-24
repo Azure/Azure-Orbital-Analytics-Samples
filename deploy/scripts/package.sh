@@ -86,7 +86,7 @@ if [[ "$AI_MODEL_INFRA_TYPE" == "batch-account" ]]; then
     fi
 
     echo 'Retrieved resource from Azure and ready to package'
-    PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/package.py \
+    PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/scripts/package.py \
         --raw_storage_account_name $RAW_STORAGE_ACCOUNT_NAME \
         --synapse_storage_account_name $SYNAPSE_STORAGE_ACCOUNT_NAME \
         --modes $MODE \
@@ -132,7 +132,7 @@ elif [[ "$AI_MODEL_INFRA_TYPE" == "aks" ]]; then
         counter=$((counter+1))
     done
     BASE64ENCODEDZIPCONTENT_FUNCTIONAPP_URL="https://${BASE64ENCODEDZIPCONTENT_FUNCTIONAPP_HOST}"
-    PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/package.py \
+    PACKAGING_SCRIPT="python3 ${PRJ_ROOT}/deploy/scripts/package.py \
         --raw_storage_account_name $RAW_STORAGE_ACCOUNT_NAME \
         --synapse_storage_account_name $SYNAPSE_STORAGE_ACCOUNT_NAME \
         --modes $MODE \

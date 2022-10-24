@@ -36,7 +36,7 @@ if [[ -z "$SYNAPSE_POOL" ]]; then
 fi
 if [[ -n $SYNAPSE_WORKSPACE ]] && [[ -n $SYNAPSE_WORKSPACE_RG ]] && [[ -n $SYNAPSE_POOL ]]; then
     # upload synapse pool 
-    az synapse spark pool update --name ${SYNAPSE_POOL} --workspace-name ${SYNAPSE_WORKSPACE} --resource-group ${SYNAPSE_WORKSPACE_RG} --library-requirements "${PRJ_ROOT}/deploy/environment.yml"
+    az synapse spark pool update --name ${SYNAPSE_POOL} --workspace-name ${SYNAPSE_WORKSPACE} --resource-group ${SYNAPSE_WORKSPACE_RG} --library-requirements "${PRJ_ROOT}/deploy/scripts/environment.yml"
 fi
 
 if [[ -z "$SYNAPSE_STORAGE_ACCOUNT" ]]; then
