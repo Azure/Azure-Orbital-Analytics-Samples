@@ -3,7 +3,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/..; pwd)"
+PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/../..; pwd)"
 ENV_CODE=${1:-${ENV_CODE}}
 
 AI_MODEL_INFRA_TYPE=${2:-${AI_MODEL_INFRA_TYPE:-"batch-account"}} # Currently supported values are aks and batch-account

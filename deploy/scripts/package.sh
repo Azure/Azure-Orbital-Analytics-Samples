@@ -3,7 +3,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/..; pwd)"
+PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/../..; pwd)"
 
 ENV_CODE=${1:-$ENV_CODE}
 PIPELINE_NAME=${2:-${PIPELINE_NAME:-"custom-vision-model"}}
