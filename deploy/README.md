@@ -45,20 +45,20 @@ az account set -s <subscription_id>
 The following command will install, configure and generate the custom vision model package.
 
 ```bash
-./deploy/setup.sh <environmentCode> <location>
+./deploy/scripts/setup.sh <environmentCode> <location>
 ```
 - `environmentCode` used as a prefix for Azure resource names. It allows only alpha numeric(no special characters) and must be between 3 and 8 characters.
 - `location`is a valid Azure region.
 
 For eg.
 ```bash
-./deploy/setup.sh aoi eastus
+./deploy/scripts/setup.sh aoi eastus
 ```
 
-[setup.sh](./setup.sh) executes tasks in 3 steps
-- installs the infrastructure using [install.sh](./install.sh) script.
-- configures the infrastructure for setting up the dependecies using [configure.sh](./configure.sh) script.
-- packages the pipeline code to a zip file using [package.sh](./package.sh) script.
+[setup.sh](./scripts/setup.sh) executes tasks in 3 steps
+- installs the infrastructure using [install.sh](./scripts/install.sh) script.
+- configures the infrastructure for setting up the dependecies using [configure.sh](./scripts/configure.sh) script.
+- packages the pipeline code to a zip file using [package.sh](./scripts/package.sh) script.
 
 After the script has run successfully, please check the batch-account pool created is created successfully.
 
@@ -91,12 +91,12 @@ As discussed above the `environmentCode` is used as prefix to generate resource 
 Execute the cleanup script as follows:
 
 ```bash
-./deploy/cleanup.sh <environmentCode>
+./deploy/scripts/cleanup.sh <environmentCode>
 ```
 
 For eg.
 ```bash
-./deploy/cleanup.sh aoi
+./deploy/scripts/cleanup.sh aoi
 ```
 
 If one wants not to delete any specific resource group and thus resource they can use NO_DELETE_*_RESOURCE_GROUP environment variable, by setting it to true
@@ -107,9 +107,9 @@ NO_DELETE_MONITORING_RESOURCE_GROUP=true
 NO_DELETE_NETWORKING_RESOURCE_GROUP=true
 NO_DELETE_ORCHESTRATION_RESOURCE_GROUP=true
 NO_DELETE_PIPELINE_RESOURCE_GROUP=true
-./deploy/cleanup.sh <environmentCode>
+./deploy/scripts/cleanup.sh <environmentCode>
 ```
 
 ## AI Model
 
-Follow the [document](./using-ai-model-in-pipeline.md) to understand and use [Custom Vision Model](/src/aimodels) or bring different ai-model for processing with the pipeline.
+Follow the [document](./docs/using-ai-model-in-pipeline.md) to understand and use [Custom Vision Model](/src/aimodels) or bring different ai-model for processing with the pipeline.

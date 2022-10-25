@@ -3,6 +3,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/../..; pwd)"
+
 set -ex
 
 if [[ -z "$1" ]]
@@ -32,7 +34,7 @@ if [[ "$AI_MODEL_INFRA_TYPE" != "batch-account" ]] && [[ "$AI_MODEL_INFRA_TYPE" 
 fi
 
 DEPLOYMENT_SCRIPT="az deployment sub create -l $LOCATION -n $DEPLOYMENT_NAME \
-    -f ./deploy/infra/main.bicep \
+    -f ${PRJ_ROOT}/deploy/infra/main.bicep \
     -p \
     location=$LOCATION \
     environmentCode=$ENV_CODE \

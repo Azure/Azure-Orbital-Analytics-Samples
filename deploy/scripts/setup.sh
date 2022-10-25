@@ -11,6 +11,8 @@ AI_MODEL_INFRA_TYPE=${5:-${AI_MODEL_INFRA_TYPE:-"batch-account"}} # Currently su
 PRE_PROVISIONED_AI_MODEL_INFRA_NAME=${6:-$PRE_PROVISIONED_AI_MODEL_INFRA_NAME}
 DEPLOY_PGSQL=${7:-${DEPLOY_PGSQL:-"true"}}
 
+PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/../..; pwd)"
+
 set -ex
 
 if [[ -z "$ENV_CODE" ]]
@@ -43,24 +45,24 @@ if [[ -z "$ENV_TAG" ]]
     DEPLOY_PGSQL=${DEPLOY_PGSQL} \
     DEPLOY_AI_MODEL_INFRA=${DEPLOY_AI_MODEL_INFRA} \
     AI_MODEL_INFRA_TYPE=${AI_MODEL_INFRA_TYPE} \
-      ./deploy/install.sh "$ENV_CODE" "$LOCATION" 
+      ${PRJ_ROOT}/deploy/scripts/install.sh "$ENV_CODE" "$LOCATION" 
   else
     DEPLOY_PGSQL=${DEPLOY_PGSQL} \
     DEPLOY_AI_MODEL_INFRA=${DEPLOY_AI_MODEL_INFRA} \
     AI_MODEL_INFRA_TYPE=${AI_MODEL_INFRA_TYPE} \
-      ./deploy/install.sh "$ENV_CODE" "$LOCATION" "$ENV_TAG"
+      ${PRJ_ROOT}/deploy/scripts/install.sh "$ENV_CODE" "$LOCATION" "$ENV_TAG"
 fi
 
 if [[ "${DEPLOY_AI_MODEL_INFRA}" == "false" ]] && [[ "${AI_MODEL_INFRA_TYPE}" == "batch-account" ]]; then
   echo "Setting up the batch account!!!"
-  ./test/use-pre-provisioned-batch-account.sh \
+  ${PRJ_ROOT}/test/use-pre-provisioned-batch-account.sh \
     "$ENV_CODE" \
     "$PRE_PROVISIONED_AI_MODEL_INFRA_NAME" \
     "$PIPELINE_NAME"
 fi
 
 echo "Performing configuration"
-./deploy/configure.sh \
+${PRJ_ROOT}/deploy/scripts/configure.sh \
   "$ENV_CODE" \
   "$AI_MODEL_INFRA_TYPE" \
   "$PRE_PROVISIONED_AI_MODEL_INFRA_NAME" 
@@ -71,7 +73,7 @@ if [[ -z "$PIPELINE_NAME" ]]
   else
     echo "Performing pipeline packaging"
     DEPLOY_PGSQL=${DEPLOY_PGSQL} \
-      ./deploy/package.sh \
+      ${PRJ_ROOT}/deploy/scripts/package.sh \
       "$ENV_CODE" \
       "$PIPELINE_NAME" \
       "$AI_MODEL_INFRA_TYPE" \

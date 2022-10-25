@@ -3,7 +3,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/..; pwd)"
+PRJ_ROOT="$(cd `dirname "${BASH_SOURCE}"`/../..; pwd)"
 ENV_CODE=${1:-${ENV_CODE}}
 
 AI_MODEL_INFRA_TYPE=${2:-${AI_MODEL_INFRA_TYPE:-"batch-account"}} # Currently supported values are aks and batch-account
@@ -36,7 +36,7 @@ if [[ -z "$SYNAPSE_POOL" ]]; then
 fi
 if [[ -n $SYNAPSE_WORKSPACE ]] && [[ -n $SYNAPSE_WORKSPACE_RG ]] && [[ -n $SYNAPSE_POOL ]]; then
     # upload synapse pool 
-    az synapse spark pool update --name ${SYNAPSE_POOL} --workspace-name ${SYNAPSE_WORKSPACE} --resource-group ${SYNAPSE_WORKSPACE_RG} --library-requirements "${PRJ_ROOT}/deploy/environment.yml"
+    az synapse spark pool update --name ${SYNAPSE_POOL} --workspace-name ${SYNAPSE_WORKSPACE} --resource-group ${SYNAPSE_WORKSPACE_RG} --library-requirements "${PRJ_ROOT}/deploy/scripts/environment.yml"
 fi
 
 if [[ -z "$SYNAPSE_STORAGE_ACCOUNT" ]]; then

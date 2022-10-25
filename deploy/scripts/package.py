@@ -60,7 +60,7 @@ def replace(tokens_map: dict, body: str):
 def package(pipeline_name: str, tokens_map: dict, modes='batch-account'):
 
     script_dirname = os.path.dirname(__file__)
-    src_folder_path = os.path.join(script_dirname, '..', 'src', 'workflow', pipeline_name)
+    src_folder_path = os.path.join(script_dirname, '../..', 'src', 'workflow', pipeline_name)
     package_folder_path= os.path.join(os.getcwd(), pipeline_name)
 
     # mode

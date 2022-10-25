@@ -41,7 +41,7 @@ param dbPassword string
 
 param dbPort int = 5432
 
-var commandString = 'apt update -y && apt install curl -y && curl -o root.crt https://cacerts.digicert.com/BaltimoreCyberTrustRoot.crt.pem && curl -o CVModelSQLScript.sql https://raw.githubusercontent.com/Azure/Azure-Orbital-Analytics-Samples/main/deploy/CVModelSQLScript.sql && psql --set=sslmode=require --set=sslrootcert=root.crt -h ${server} -p ${dbPort} -U ${username} -W -d ${db} -f CVModelSQLScript.sql'
+var commandString = 'apt update -y && apt install curl -y && curl -o root.crt https://cacerts.digicert.com/BaltimoreCyberTrustRoot.crt.pem && curl -o CVModelSQLScript.sql https://raw.githubusercontent.com/Azure/Azure-Orbital-Analytics-Samples/main/deploy/scripts/CVModelSQLScript.sql && psql --set=sslmode=require --set=sslrootcert=root.crt -h ${server} -p ${dbPort} -U ${username} -W -d ${db} -f CVModelSQLScript.sql'
 
 resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2021-09-01' = {
   name: name
