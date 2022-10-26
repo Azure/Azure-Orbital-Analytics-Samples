@@ -1,7 +1,7 @@
-numpy~=1.17.5 
-tensorflow~=2.0.4
+numpy~=1.21
+tensorflow~=2.7.2
 flask~=1.1.2 
 pillow~=9.0.1
-mscviplib==2.200731.16 
+mscviplib==2.200731.16
 MarkupSafe~=2.0.1
 protobuf~=3.19.0
