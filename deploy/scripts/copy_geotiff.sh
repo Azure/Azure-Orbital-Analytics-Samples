@@ -35,7 +35,7 @@ export AZURE_STORAGE_AUTH_MODE
 declare -A array
 
 key1='sample_4326.tif'
-value1='https://aoigeospatial.blob.core.windows.net/public/samples/sample_4326.tif'
+value1='https://raw.githubusercontent.com/Azure/Azure-Orbital-Analytics-Samples/main/deploy/sample_data/sample_4326.tif'
 
 key2='custom_vision_object_detection.json'
 value2='https://raw.githubusercontent.com/Azure/Azure-Orbital-Analytics-Samples/main/src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json'
