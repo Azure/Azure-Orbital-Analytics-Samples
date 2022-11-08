@@ -39,7 +39,7 @@ For example, in the following screenshot, the environment code **AOI** was used:
         
         ![](./images/3.png)
  
-3. After those mandatory fields are populated, turn on **Data flow debug**. While that is processing, enter the value of the parameters as shown in the screenshot and table below and then click **Publish** to save the changes. 
+3. After those mandatory fields are populated, turn on **Data flow debug**. While the request to start Data Flow Debug is processing, enter the value of the parameters as shown in the screenshot and table below and then click **Publish** to save the changes.
 
    **NOTE** Numbers on the right side of the screenshot refer to row numbers in the table, **not** values to use for those fields.
 
