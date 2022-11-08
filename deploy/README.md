@@ -13,7 +13,7 @@ This sample uses bicep templates to deploy the infrastructure resources. By defa
 The prerequisites depend to an extent on whether you will be deploying this sample on Linux or on Windows. Follow the guidance in the appropriate section below for your environment. 
 
 ## Owner Role
-Regardless of whether you are using Linux or Windows, before beginning to deploy this sample, make sure you have **Owner** role assigned on the subscription that you want to use for the sample. This role is required to grant IAM roles to managed identities in bicep templates.
+Regardless of whether you are using Linux or Windows, before beginning to deploy this sample, make sure you have **Owner** role assigned on the subscription that you want to use for the deployment. This role is required to grant IAM roles to managed identities in bicep templates.
 
 ## Linux Prerequisites
 The deployment script uses tools listed below. Before running the script, make sure you have them installed. You can use the links provided to install the suggested tools.
@@ -75,7 +75,7 @@ After the script has run successfully, use the following steps to check to make 
 1. Find the batch account named as `batchact<10-character-random-string>` under the resource group `<environment-code>-orc-rg`.
 2. In the batch account, switch to the **Pools** blade. Look for a pool whose name begins with the environment code you had used. Make sure the resizing of the pool is completed without any errors. Resizing may take a few minutes. Pools that are resizing are indicated by `0 -> 1` numbers under dedicated nodes column. Pools that have completed resizing should show the number of dedicated nodes.
 
-Errors encountered while resizing the pools are indicated by red exclamation icon next to the pool. Most common issues causing failure are related to the VM Quota limitations. If you run into this issue, try increasing the quota. You may need to contact support to increase the quota.
+Errors encountered while resizing the pools are indicated by red exclamation icon next to the pool. Most common issues causing failure are related to the VM Quota limitations. If you run into this issue, try increasing the quota. You may need to contact Azure support to increase the quota.
 
 # Run the Synapse Pipeline
 
