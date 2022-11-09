@@ -35,7 +35,7 @@ export AZURE_STORAGE_AUTH_MODE
 declare -A array
 
 key1='sample_4326.tif'
-value1='https://aoigeospatial.blob.core.windows.net/public/samples/sample_4326.tif'
+value1='https://naipeuwest.blob.core.windows.net/naip/v002/ca/2020/ca_060cm_2020/32117/m_3211716_se_11_060_20200428.tif'
 
 key2='custom_vision_object_detection.json'
 value2='https://raw.githubusercontent.com/Azure/Azure-Orbital-Analytics-Samples/main/src/aimodels/custom_vision_object_detection_offline/specs/custom_vision_object_detection.json'
@@ -55,6 +55,8 @@ then
 else
     echo "Container $container_name created successfully"
 fi
+
+set -x
 
 for key in "${!array[@]}"; do
     echo "Copying $key from source"
